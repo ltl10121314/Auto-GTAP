@@ -5,3 +5,5 @@
 
 solution_method: j
 gtap_file_name: gtap
+input_directory_list:
+  - GTAP-E

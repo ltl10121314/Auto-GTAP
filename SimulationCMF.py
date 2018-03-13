@@ -8,12 +8,13 @@ class SimulationCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the policy simulation (as opposed to the shock
     calculation)"""
 
-    __slots__ = ["project", "simulation_name", "solution_method"]
+    __slots__ = ["project", "simulation_name", "solution_method", "model_folder"]
 
-    def __init__(self, project: str, simulation_name: str, solution_method: str) -> None:
+    def __init__(self, project: str, simulation_name: str, solution_method: str, model_folder: str) -> None:
         self.project = project
         self.simulation_name = simulation_name
         self.solution_method = solution_method
+        self.model_folder = model_folder
 
     def shockedsectors(self):
         list_shocked_sectors = self.simulation_name
@@ -125,5 +126,5 @@ class SimulationCMF(object):
                           + line_list_shocks
 
         # Create final file
-        with open("Work_Files\\" + cmf_file_name, "w+") as writer:  # Create the empty file
+        with open("Work_Files\\" + self.model_folder + "\\" + cmf_file_name, "w+") as writer:  # Create the empty file
             writer.writelines(line_list_total)  # write the line list to the file

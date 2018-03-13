@@ -9,24 +9,14 @@ import shutil
 class CopyInputFiles(object):
     """Copies files from the input files directory to the work files directory"""
 
-    # __slots__ = []
+    __slots__ = ["input_directory_list"]
+
+    def __init__(self, input_directory_list: list) -> None:
+        self.input_directory_list = input_directory_list
 
     def create(self) -> None:
         # Define lists of files to copy.
-        files_gtap = [
-            "gtap.tab",
-            "basedata.har",
-            "baserate.har",
-            "baseview.har",
-            "sets.har",
-            "default.prm"
-        ]
 
-        files_other = [
-        ]
-
-        list_of_files_to_copy = files_gtap + files_other
-
-        for file_name in list_of_files_to_copy:
+        for folder in self.input_directory_list:
             # copy files with file_name from Input_Files to Work_Files
-            shutil.copy('Input_Files\\{0}'.format(file_name), 'Work_Files\\{0}'.format(file_name))
+            shutil.copytree('Input_Files\\{0}'.format(folder), 'Work_Files\\{0}'.format(folder))
