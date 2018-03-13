@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
-__project__ = "GTAP-E-Validation"
+__project__ = "GTAP-E Validation"
 __created__ = "2018-3-12"
-__altered__ = "2018-3-12"
+__altered__ = "2018-3-13"
 
 import shutil
 
