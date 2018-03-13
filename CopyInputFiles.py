@@ -14,12 +14,11 @@ class CopyInputFiles(object):
     def create(self) -> None:
         # Define lists of files to copy.
         files_gtap = [
-            "gtap3.tab",
+            "gtap.tab",
             "basedata.har",
             "baserate.har",
             "baseview.har",
             "sets.har",
-            "co2.har",
             "default.prm"
         ]
 
