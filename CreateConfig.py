@@ -6,7 +6,7 @@ __altered__ = "2018-3-15"
 import yaml
 
 
-class ReadYaml(object):
+class CreateConfig(object):
     """Creates config information from yaml file"""
 
     __slots__ = ["yaml_file_location"]
@@ -19,9 +19,8 @@ class ReadYaml(object):
         with open(self.yaml_file_location, 'r') as f:
             yaml_file = yaml.load(f)
         # Define control variables from yaml
-        config.solution_method = yaml_file["solution_method"]
-        config.gtap_file_name = yaml_file["gtap_file_name"]
-        config.input_directory_list = yaml_file["input_directory_list"]
-        config.simulation_name = "hello"
-        config.simulation_list = [simulation_name]
-        return config
+        self.solution_method = yaml_file["solution_method"]
+        self.gtap_file_name = yaml_file["gtap_file_name"]
+        self.input_directory_list = yaml_file["input_directory_list"]
+        self.simulation_name = "hello"
+        self.simulation_list = [self.simulation_name]
