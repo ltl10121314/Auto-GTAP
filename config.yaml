@@ -3,7 +3,8 @@
 #__created__ = "2018-3-12"
 #__altered__ = "2018-3-12"
 
-solution_method: j
-gtap_file_name: gtap
-input_directory_list:
-  - GTAP-E
+# Simulations
+-  Validate GTAP-E:
+    input_directory: GTAP-E
+    model_name: gtap
+    solution_method: j
