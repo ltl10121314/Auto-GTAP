@@ -16,6 +16,7 @@ from CreateMAP import CreateMAP
 from ImportCSV_SL4 import ImportCSV_SL4
 from ModifyDatabase import ModifyDatabase
 from ExportDictionary import ExportDictionary
+from CreateOutput import CreateOutput
 
 # Import control variables from yaml
 with open('config.yaml', 'r') as f:
@@ -50,3 +51,8 @@ subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
 databaseSL4 = ImportCSV_SL4("sim_", simulation_list).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
 ExportDictionary("Results {0}.csv".format(solution_method), databaseMod).create()
+os.chdir("..")
+os.chdir("..")
+# Put results in output directory
+for simulation_name in simulation_list:
+    CreateOutput(["Results {0}.csv".format(solution_method)]).create()
