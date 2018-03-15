@@ -111,8 +111,8 @@ class SimulationCMF(object):
         ]
 
         # Create lines for shocks
-        gas_price_2005 = 8.86
-        cpi_2005 = 195.3
+        gas_price_2005 = 8.86  # https://www.eia.gov/dnav/ng/hist/rngwhhdA.htm
+        cpi_2005 = 195.3  # CPI-All Urban Consumers (Current Series)
         gas_price_2016 = 2.52
         cpi_2016 = 240.0
         gas_price_shock = 100 * (gas_price_2005 / cpi_2005) / (gas_price_2016 / cpi_2016) - 100
