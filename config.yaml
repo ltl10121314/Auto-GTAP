@@ -4,7 +4,7 @@
 #__altered__ = "2018-3-12"
 
 # Simulations
--  Validate GTAP-E:
+Validate GTAP-E:
     input_directory: GTAP-E
     model_name: gtap
     solution_method: j
