@@ -20,12 +20,13 @@ from CreateOutput import CreateOutput
 from CreateConfig import CreateConfig
 
 # Call Methods
-config = CreateConfig("config.yaml").create()
+config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
-CleanWorkFiles(config.input_directory_list).create()
-CopyInputFiles(config.input_directory_list).create()
-SimulationCMF("sim", config.simulation_name, "default_{0}".format(config.solution_method), "GTAP-E").create(
-    config.simulation_name)
+for simulation_name in config.simulation_list():
+    CleanWorkFiles(config.sim_property(simulation_name, "input_directory_list")).create()
+    CopyInputFiles(config.sim_property(simulation_name, "input_directory_list")).create()
+    SimulationCMF("sim", config.simulation_name, "default_{0}".format(config.solution_method), "GTAP-E").create(
+        config.simulation_name)
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
