@@ -22,9 +22,9 @@ from CreateConfig import CreateConfig
 # Call Methods
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
+CleanWorkFiles(config.simulation_list()).create()
+CopyInputFiles(config.input_directory_list()).create()
 for simulation_name in config.simulation_list():
-    CleanWorkFiles(config.input_directory_list()).create()
-    CopyInputFiles(config.input_directory_list()).create()
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name).create("Gas")
 
@@ -44,10 +44,9 @@ for simulation_name in config.simulation_list():
     subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
 
 # Import simulation results into a single database
-    # Copy results to output directory
-for simulation_name in config.simulation_list():
-    databaseSL4 = ImportCSV_SL4("sim_", [simulation_name]).create()
-    databaseMod = ModifyDatabase(databaseSL4).create()
+# Copy results to output directory
+databaseSL4 = ImportCSV_SL4("sim_", config.simulation_list()).create()
+databaseMod = ModifyDatabase(databaseSL4).create()
 os.chdir("..")
 ExportDictionary("Results.csv", databaseMod).create()
 
