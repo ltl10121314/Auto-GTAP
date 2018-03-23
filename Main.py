@@ -50,5 +50,4 @@ for simulation_name in config.simulation_list():
 os.chdir("..")
 os.chdir("..")
 # Put results in output directory
-for simulation_name in config.simulation_list():
-    CreateOutput(["Results {0}.csv".format(simulation_name)]).create()
+CreateOutput(config.simulation_list()).create()

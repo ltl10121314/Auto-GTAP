@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-15"
-__altered__ = "2018-3-15"
+__altered__ = "2018-3-23"
 
 import shutil, datetime
 
@@ -9,10 +9,12 @@ import shutil, datetime
 class CreateOutput(object):
     """Copies files from the work files directory to the output files directory"""
 
-    __slots__ = ["list_of_files_to_copy"]
+    __slots__ = ["simulation_list", "list_of_files_to_copy"]
 
-    def __init__(self, list_of_files_to_copy: list) -> None:
-        self.list_of_files_to_copy = list_of_files_to_copy
+    def __init__(self, simulation_list: list) -> None:
+        self.list_of_files_to_copy = []
+        for simulation_name in simulation_list:
+            self.list_of_files_to_copy.append("Results {0}.csv".format(simulation_name))
 
     def create(self) -> None:
         # Gets current date and time
