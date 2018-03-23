@@ -24,7 +24,7 @@ config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 CleanWorkFiles(config.simulation_list)
 for simulation_name in config.simulation_list:
-    CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name).create()
+    CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name)
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name).create("Gas")
 
@@ -33,14 +33,14 @@ for simulation_name in config.simulation_list:
 for simulation_name in config.simulation_list:
     os.chdir("Work_Files\\{0}".format(simulation_name))
     # Create GSS and GST files for shocks and model gemsim
-    CreateSTI(config.sim_property(simulation_name, "gtap_file_name"), "NA", "gtap").create()
+    CreateSTI(config.sim_property(simulation_name, "gtap_file_name"), "NA", "gtap")
     subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "gtap_file_name")))
     subprocess.call("gemsim -cmf sim_{0}.cmf".format(simulation_name))
 
     # Export Results of Simulation
     # Export sl4 to csv via sltoht
-    CreateMAP("sim", simulation_name).create()
-    CreateSTI("NA", simulation_name, "sltoht").create()
+    CreateMAP("sim", simulation_name)
+    CreateSTI("NA", simulation_name, "sltoht")
     subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
     os.chdir("..")
     os.chdir("..")
@@ -50,8 +50,8 @@ for simulation_name in config.simulation_list:
 databaseSL4 = ImportCSV_SL4(config.simulation_list).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
 os.chdir("Work_Files")
-ExportDictionary("Results.csv", databaseMod).create()
+ExportDictionary("Results.csv", databaseMod)
 
 os.chdir("..")
 # Put results in output directory
-CreateOutput().create()
+CreateOutput()

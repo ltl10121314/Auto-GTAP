@@ -15,6 +15,5 @@ class CopyInputFiles(object):
         self.input_folder = input_folder
         self.simulation_name = simulation_name
 
-    def create(self) -> None:
         # copy files with file_name from Input_Files to Work_Files in folder simulation_name
         shutil.copytree('Input_Files\\{0}'.format(self.input_folder), 'Work_Files\\{0}'.format(self.simulation_name))

@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E-Validation"
 __created__ = "2018-3-13"
-__altered__ = "2018-3-13"
+__altered__ = "2018-3-23"
 
 
 class CreateSTI(object):
@@ -18,7 +18,6 @@ class CreateSTI(object):
         self.simulation_name = simulation_name
         self.sti_type = sti_type
 
-    def create(self) -> None:
         # Create list of lines to write to STI file
         if self.sti_type == "sltoht":
             line_list = [

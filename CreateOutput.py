@@ -14,7 +14,6 @@ class CreateOutput(object):
     def __init__(self) -> None:
         self.list_of_files_to_copy = ["Results.csv"]
 
-    def create(self) -> None:
         # Gets current date and time
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M")
 

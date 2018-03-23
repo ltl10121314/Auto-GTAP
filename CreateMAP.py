@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-13"
-__altered__ = "2018-3-13"
+__altered__ = "2018-3-23"
 
 
 class CreateMAP(object):
@@ -14,7 +14,6 @@ class CreateMAP(object):
         self.project_name = project_name
         self.simulation_name = simulation_name
 
-    def create(self) -> None:
         # define simulation type
         simulation_type = "gtap_sector"
 

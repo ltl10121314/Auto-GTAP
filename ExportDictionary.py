@@ -15,7 +15,6 @@ class ExportDictionary(object):
         self.file_name = file_name
         self.database = database
 
-    def create(self) -> None:
         # Writes the contents of the dictionary to a csv file
 
         # newline="" is necessary as per https://stackoverflow.com/questions/7200606/python3-writing-csv-files
