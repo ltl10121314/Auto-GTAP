@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-13"
-__altered__ = "2018-3-13"
+__altered__ = "2018-3-23"
 
 import os, shutil
 
@@ -14,7 +14,6 @@ class CleanWorkFiles(object):
     def __init__(self, input_directory_list: list) -> None:
         self.input_directory_list = input_directory_list
 
-    def create(self) -> None:
         # Delete folders in work_files
         folders_to_delete = ['Work_Files//{0}'.format(folder) for folder in self.input_directory_list]
         for folder in folders_to_delete:
