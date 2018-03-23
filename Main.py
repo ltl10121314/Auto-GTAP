@@ -22,15 +22,15 @@ from CreateConfig import CreateConfig
 # Call Methods
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
-CleanWorkFiles(config.simulation_list()).create()
-for simulation_name in config.simulation_list():
+CleanWorkFiles(config.simulation_list)
+for simulation_name in config.simulation_list:
     CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name).create()
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name).create("Gas")
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
-for simulation_name in config.simulation_list():
+for simulation_name in config.simulation_list:
     os.chdir("Work_Files\\{0}".format(simulation_name))
     # Create GSS and GST files for shocks and model gemsim
     CreateSTI(config.sim_property(simulation_name, "gtap_file_name"), "NA", "gtap").create()
@@ -47,7 +47,7 @@ for simulation_name in config.simulation_list():
 
 # Import simulation results into a single database
 # Copy results to output directory
-databaseSL4 = ImportCSV_SL4(config.simulation_list()).create()
+databaseSL4 = ImportCSV_SL4(config.simulation_list).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
 os.chdir("Work_Files")
 ExportDictionary("Results.csv", databaseMod).create()
