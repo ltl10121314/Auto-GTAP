@@ -9,12 +9,10 @@ import shutil, datetime
 class CreateOutput(object):
     """Copies files from the work files directory to the output files directory"""
 
-    __slots__ = ["simulation_list", "list_of_files_to_copy"]
+    __slots__ = ["list_of_files_to_copy"]
 
-    def __init__(self, simulation_list: list) -> None:
-        self.list_of_files_to_copy = []
-        for simulation_name in simulation_list:
-            self.list_of_files_to_copy.append("Results {0}.csv".format(simulation_name))
+    def __init__(self) -> None:
+        self.list_of_files_to_copy = ["Results.csv"]
 
     def create(self) -> None:
         # Gets current date and time
@@ -23,5 +21,5 @@ class CreateOutput(object):
         # loop to copy and rename output files
         for file_name in self.list_of_files_to_copy:
             # copy files with file_name from Input_Files to Work_Files, also appends current_time
-            shutil.copy('Work_Files\\GTAP-E\\{0}'.format(file_name),
+            shutil.copy('Work_Files\\{0}'.format(file_name),
                         'Output_Files\\{1} {0}'.format(file_name, current_time))

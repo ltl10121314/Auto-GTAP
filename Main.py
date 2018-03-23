@@ -42,12 +42,15 @@ for simulation_name in config.simulation_list():
     CreateMAP("sim", simulation_name).create()
     CreateSTI("NA", simulation_name, "sltoht").create()
     subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
+
+# Import simulation results into a single database
     # Copy results to output directory
+for simulation_name in config.simulation_list():
     databaseSL4 = ImportCSV_SL4("sim_", [simulation_name]).create()
     databaseMod = ModifyDatabase(databaseSL4).create()
-    ExportDictionary("Results {0}.csv".format(simulation_name), databaseMod).create()
+os.chdir("..")
+ExportDictionary("Results.csv", databaseMod).create()
 
 os.chdir("..")
-os.chdir("..")
 # Put results in output directory
-CreateOutput(config.simulation_list()).create()
+CreateOutput().create()
