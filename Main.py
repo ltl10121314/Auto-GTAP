@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-9"
-__altered__ = "2018-3-15"
+__altered__ = "2018-3-23"
 
 # Import methods
 # Import External Methods
@@ -23,30 +23,32 @@ from CreateConfig import CreateConfig
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 for simulation_name in config.simulation_list():
-    CleanWorkFiles(config.sim_property(simulation_name, "input_directory_list")).create()
-    CopyInputFiles(config.sim_property(simulation_name, "input_directory_list")).create()
-    SimulationCMF("sim", config.simulation_name, "default_{0}".format(config.solution_method), "GTAP-E").create(
-        config.simulation_name)
+    CleanWorkFiles(config.input_directory_list()).create()
+    CopyInputFiles(config.input_directory_list()).create()
+    SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
+                  simulation_name).create("Gas")
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
-os.chdir("Work_Files\\GTAP-E")
-# Create GSS and GST files for shocks and model gemsim
-CreateSTI(config.gtap_file_name, "NA", "gtap").create()
-subprocess.call("tablo -sti {0}.sti".format(config.gtap_file_name))
-subprocess.call("gemsim -cmf sim_{0}.cmf".format(config.simulation_name))
+for simulation_name in config.simulation_list():
+    os.chdir("Work_Files\\{0}".format(simulation_name))
+    # Create GSS and GST files for shocks and model gemsim
+    CreateSTI(config.sim_property(simulation_name, "gtap_file_name"), "NA", "gtap").create()
+    subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "gtap_file_name")))
+    subprocess.call("gemsim -cmf sim_{0}.cmf".format(simulation_name))
 
-# Export Results of Simulation
-# Export sl4 to csv via sltoht
-CreateMAP("sim", config.simulation_name).create()
-CreateSTI("NA", config.simulation_name, "sltoht").create()
-subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(config.simulation_name))
-# Copy results to output directory
-databaseSL4 = ImportCSV_SL4("sim_", config.simulation_list).create()
-databaseMod = ModifyDatabase(databaseSL4).create()
-ExportDictionary("Results {0}.csv".format(config.solution_method), databaseMod).create()
+    # Export Results of Simulation
+    # Export sl4 to csv via sltoht
+    CreateMAP("sim", simulation_name).create()
+    CreateSTI("NA", simulation_name, "sltoht").create()
+    subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
+    # Copy results to output directory
+    databaseSL4 = ImportCSV_SL4("sim_", [simulation_name]).create()
+    databaseMod = ModifyDatabase(databaseSL4).create()
+    ExportDictionary("Results {0}.csv".format(simulation_name), databaseMod).create()
+
 os.chdir("..")
 os.chdir("..")
 # Put results in output directory
-for simulation_name in config.simulation_list:
-    CreateOutput(["Results {0}.csv".format(config.solution_method)]).create()
+for simulation_name in config.simulation_list():
+    CreateOutput(["Results {0}.csv".format(simulation_name)]).create()

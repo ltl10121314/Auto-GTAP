@@ -1,11 +1,13 @@
 #__author__ = "Andre Barbe"
 #__project__ = "GTAP-E Validation"
 #__created__ = "2018-3-12"
-#__altered__ = "2018-3-12"
+#__altered__ = "2018-3-23"
 
 # Simulations
-Simulations:
-    -Validate GTAP-E:
-      input_directory: GTAP-E
-      model_name: gtap
-      solution_method: j
+simulations:
+  GTAP-E:
+    input_directory: GTAP-E
+    gtap_file_name: gtap
+    solution_method: j
+simulations_to_run:
+  - GTAP-E
