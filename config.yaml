@@ -9,5 +9,10 @@ simulations:
     input_directory: GTAP-E
     gtap_file_name: gtap
     solution_method: j
+  GTAP-E2:
+    input_directory: GTAP-E
+    gtap_file_name: gtap
+    solution_method: j
 simulations_to_run:
   - GTAP-E
+  - GTAP-E2
