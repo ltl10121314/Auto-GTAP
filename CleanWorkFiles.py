@@ -15,14 +15,20 @@ class CleanWorkFiles(object):
         self.input_directory_list = input_directory_list
 
     def create(self) -> None:
+        # Delete folders in work_files
         folders_to_delete = ['Work_Files//{0}'.format(folder) for folder in self.input_directory_list]
-
         for folder in folders_to_delete:
-            shutil.rmtree(folder)
+            # the try/except structure prevents an error if the folder does not exist
+            try:
+                shutil.rmtree(folder)
+            except OSError:
+                pass
 
+        #Delete files in work files
         folder = 'Work_Files'
         for the_file in os.listdir(folder):
             file_path = os.path.join(folder, the_file)
+            # the try/except structure prevents an error if the folder does not exist
             try:
                 if os.path.isfile(file_path):
                     os.unlink(file_path)
