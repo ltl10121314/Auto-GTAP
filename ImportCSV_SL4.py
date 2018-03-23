@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-15"
-__altered__ = "2018-3-15"
+__altered__ = "2018-3-23"
 
 from typing import List
 
@@ -9,18 +9,19 @@ from typing import List
 class ImportCSV_SL4(object):
     """Imports the CSV Files created by SLTOHT"""
 
-    __slots__ = ["project", "simulation_list"]
+    __slots__ = ["simulation_list"]
 
-    def __init__(self, project: str, simulation_list: List[str]) -> None:
-        self.project = project
+    def __init__(self, simulation_list: List[str]) -> None:
         self.simulation_list = simulation_list
 
-    def filecontents(self, simulation_number) -> List[str]:
+    def filecontents(self, simulation_name) -> List[str]:
         """
         Reads the CSV file into memory
         :return:
         """
-        with open("{0}{1}.csv".format(self.project, simulation_number), "r") as reader:  # Read the csv file
+        filename = "sim_{0}.csv".format(simulation_name)
+        filepath = "Work_Files//" + simulation_name + "//" + filename
+        with open(filepath, "r") as reader:  # Read the csv file
             return [line for line in reader.readlines() if
                     line != " \n"]  # deletes lines that are nothing but line breaks
 
