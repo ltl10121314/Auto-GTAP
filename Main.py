@@ -29,7 +29,7 @@ for simulation_name in config.simulation_list:
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name).create("Gas")
     if config.sim_property(simulation_name, "modify_har"):
-        ModifyHAR("Work_Files\\"+simulation_name+"\\olddefault", "Work_Files\\"+simulation_name+"\\default")
+        ModifyHAR("Work_Files\\"+simulation_name,"olddefault", "default")
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
