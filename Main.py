@@ -24,19 +24,20 @@ from ModifyHAR import ModifyHAR
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 CleanWorkFiles(config.simulation_list)
-ModifyHAR("Input_Files\\GTAP-E-Beckman2010\\olddefault", "Input_Files\\GTAP-E-Beckman2010\\default")
 for simulation_name in config.simulation_list:
     CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name)
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name).create("Gas")
+    if config.sim_property(simulation_name, "modify_har"):
+        ModifyHAR("Work_Files\\"+simulation_name+"\\olddefault", "Work_Files\\"+simulation_name+"\\default")
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
 for simulation_name in config.simulation_list:
     os.chdir("Work_Files\\{0}".format(simulation_name))
     # Create GSS and GST files for shocks and model gemsim
-    CreateSTI(config.sim_property(simulation_name, "gtap_file_name"), "NA", "gtap")
-    subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "gtap_file_name")))
+    CreateSTI(config.sim_property(simulation_name, "model_file_name"), "NA", "gtap")
+    subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "model_file_name")))
     subprocess.call("gemsim -cmf sim_{0}.cmf".format(simulation_name))
 
     # Export Results of Simulation

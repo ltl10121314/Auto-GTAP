@@ -23,10 +23,10 @@ class ModifyHAR(object):
             "bat\n",
             "\n",
             "y\n",
-            "old.har\n",  # old filename
-            "new.har\n",  # new filename
+            self.input_file+".har\n",  # old filename
+            self.output_file+".prm\n",  # new filename
             "mw\n",
-            "vkb\n",  # header to modify
+            "EPEN\n",  # header to modify
             "m\n",
             "r\n",
             "o\n",

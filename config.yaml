@@ -5,7 +5,7 @@
 
 # Simulations
 simulations_to_run:
-  - GTAP-V7
+  - GTAP-E-Beckman2010
 simulations:
   GTAP-E:
     input_directory: GTAP-E
@@ -17,6 +17,7 @@ simulations:
     model_file_name: gtap
     model_type: gtap-e
     solution_method: j
+    modify_har: true
   GTAP-V6:
     input_directory: GTAP-V6
     model_file_name: gtap
