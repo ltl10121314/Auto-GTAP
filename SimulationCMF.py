@@ -111,6 +111,11 @@ class SimulationCMF(object):
         ]
 
         # Create lines for shocks
+        # NB: Gas production data
+        # https://www.eia.gov/dnav/ng/hist/n9010us2A.htm
+        # 2005: 23,456,822
+        # 2016: 32,635,511
+
         gas_price_2005 = 8.86  # https://www.eia.gov/dnav/ng/hist/rngwhhdA.htm
         cpi_2005 = 195.3  # CPI-All Urban Consumers (Current Series)
         gas_price_2016 = 2.52
