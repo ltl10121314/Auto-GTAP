@@ -21,6 +21,5 @@ class CreateConfig(object):
         for simulation in self.simulation_list:
             self.input_directory_list.append(self.sim_property(simulation, "input_directory"))
 
-
     def sim_property(self, simulation_name: str, property_name: str):
         return self.yaml_file["simulations"][simulation_name][property_name]
