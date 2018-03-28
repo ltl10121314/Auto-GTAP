@@ -1,21 +1,33 @@
 #__author__ = "Andre Barbe"
 #__project__ = "GTAP-E Validation"
 #__created__ = "2018-3-12"
-#__altered__ = "2018-3-23"
+#__altered__ = "2018-3-28"
 
 # Simulations
 simulations_to_run:
-  - GTAP-E
+  - GTAP-V7
 simulations:
   GTAP-E:
     input_directory: GTAP-E
-    gtap_file_name: gtap
+    model_file_name: gtap
+    model_type: gtap-e
+    solution_method: j
+  GTAP-E-Beckman2010:
+    input_directory: GTAP-E-Beckman2010
+    model_file_name: gtap
+    model_type: gtap-e
+    solution_method: j
+  GTAP-V6:
+    input_directory: GTAP-V6
+    model_file_name: gtap
+    model_type: gtap-v6
+    solution_method: j
+  GTAP-V7:
+    input_directory: GTAP-V7
+    model_file_name: gtap
+    model_type: gtap-v7
     solution_method: j
   GTAP-Eg:
     input_directory: GTAP-E
     gtap_file_name: gtap
     solution_method: g
-  GTAP-E-Beckman2010:
-    input_directory: GTAP-E-Beckman2010
-    gtap_file_name: gtap
-    solution_method: j
