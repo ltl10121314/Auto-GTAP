@@ -5,25 +5,15 @@ __altered__ = "2018-3-28"
 
 
 class ModifyHAR(object):
-    """Creates an CMF file for controlling gemsim when it runs the policy simulation (as opposed to the shock
-    calculation)"""
+    """Modifies the values of a HAR file"""
 
-    __slots__ = ["project", "simulation_name", "solution_method", "model_folder"]
+    __slots__ = ["input_file", "output_file"]
 
-    def __init__(self, project: str, simulation_name: str, solution_method: str, model_folder: str) -> None:
-        self.project = project
-        self.simulation_name = simulation_name
-        self.solution_method = solution_method
-        self.model_folder = model_folder
+    def __init__(self, input_file: str, output_file: str) -> None:
+        self.input_file = input_file
+        self.output_file = output_file
 
-    def shockedsectors(self):
-        list_shocked_sectors = self.simulation_name
-        return list_shocked_sectors
-
-    def create(self, shocked_sector: str) -> None:
-
-        cmf_file_name = self.project + "_" + self.simulation_name + ".cmf"
-        # Create list of lines to be added to CMF file
+        tab_file_name = "ModifyHAR.tab"
 
         # Create lines for solution method
         if self.solution_method == "default_j":
