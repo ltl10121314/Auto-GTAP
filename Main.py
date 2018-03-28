@@ -18,11 +18,13 @@ from ModifyDatabase import ModifyDatabase
 from ExportDictionary import ExportDictionary
 from CreateOutput import CreateOutput
 from CreateConfig import CreateConfig
+from ModifyHAR import ModifyHAR
 
 # Call Methods
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 CleanWorkFiles(config.simulation_list)
+ModifyHAR("Input_Files\\GTAP-E-Beckman2010\\olddefault", "Input_Files\\GTAP-E-Beckman2010\\default")
 for simulation_name in config.simulation_list:
     CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name)
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
