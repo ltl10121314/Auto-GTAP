@@ -115,7 +115,7 @@ class SimulationCMF(object):
         cpi_2005 = 195.3  # CPI-All Urban Consumers (Current Series)
         gas_price_2016 = 2.52
         cpi_2016 = 240.0
-        gas_price_shock = 100 * (gas_price_2005 / cpi_2005) / (gas_price_2016 / cpi_2016) - 100
+        gas_price_shock = 100 * (gas_price_2016 / cpi_2016) / (gas_price_2005 / cpi_2005) - 100
         line_list_shocks = [
             ' Swap aoall("Gas", "USA") = pm("Gas", "USA");\n',
             ' Shock pm("Gas","USA") = uniform {0};\n'.format(gas_price_shock)
