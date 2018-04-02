@@ -121,10 +121,29 @@ class SimulationCMF(object):
         gas_price_2016 = 2.52
         cpi_2016 = 240.0
         gas_price_shock = 100 * (gas_price_2016 / cpi_2016) / (gas_price_2005 / cpi_2005) - 100
-        line_list_shocks = [
+        line_list_gas_shocks = [
             ' Swap aoall("Gas", "USA") = pm("Gas", "USA");\n',
             ' Shock pm("Gas","USA") = uniform {0};\n'.format(gas_price_shock)
         ]
+
+        us_gdp_2005 = 14.706  # https://data.worldbank.org/indicator/NY.GDP.MKTP.PP.KD?contextual=default&locations=US-1W
+        us_gdp_2016 = 17.27
+        world_gdp_2005 = 76.235
+        world_gdp_2016 = 112.152
+        non_us_gdp_2005 = world_gdp_2005 - us_gdp_2005
+        non_us_gdp_2016 = world_gdp_2016 - us_gdp_2016
+        us_gdp_shock = 100 * us_gdp_2016 / us_gdp_2005 - 100
+        non_us_gdp_shock = 100 * non_us_gdp_2016 / non_us_gdp_2005 - 100
+        line_list_gdp_shocks = [
+            ' Swap aoreg = qgdp;\n',
+            ' Shock qgdp("USA") = uniform {0};\n'.format(us_gdp_shock),
+            ' XSET USset ## (USA);\n',
+            ' XSUBSET USset is subset of REG;\n',
+            ' XSET non_US = REG - USset;\n',
+            ' Shock qgdp(non_US) = uniform {0};\n'.format(non_us_gdp_shock)
+        ]
+
+        line_list_shocks = line_list_gas_shocks + line_list_gdp_shocks
 
         # Combine line lists
         line_list_total = line_list_header + line_list_method + line_list_exogendo \
