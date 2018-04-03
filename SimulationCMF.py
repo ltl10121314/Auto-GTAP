@@ -145,16 +145,25 @@ class SimulationCMF(object):
             ' Shock qgdp(non_US) = uniform {0};\n'.format(non_us_gdp_shock)
         ]
 
-        gas_production_shock = 1
-        gas_import_shock = 2
-        gas_export_shock = 7
+        us_gas_production_2005 = 18050598  # Source: EIA Series N9070US2
+        us_gas_production_2016 = 26662774
+        us_gas_production_shock = 100 * (us_gas_production_2016 / us_gas_production_2005) - 100
+
+        us_gas_imports_2005 = 4341034  # Source: EIA Series  N9100US2
+        us_gas_imports__2016 = 3006439
+        us_gas_import_shock = 100 * (us_gas_imports__2016 / us_gas_imports_2005) - 100
+
+        us_gas_exports_2005 = 18050598  # Source: EIA Series  N9130US2
+        us_gas_exports_2016 = 26662774
+        us_gas_export_shock = 100 * (us_gas_exports_2016 / us_gas_exports_2005) - 100
+
         line_list_gas_quantity_shocks_actual = [
             ' Swap qo("Gas","USA") = aoall("Gas", "USA");\n',
             ' Swap qiw("Gas","USA") = tm("Gas", "USA");\n',
             ' Swap qxw("Gas","USA") = tx("Gas", "USA");\n',
-            ' Shock qo("Gas","USA") = uniform {0};\n'.format(gas_production_shock),
-            ' Shock qiw("Gas","USA") = uniform {0};\n'.format(gas_import_shock),
-            ' Shock qxw("Gas","USA") = uniform {0};\n'.format(gas_export_shock)
+            ' Shock qo("Gas","USA") = uniform {0};\n'.format(us_gas_production_shock),
+            ' Shock qiw("Gas","USA") = uniform {0};\n'.format(us_gas_import_shock),
+            ' Shock qxw("Gas","USA") = uniform {0};\n'.format(us_gas_export_shock)
         ]
 
         if self.shock_type == "experiment":
