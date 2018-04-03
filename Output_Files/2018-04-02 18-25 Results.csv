@@ -1,0 +1,15 @@
+simulation name,commodities shocked,Commodity Description,variable,variable property,variable description,value
+GTAP-Eg,GTAP-Eg,Unknown Sector,"pm(""Gas"":""USA"")",Percent Change,No Variable Description Available,-76.854965
+GTAP-Eg,GTAP-Eg,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+GTAP-Eg,GTAP-Eg,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,0.23145035
+GTAP-Eg,GTAP-Eg,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,-0.76854968
+GTAP-Eg,GTAP-Eg,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,297.67181
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,2117.7854
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,2122929.8
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,2027206.8
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,28711.676
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,1838353.6
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,1831973.0
+GTAP-Eg,GTAP-Eg,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-99.746368
