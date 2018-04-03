@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-9"
-__altered__ = "2018-3-23"
+__altered__ = "2018-4-3"
 
 # Import methods
 # Import External Methods
@@ -27,7 +27,7 @@ CleanWorkFiles(config.simulation_list)
 for simulation_name in config.simulation_list:
     CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name)
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
-                  simulation_name).create("Gas")
+                  simulation_name, config.sim_property(simulation_name, "shock")).create("Gas")
     if config.sim_property(simulation_name, "modify_har"):
         ModifyHAR("Work_Files\\"+simulation_name,"olddefault", "default")
 

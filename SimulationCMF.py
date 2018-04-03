@@ -1,20 +1,22 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-13"
-__altered__ = "2018-3-13"
+__altered__ = "2018-4-3"
 
 
 class SimulationCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the policy simulation (as opposed to the shock
     calculation)"""
 
-    __slots__ = ["project", "simulation_name", "solution_method", "model_folder"]
+    __slots__ = ["project", "simulation_name", "solution_method", "model_folder", "shock_type"]
 
-    def __init__(self, project: str, simulation_name: str, solution_method: str, model_folder: str) -> None:
+    def __init__(self, project: str, simulation_name: str, solution_method: str, model_folder: str,
+                 shock_type: str) -> None:
         self.project = project
         self.simulation_name = simulation_name
         self.solution_method = solution_method
         self.model_folder = model_folder
+        self.shock_type = shock_type
 
     def shockedsectors(self):
         list_shocked_sectors = self.simulation_name
@@ -121,7 +123,7 @@ class SimulationCMF(object):
         gas_price_2016 = 2.52
         cpi_2016 = 240.0
         gas_price_shock = 100 * (gas_price_2016 / cpi_2016) / (gas_price_2005 / cpi_2005) - 100
-        line_list_gas_shocks = [
+        line_list_gas_price_shocks = [
             ' Swap aoall("Gas", "USA") = pm("Gas", "USA");\n',
             ' Shock pm("Gas","USA") = uniform {0};\n'.format(gas_price_shock)
         ]
@@ -143,7 +145,23 @@ class SimulationCMF(object):
             ' Shock qgdp(non_US) = uniform {0};\n'.format(non_us_gdp_shock)
         ]
 
-        line_list_shocks = line_list_gas_shocks + line_list_gdp_shocks
+        gas_production_shock = 1
+        gas_import_shock = 2
+        gas_export_shock = 7
+        line_list_gas_quantity_shocks_actual = [
+            ' Swap qo("Gas","USA") = aoall("Gas", "USA");\n',
+            ' Swap qiw("Gas","USA") = tm("Gas", "USA");\n',
+            ' Swap qxw("Gas","USA") = tx("Gas", "USA");\n',
+            ' Shock qo("Gas","USA") = uniform {0};\n'.format(gas_production_shock),
+            ' Shock qiw("Gas","USA") = uniform {0};\n'.format(gas_import_shock),
+            ' Shock qxw("Gas","USA") = uniform {0};\n'.format(gas_export_shock)
+        ]
+
+        if self.shock_type == "experiment":
+            line_list_shocks = line_list_gas_price_shocks + line_list_gdp_shocks
+
+        if self.shock_type == "actual":
+            line_list_shocks = line_list_gas_quantity_shocks_actual
 
         # Combine line lists
         line_list_total = line_list_header + line_list_method + line_list_exogendo \
