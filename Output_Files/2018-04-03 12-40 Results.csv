@@ -1,0 +1,29 @@
+simulation name,commodities shocked,Commodity Description,variable,variable property,variable description,value
+Actual,Actual,Unknown Sector,"pm(""Gas"":""USA"")",Percent Change,No Variable Description Available,232.13863
+Actual,Actual,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+Actual,Actual,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,3.3213863
+Actual,Actual,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,2.3213863
+Actual,Actual,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,-204.11203
+Actual,Actual,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,47.711308
+Actual,Actual,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
+Actual,Actual,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,141393.64
+Actual,Actual,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,45670.680
+Actual,Actual,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,3105.3911
+Actual,Actual,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
+Actual,Actual,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,204522.72
+Actual,Actual,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,198142.14
+Actual,Actual,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-30.743711
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"pm(""Gas"":""USA"")",Percent Change,No Variable Description Available,-76.854965
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,0.23145035
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,-0.76854968
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,30.470318
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,137.70026
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,227533.72
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,131810.75
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,926.15094
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,65474.438
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,59093.852
+GTAP-E-Johan,GTAP-E-Johan,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-244.01802

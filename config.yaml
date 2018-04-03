@@ -21,28 +21,28 @@ simulations:
     model_type: gtap-e
     solution_method: j
     modify_har: true
-    shock: actual
+    shock: experiment
   GTAP-V6:
     input_directory: GTAP-V6
     model_file_name: gtap
     model_type: gtap-v6
     solution_method: j
     modify_har: false
-    shock: actual
+    shock: experiment
   GTAP-V7:
     input_directory: GTAP-V7
     model_file_name: gtap
     model_type: gtap-v7
     solution_method: j
     modify_har: false
-    shock: actual
+    shock: experiment
   GTAP-E-Gragg:
     input_directory: GTAP-E
     model_file_name: gtap
     model_type: gtap-e
     solution_method: g
     modify_har: false
-    shock: actual
+    shock: experiment
   Actual:
     input_directory: GTAP-E
     model_file_name: gtap

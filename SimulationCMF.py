@@ -153,8 +153,8 @@ class SimulationCMF(object):
         us_gas_imports__2016 = 3006439
         us_gas_import_shock = 100 * (us_gas_imports__2016 / us_gas_imports_2005) - 100
 
-        us_gas_exports_2005 = 18050598  # Source: EIA Series  N9130US2
-        us_gas_exports_2016 = 26662774
+        us_gas_exports_2005 = 72860  # Source: EIA Series  N9130US2
+        us_gas_exports_2016 = 2335448
         us_gas_export_shock = 100 * (us_gas_exports_2016 / us_gas_exports_2005) - 100
 
         line_list_gas_quantity_shocks_actual = [
