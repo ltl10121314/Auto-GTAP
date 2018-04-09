@@ -158,10 +158,12 @@ class SimulationCMF(object):
         us_gas_exports_2016 = 2335448
         us_gas_export_shock = 100 * (us_gas_exports_2016 / us_gas_exports_2005) - 100
 
-        line_list_gas_quantity_shocks_actual = [
+        line_list_gas_shocks_actual = [
+            ' Swap pm("Gas", "USA") = to("Gas", "USA");\n',
             ' Swap qo("Gas","USA") = aoall("Gas", "USA");\n',
             ' Swap qiw("Gas","USA") = tm("Gas", "USA");\n',
             ' Swap qxw("Gas","USA") = tx("Gas", "USA");\n',
+            ' Shock pm("Gas","USA") = uniform {0};\n'.format(gas_price_shock),
             ' Shock qo("Gas","USA") = uniform {0};\n'.format(us_gas_production_shock),
             ' Shock qiw("Gas","USA") = uniform {0};\n'.format(us_gas_import_shock),
             ' Shock qxw("Gas","USA") = uniform {0};\n'.format(us_gas_export_shock)
@@ -187,11 +189,11 @@ class SimulationCMF(object):
         us_oil_export_shock = 100 * (us_oil_exports_2016 / us_oil_exports_2005) - 100
 
         line_list_oil_shocks_actual = [
-            ' Swap aoall("Oil", "USA") = pm("Oil", "USA");\n',
-            ' Shock pm("Oil","USA") = uniform {0};\n'.format(oil_price_shock),
+            ' Swap pm("Oil", "USA") = to("Oil", "USA");\n',
             ' Swap qo("Oil","USA") = aoall("Oil", "USA");\n',
             ' Swap qiw("Oil","USA") = tm("Oil", "USA");\n',
             ' Swap qxw("Oil","USA") = tx("Oil", "USA");\n',
+            ' Shock pm("Oil","USA") = uniform {0};\n'.format(oil_price_shock),
             ' Shock qo("Oil","USA") = uniform {0};\n'.format(us_oil_production_shock),
             ' Shock qiw("Oil","USA") = uniform {0};\n'.format(us_oil_import_shock),
             ' Shock qxw("Oil","USA") = uniform {0};\n'.format(us_oil_export_shock)
@@ -201,8 +203,8 @@ class SimulationCMF(object):
             line_list_shocks = line_list_gas_price_shocks + line_list_gdp_shocks
 
         if self.shock_type == "actual":
-            line_list_shocks = line_list_gas_price_shocks + line_list_gdp_shocks \
-                               + line_list_gas_quantity_shocks_actual \
+            line_list_shocks = line_list_gdp_shocks \
+                               + line_list_gas_shocks_actual \
                                + line_list_oil_shocks_actual
 
         # Combine line lists
