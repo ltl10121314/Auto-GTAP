@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-13"
-__altered__ = "2018-3-23"
+__altered__ = "2018-4-9"
 
 
 class CreateMAP(object):
@@ -14,26 +14,23 @@ class CreateMAP(object):
         self.project_name = project_name
         self.simulation_name = simulation_name
 
-        # define simulation type
-        simulation_type = "gtap_sector"
-
-        # Create the contents to be written to the file, grouped by variable
-        # variables will be represented differently depending on the simulation
-
-        # tms
-        line_list_pm = [
+        line_list_gas = [
             'pm("Gas","USA")\n',
-        ]
-
-        if simulation_type == "gtap_sector":
-            line_list_var = [
-                'aoall("Gas","USA")\n',
-                'qo("Gas","USA")\n',
-                'qxw("Gas","USA")\n',
-                'qiw("Gas","USA")\n'
+            'aoall("Gas","USA")\n',
+            'qo("Gas","USA")\n',
+            'qxw("Gas","USA")\n',
+            'qiw("Gas","USA")\n'
             ]
 
-        line_list_total = line_list_pm + line_list_var
+        line_list_oil = [
+            'pm("Oil","USA")\n',
+            'aoall("Oil","USA")\n',
+            'qo("Oil","USA")\n',
+            'qxw("Oil","USA")\n',
+            'qiw("Oil","USA")\n'
+        ]
+
+        line_list_total = line_list_gas + line_list_oil
 
         # Create final file
         file_name = self.project_name + "_" + self.simulation_name
