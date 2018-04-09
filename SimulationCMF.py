@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-13"
-__altered__ = "2018-4-3"
+__altered__ = "2018-4-9"
 
 
 class SimulationCMF(object):
@@ -153,7 +153,7 @@ class SimulationCMF(object):
         us_gas_imports__2016 = 3006439
         us_gas_import_shock = 100 * (us_gas_imports__2016 / us_gas_imports_2005) - 100
 
-        us_gas_exports_2005 = 72860  # Source: EIA Series  N9130US2
+        us_gas_exports_2005 = 728601  # Source: EIA Series  N9130US2
         us_gas_exports_2016 = 2335448
         us_gas_export_shock = 100 * (us_gas_exports_2016 / us_gas_exports_2005) - 100
 
