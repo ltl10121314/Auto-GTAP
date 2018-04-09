@@ -113,6 +113,7 @@ class SimulationCMF(object):
         ]
 
         # Create lines for shocks
+        # NB: most gas data is available at https://www.eia.gov/dnav/ng/ng_sum_lsum_dcu_nus_a.htm
         # NB: Gas production data
         # https://www.eia.gov/dnav/ng/hist/n9010us2A.htm
         # 2005: 23,456,822
@@ -166,11 +167,43 @@ class SimulationCMF(object):
             ' Shock qxw("Gas","USA") = uniform {0};\n'.format(us_gas_export_shock)
         ]
 
+        # NB: Oil data available at https://www.eia.gov/dnav/pet/pet_sum_crdsnd_k_a.htm
+
+        oil_price_2005 = 56.64
+        oil_price_2016 = 43.29
+        oil_price_shock = 100 * (oil_price_2016 / cpi_2016) / (oil_price_2005 / cpi_2005) - 100
+
+        us_oil_production_2005 = 1892095
+        us_oil_production_2016 = 3241591
+
+        us_oil_production_shock = 100 * (us_oil_production_2016 / us_oil_production_2005) - 100
+
+        us_oil_imports_2005 = 3695971
+        us_oil_imports__2016 = 2873208
+        us_oil_import_shock = 100 * (us_oil_imports__2016 / us_oil_imports_2005) - 100
+
+        us_oil_exports_2005 = 11619
+        us_oil_exports_2016 = 216274
+        us_oil_export_shock = 100 * (us_oil_exports_2016 / us_oil_exports_2005) - 100
+
+        line_list_oil_shocks_actual = [
+            ' Swap aoall("Oil", "USA") = pm("Oil", "USA");\n',
+            ' Shock pm("Oil","USA") = uniform {0};\n'.format(oil_price_shock),
+            ' Swap qo("Oil","USA") = aoall("Oil", "USA");\n',
+            ' Swap qiw("Oil","USA") = tm("Oil", "USA");\n',
+            ' Swap qxw("Oil","USA") = tx("Oil", "USA");\n',
+            ' Shock qo("Oil","USA") = uniform {0};\n'.format(us_oil_production_shock),
+            ' Shock qiw("Oil","USA") = uniform {0};\n'.format(us_oil_import_shock),
+            ' Shock qxw("Oil","USA") = uniform {0};\n'.format(us_oil_export_shock)
+        ]
+
         if self.shock_type == "experiment":
             line_list_shocks = line_list_gas_price_shocks + line_list_gdp_shocks
 
         if self.shock_type == "actual":
-            line_list_shocks = line_list_gas_quantity_shocks_actual
+            line_list_shocks = line_list_gas_price_shocks + line_list_gdp_shocks \
+                               + line_list_gas_quantity_shocks_actual \
+                               + line_list_oil_shocks_actual
 
         # Combine line lists
         line_list_total = line_list_header + line_list_method + line_list_exogendo \
