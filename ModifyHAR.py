@@ -47,15 +47,15 @@ class ModifyHAR(object):
             self.input_file + ".har\n",  # old filename
             self.output_file + ".prm\n",  # new filename
             #
-            "mw\n",  # task menu: modify and write
-            "EFNC\n",  # header to modify
-            "m\n",  #subcommand: modify the data
-            "s\n",  # scale entries of array
-            "w\n",  # whole matrix to be scaled
-            "s\n",  # multiply by scalar or matrix
-            "0.1\n",  # value of scalar
-            "w\n",  # write it to new file
-            "n\n",  # reuse array again?
+            # "mw\n",  # task menu: modify and write
+            # "EFNC\n",  # header to modify
+            # "m\n",  #subcommand: modify the data
+            # "s\n",  # scale entries of array
+            # "w\n",  # whole matrix to be scaled
+            # "s\n",  # multiply by scalar or matrix
+            # "0.1\n",  # value of scalar
+            # "w\n",  # write it to new file
+            # "n\n",  # reuse array again?
             #
             "mw\n",  # task menu: modify and write
             "ESBD\n",  # header to modify
