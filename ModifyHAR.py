@@ -44,8 +44,9 @@ class ModifyHAR(object):
             "bat\n",
             "\n",
             "y\n",
-            self.input_file + ".prm\n",  # old filename
+            self.input_file + ".har\n",  # old filename
             self.output_file + ".prm\n",  # new filename
+            #
             "mw\n",  # task menu: modify and write
             "EFNC\n",  # header to modify
             "m\n",  #subcommand: modify the data
@@ -55,6 +56,27 @@ class ModifyHAR(object):
             "0.1\n",  # value of scalar
             "w\n",  # write it to new file
             "n\n",  # reuse array again?
+            #
+            "mw\n",  # task menu: modify and write
+            "ESBD\n",  # header to modify
+            "m\n",  # subcommand: modify the data
+            "r\n",  # replace entries of array
+            "o\n",  # one entry to be changed
+            "4\n",  # entry to be changed
+            "0.2\n",  # value of replacement
+            "w\n",  # write it to new file
+            "n\n",  # reuse array again?
+            #
+            "mw\n",  # task menu: modify and write
+            "ESBM\n",  # header to modify
+            "m\n",  # subcommand: modify the data
+            "r\n",  # replace entries of array
+            "o\n",  # one entry to be changed
+            "4\n",  # entry to be changed
+            "0.2\n",  # value of replacement
+            "w\n",  # write it to new file
+            "n\n",  # reuse array again?
+            #
             "ex\n",  # task menu: exit, saving changes
             "a\n",  # transfer all remaining arrays
             "0\n"  # do not add history for the new file
