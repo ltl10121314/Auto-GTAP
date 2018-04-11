@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "GTAP-E Validation"
 __created__ = "2018-3-28"
-__altered__ = "2018-3-28"
+__altered__ = "2018-4-11"
 
 import subprocess
 
@@ -46,18 +46,19 @@ class ModifyHAR(object):
             "y\n",
             self.input_file + ".prm\n",  # old filename
             self.output_file + ".prm\n",  # new filename
-            "mw\n",
+            "mw\n",  # task menu: modify and write
             "EFNC\n",  # header to modify
-            "m\n",
+            "m\n",  #subcommand: modify the data
             "s\n",  # scale entries of array
             "w\n",  # whole matrix to be scaled
             "s\n",  # multiply by scalar or matrix
             "0.1\n",  # value of scalar
-            "w\n",
-            "n\n",
-            "ex\n",
-            "a\n",
-            "0\n"]
+            "w\n",  # write it to new file
+            "n\n",  # reuse array again?
+            "ex\n",  # task menu: exit, saving changes
+            "a\n",  # transfer all remaining arrays
+            "0\n"  # do not add history for the new file
+        ]
 
         # Create final file
         with open(self.sti_file, "w+") as writer:  # Create the empty file
