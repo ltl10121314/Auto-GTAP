@@ -5,9 +5,9 @@
 
 # Simulations
 simulations_to_run:
-  #- Actual
-  #- GTAP-E-Gragg
-  - GTAP-E-Custom-J
+  - Actual
+  - GTAP-E-Gragg
+  - GTAP-E-Custom-G
 simulations:
   GTAP-E-Johan:
     input_directory: GTAP-E
