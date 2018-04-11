@@ -1,0 +1,354 @@
+  
+  (Processing command line options.)
+  
+  
+  (Opening Stored-input file 'TABmate.sif')
+ (Opened, as text, existing file
+  
+  'C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E\TAB
+ mate.sif'.)
+ Taking inputs from a Stored-input file
+  
+  
+ <TABLO  Version 6.5   January 2016>
+   This program accesses some of the routines in the GEMPACK software release
+ <GEMPACK Release 11.4.003   January 2016>
+  
+ Licence file: C:\GP\licen.gem
+  
+  
+  %%WARNING. Your GEMPACK licence expires on 30-APR-2018.
+  You will not be able to run GEMPACK programs
+    after that date unless you renew the licence.
+  
+     -------------------------------------------------------
+    !            GEMPACK Software System Licence            !
+    !  Source Code Licence for the GEMPACK Software System  !
+    !                 Licence No.  GFM-0137                 !
+    !          Licence for Release 11.4 of GEMPACK          !
+    !          U.S. International Trade Commission          !
+    !                     Washington DC                     !
+    !                          USA                          !
+    !    (Your GEMPACK licence expires on 30-APR-2018.)     !
+     -------------------------------------------------------
+  
+  
+     << COPYRIGHT 1987-2016: CoPS/Impact and KPSOFT >>
+  
+  Current directory is:
+ C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E
+  
+  
+  Full path name of running EXE is: C:\GP\tablo.exe
+  Fortran compiler = IF64   version 14.00, build date 20150916
+  OPENMP number of threads: 32
+  Operating system is Windows 8
+  
+  
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  
+  
+                    TABLO OPTIONS
+               ( --> indicates those in effect )
+  
+       BAT Run in batch          --> STI Take inputs from a Stored-input file
+       BPR Brief prompts             SIF Store inputs on a file
+       LOG Output to log file        ASI Add to incomplete Stored-input file
+  
+       First stage                   Last Stage
+   --> F1 CHECK                      L1 CHECK
+       F2 CONDENSATION               L2 CONDENSATION
+       F3 CODE GENERATION        --> L3 CODE GENERATION
+  
+       RMS Require maximum set sizes to be specified
+       NTX Dont store TAB file on Auxiliary file
+       ICT Ignore Condensation statements on TAB file
+       ASB All Substitutions treated as Backsolves
+       NWT Add Newton-correction terms to levels equations
+       ACD Always use Change Differentiation of levels equations
+       SCO Specialized Check Options menu
+  
+   Select an option   :  <opt>      Deselect an option      : -<opt>
+   Help for an option : ?<opt>      Help on all options     : ??
+   Redisplay options  : /           Finish option selection : Carriage return
+ Your selection >
+  
+  
+ bat
+ Running in batch
+ Your selection >
+  
+  
+ L1
+  --> Last stage is CHECK
+ Your selection >
+  
+  
+ ICT
+  -->  Ignore Condensation statements on TAB file
+ Your selection >
+  
+  
+ MNC
+  -->  Will write MNC file
+ Your selection >
+  
+  
+  
+  
+ Name of TABLO input file :
+ ------------------------
+   (Suffix '.tab' will be automatically appended.)
+  
+  
+ gtap
+ (Opened, as text, existing file
+  
+  'C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E\gta
+ p.tab'.)
+  
+ Name of Information file :
+ ------------------------
+  
+  Input the full name (excluding suffix) of this file.
+   (The suffix '.inf' will be appended automatically to your input.)
+    Enter a CARRIAGE-RETURN to use the name    'gtap'.
+  
+  
+  
+ (Opened new print file
+  
+  'C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E\gta
+ p.inf'.)
+  
+ Note that this implementation will be known by the name 'gtap'.
+ Licence file: C:\GP\licen.gem
+  
+  
+  %%WARNING. Your GEMPACK licence expires on 30-APR-2018.
+  You will not be able to run GEMPACK programs
+    after that date unless you renew the licence.
+  
+  
+ --> Starting CHECK stage
+  (Beginning preliminary pass of your TABLO Input file.)
+  
+  NUMIG = 4902, NUMZD = 26.
+  NUMST = 44, NUMSS = 62.
+  NUMFL = 3, NUMDS = 0.
+  NUMRD = 1073, NUMWR = 0.
+  NUMCS = 1020, NUMVC = 528.
+  TCSIND = 3983, TVCIND = 3955.
+  NUMEQ = 262, NUMFM = 1016.
+  NUMUD = 868, NUMTR = 0.
+  NUMOMT = 0, NUMBST = 0.
+  NUMCP = 0, NUMMF = 0.
+  (Beginning the check of your TABLO Input file.)
+  
+  %%WARNING.Update for "VERNUM" defined at line number 198.
+   This really should be an Update(Change).
+   [Since RHS equals zero, the Update will not change value.]
+   [Strictly speaking, only Linear Variables (and *) are
+     allowed on RHS of a Product UPDATE.]
+  
+  (After 50 statements, total number of errors is 0.)
+  (After 100 statements, total number of errors is 0.)
+  (After 150 statements, total number of errors is 0.)
+  (After 200 statements, total number of errors is 0.)
+  (After 250 statements, total number of errors is 0.)
+  (After 300 statements, total number of errors is 0.)
+  (After 350 statements, total number of errors is 0.)
+  (After 400 statements, total number of errors is 0.)
+  (After 500 statements, total number of errors is 0.)
+  (After 550 statements, total number of errors is 0.)
+  (After 650 statements, total number of errors is 0.)
+  (After 700 statements, total number of errors is 0.)
+  (After 750 statements, total number of errors is 0.)
+  (After 800 statements, total number of errors is 0.)
+  (After 850 statements, total number of errors is 0.)
+  (After 900 statements, total number of errors is 0.)
+  (After 950 statements, total number of errors is 0.)
+  (After 1000 statements, total number of errors is 0.)
+  (After 1050 statements, total number of errors is 0.)
+  (After 1100 statements, total number of errors is 0.)
+  (After 1150 statements, total number of errors is 0.)
+  (After 1200 statements, total number of errors is 0.)
+ Declaration of 'NEP_COMM' as a SUBSET of 'PROD_COMM'.
+ %% Information only.
+     This subset relation is a consequence of earlier subset declarations.
+ Declaration of 'NEF_COMM' as a SUBSET of 'FIRM_COMM'.
+ %% Information only.
+     This subset relation is a consequence of earlier subset declarations.
+ Declaration of 'NUS_REG' as a SUBSET of 'REG'.
+ %% Information only.
+     This subset relation is a consequence of earlier subset declarations.
+  
+  (After 1298 statements, total number of errors is 0.)
+  
+  NUMIG = 1298, NUMZD = 26.
+  NUMST = 50, NUMSS = 60.
+  NUMFL = 3, NUMDS = 0.
+  NUMRD = 75, NUMWR = 0.
+  NUMCS = 252, NUMVC = 266.
+  TCSIND = 3983, TVCIND = 3955.
+  NUMEQ = 261, NUMFM = 248.
+  NUMUD = 57, NUMTR = 0.
+  NUMOMT = 0, NUMBST = 0.
+  NUMCP = 0, NUMMF = 0.
+  (Checking for duplicate name use.)
+  (Checking coefficient initialization.)
+  
+  
+ MESSAGE(S) ABOUT COEFFICIENT INITIALIZATION
+ -------------------------------------------
+  
+  FORMULA for 'VGAS' starting at line 1346.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VGA' which occurs in this formula.
+  
+  FORMULA for 'VGA' starting at line 1348.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VGAS' which occurs in this formula.
+  
+  FORMULA for 'GSHENY' starting at line 1358.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VGAS' which occurs in this formula.
+  
+  FORMULA for 'GSHENY' starting at line 1360.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VGAS' which occurs in this formula.
+  
+  FORMULA for 'VPAS' starting at line 1623.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VPA' which occurs in this formula.
+  
+  FORMULA for 'VPA' starting at line 1625.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VPAS' which occurs in this formula.
+  
+  FORMULA for 'PSHENY' starting at line 1635.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VPAS' which occurs in this formula.
+  
+  FORMULA for 'PSHENY' starting at line 1637.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VPAS' which occurs in this formula.
+  
+  FORMULA for 'VFAS' starting at line 2052.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VFA' which occurs in this formula.
+  
+  FORMULA for 'VFA' starting at line 2054.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VFAS' which occurs in this formula.
+  
+  FORMULA for 'FSHNCOAL' starting at line 2065.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VFAS' which occurs in this formula.
+  
+  FORMULA for 'FSHNCOAL' starting at line 2067.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VFAS' which occurs in this formula.
+  
+  FORMULA for 'FSHNCOAL_S' starting at line 5401.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VFAS_S' which occurs in this formula.
+  
+  FORMULA for 'FSHNCOAL_S' starting at line 5403.
+  %%WARNING.    Only some values have been assigned to
+     coefficient 'VFAS_S' which occurs in this formula.
+  
+  
+ MESSAGE(S) ABOUT APPARENTLY REDUNDANT STATEMENTS
+ ------------------------------------------------
+  
+  FORMULA for 'CO2SOURCE' starting at line 1163.
+  
+  %%WARNING.    This formula appears to be redundant because
+     the coefficient 'CO2SOURCE' affected by it occurs in no equation
+     update or 'ORIG_LEVEL=' qualifier, nor on the right hand side of any
+     subsequent formula, nor in any subsequent DISPLAY,
+     ZERODIVIDE, WRITE or SET statement.
+  
+  FORMULA for 'CO2SOURCE' starting at line 1165.
+  
+  %%WARNING.    This formula appears to be redundant because
+     the coefficient 'CO2SOURCE' affected by it occurs in no equation
+     update or 'ORIG_LEVEL=' qualifier, nor on the right hand side of any
+     subsequent formula, nor in any subsequent DISPLAY,
+     ZERODIVIDE, WRITE or SET statement.
+  
+  FORMULA for 'CO2SOURCE' starting at line 1167.
+  
+  %%WARNING.    This formula appears to be redundant because
+     the coefficient 'CO2SOURCE' affected by it occurs in no equation
+     update or 'ORIG_LEVEL=' qualifier, nor on the right hand side of any
+     subsequent formula, nor in any subsequent DISPLAY,
+     ZERODIVIDE, WRITE or SET statement.
+  
+  FORMULA for 'CO2SOURCE' starting at line 1169.
+  
+  %%WARNING.    This formula appears to be redundant because
+     the coefficient 'CO2SOURCE' affected by it occurs in no equation
+     update or 'ORIG_LEVEL=' qualifier, nor on the right hand side of any
+     subsequent formula, nor in any subsequent DISPLAY,
+     ZERODIVIDE, WRITE or SET statement.
+  
+  FORMULA for 'CO2SOURCE' starting at line 1171.
+  
+  %%WARNING.    This formula appears to be redundant because
+     the coefficient 'CO2SOURCE' affected by it occurs in no equation
+     update or 'ORIG_LEVEL=' qualifier, nor on the right hand side of any
+     subsequent formula, nor in any subsequent DISPLAY,
+     ZERODIVIDE, WRITE or SET statement.
+  
+  FORMULA for 'CO2SOURCE' starting at line 1173.
+  
+  %%WARNING.    This formula appears to be redundant because
+     the coefficient 'CO2SOURCE' affected by it occurs in no equation
+     update or 'ORIG_LEVEL=' qualifier, nor on the right hand side of any
+     subsequent formula, nor in any subsequent DISPLAY,
+     ZERODIVIDE, WRITE or SET statement.
+  
+ COEFFICIENT INITIALIZATION SUMMARY
+ ----------------------------------
+  
+  %% NOTE the 20 WARNING(s) above about coefficients.
+  
+  %%INFORMATION. TABLO has created 6 new sets as follows:
+   S@eny # Set with one element eny, a subset of GOV_COMM #
+   S@neny # Set with one element neny, a subset of GOV_COMM #
+   S@ncoal # Set with one element ncoal, a subset of FIRM_COMM #
+   S@nely # Set with one element nely, a subset of FIRM_COMM #
+   S@ken # Set with one element ken, a subset of FIRM_COMM #
+   S@vaen # Set with one element vaen, a subset of FIRM_COMM #
+  
+  
+  
+ INPUT CHECK SUMMARY
+ -------------------
+  
+  Total number of statements is 1298.
+  There are NO syntax errors or semantic problems.
+ (Model Information file is
+  
+  'C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E\gta
+ p.mnc'.)
+ (Opened new binary file
+  
+  'C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E\gta
+ p.tbt'.)
+   (5531 character strings, each of length 136 written. Header 'TBFL')
+ (Information file is
+  
+  'C:\Users\andre.barbe\PycharmProjects\GTAP-E-Validation\Input_Files\GTAP-E\gta
+ p.inf'.)
+  
+  (The program has completed without error.)
+  (There were        23 warnings.)
+  (If you have a LOG file, search for '%%W' to see them.)
+  (Alternatively, search the Information file for '%%W'.)
+  (The last was:
+   'Statement appears redundant')
+  Total elapsed time is: less than one second.
+  

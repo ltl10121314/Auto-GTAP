@@ -1,0 +1,29 @@
+simulation name,commodities shocked,Commodity Description,variable,variable property,variable description,value
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Gas"":""USA"")",Percent Change,No Variable Description Available,-76.854965
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,0.23145035
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,-0.76854968
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,30.553339
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,137.37894
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,227226.14
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,131503.19
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,921.65839
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,65187.785
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,58807.199
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-243.19878
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Oil"":""USA"")",Percent Change,No Variable Description Available,-42.196178
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Oil"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Oil"":""USA"")",PostLevel,No Variable Description Available,0.57803822
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"pm(""Oil"":""USA"")",Absolute Change,No Variable Description Available,-0.42196178
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"aoall(""Oil"":""USA"")",Percent Change,No Variable Description Available,0.0000000
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Oil"":""USA"")",Percent Change,No Variable Description Available,11.766835
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Oil"":""USA"")",PreLevel,No Variable Description Available,222488.91
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Oil"":""USA"")",PostLevel,No Variable Description Available,248668.81
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qo(""Oil"":""USA"")",Absolute Change,No Variable Description Available,26179.906
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Oil"":""USA"")",Percent Change,No Variable Description Available,86.644623
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Oil"":""USA"")",PreLevel,No Variable Description Available,669.97400
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Oil"":""USA"")",PostLevel,No Variable Description Available,1250.4705
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qxw(""Oil"":""USA"")",Absolute Change,No Variable Description Available,580.49646
+GTAP-E-Beckman2010,GTAP-E-Beckman2010,Unknown Sector,"qiw(""Oil"":""USA"")",Percent Change,No Variable Description Available,-14.280212

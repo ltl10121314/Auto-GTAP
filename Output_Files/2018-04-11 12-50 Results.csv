@@ -1,0 +1,29 @@
+simulation name,commodities shocked,Commodity Description,variable,variable property,variable description,value
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Gas"":""USA"")",Percent Change,No Variable Description Available,-76.854965
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,0.23145035
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,-0.76854968
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,30.169706
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,132.13240
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,222204.00
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,126481.04
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,950.70697
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,67041.258
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,60660.672
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-252.97061
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Oil"":""USA"")",Percent Change,No Variable Description Available,-42.717587
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Oil"":""USA"")",PreLevel,No Variable Description Available,1.0000000
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Oil"":""USA"")",PostLevel,No Variable Description Available,0.57282412
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"pm(""Oil"":""USA"")",Absolute Change,No Variable Description Available,-0.42717588
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"aoall(""Oil"":""USA"")",Percent Change,No Variable Description Available,0.0000000
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Oil"":""USA"")",Percent Change,No Variable Description Available,11.258773
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Oil"":""USA"")",PreLevel,No Variable Description Available,222488.91
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Oil"":""USA"")",PostLevel,No Variable Description Available,247538.42
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qo(""Oil"":""USA"")",Absolute Change,No Variable Description Available,25049.516
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Oil"":""USA"")",Percent Change,No Variable Description Available,68.771606
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Oil"":""USA"")",PreLevel,No Variable Description Available,669.97400
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Oil"":""USA"")",PostLevel,No Variable Description Available,1130.7258
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qxw(""Oil"":""USA"")",Absolute Change,No Variable Description Available,460.75183
+GTAP-E-Custom-J,GTAP-E-Custom-J,Unknown Sector,"qiw(""Oil"":""USA"")",Percent Change,No Variable Description Available,-12.975911

@@ -21,7 +21,7 @@ class ModifyHAR(object):
 
     def CreateSTI(self) -> None:
         # Create lines for sti file that controls modhar
-        line_list = [
+        line_list1 = [
             "bat\n",
             "\n",
             "y\n",
@@ -30,8 +30,8 @@ class ModifyHAR(object):
             "mw\n",
             "EPEN\n",  # header to modify
             "m\n",
-            "r\n",
-            "o\n",
+            "r\n",  # replace entries of array
+            "o\n",  # *one* entry
             "5\n",
             "16\n",
             "w\n",
@@ -40,6 +40,25 @@ class ModifyHAR(object):
             "a\n",
             "0\n"]
 
+        line_list2 = [
+            "bat\n",
+            "\n",
+            "y\n",
+            self.input_file + ".prm\n",  # old filename
+            self.output_file + ".prm\n",  # new filename
+            "mw\n",
+            "EFNC\n",  # header to modify
+            "m\n",
+            "s\n",  # scale entries of array
+            "w\n",  # whole matrix to be scaled
+            "s\n",  # multiply by scalar or matrix
+            "0.1\n",  # value of scalar
+            "w\n",
+            "n\n",
+            "ex\n",
+            "a\n",
+            "0\n"]
+
         # Create final file
         with open(self.sti_file, "w+") as writer:  # Create the empty file
-            writer.writelines(line_list)  # write the line list to the file
+            writer.writelines(line_list2)  # write the line list to the file
