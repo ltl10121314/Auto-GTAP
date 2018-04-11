@@ -20,6 +20,8 @@ from CreateOutput import CreateOutput
 from CreateConfig import CreateConfig
 from ModifyHAR import ModifyHAR
 
+modifications = [["ESBM", 4, 0.2], ["ESBD", 4, 0.2]]
+
 # Call Methods
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
@@ -29,7 +31,7 @@ for simulation_name in config.simulation_list:
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name, config.sim_property(simulation_name, "shock")).create("Gas")
     if config.sim_property(simulation_name, "modify_har"):
-        ModifyHAR("Work_Files\\"+simulation_name,"olddefault", "default")
+        ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default", modifications)
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
