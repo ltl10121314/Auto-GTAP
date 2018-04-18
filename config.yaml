@@ -5,9 +5,10 @@
 
 # Simulations
 simulations_to_run:
-  - Actual
-  - GTAP-E-Gragg
-  - GTAP-E-Custom-G
+#  - Actual
+#  - GTAP-E-Gragg
+#  - GTAP-E-Custom-G
+  - GTAP-E-Johan
 parameter_modifications:
   low-elasticity:
       -
