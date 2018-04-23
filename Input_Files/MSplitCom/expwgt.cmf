@@ -1,0 +1,12 @@
+auxiliary files = expwgt;
+check-on-read elements = warn;  
+cpu = yes;  
+log only = yes;   
+! Input files:
+File WORKSETS = work\worksets.har; ! Sets used in expanding the database
+File FULLSUM  = work\fullsum.har;  ! Scaled splitting weights
+File USERWGT  = input\userwgt.har; ! Original user weights (for full rank weights)
+! Output files:
+File EXPWGT   = work\expwgt.har;   ! Full rank weights(shares) for splitting SplitCom into NewCom
+File JUNK     = work\junk.har;     ! File needed to work around GEMPACK bug
+

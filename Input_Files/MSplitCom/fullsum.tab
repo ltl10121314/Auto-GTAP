@@ -1,0 +1,401 @@
+! FULLSUM.TAB   expand user weights to full size, using default rules !
+
+! This job either uses 
+(all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG) WEIGHTS(n,m,r)  at header "WGTS"
+(all,q,COST1) (all,c,SUMCOLS1)           SUMMARY_R(q,c)  at header "WSUM"
+to estimate a larger producer price flows table:
+ (all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMMARY(q,c,r)
+
+OR, if SUMMARY is available at header SMRY on original userwgt file,
+    it uses that header.
+
+Next the SUMMARY array is scaled so that
+(a) it adds up to original GTAP data, and
+(b) for each region and sector,  sector rowsums=colsums
+!
+Zerodivide off;
+File
+      SUMWGT   # Work\normchk0.har : to get SMRY for original GTAP data #;
+      WORKSETS # Sets used in expanding the database #;
+      SUMSPLIT # Scaled WGTS and WSUM from SumSplit program #;
+      USERWGT  # Initial user file (to get SMRY, if avail) #;
+(new) DIAG     # Diagnostic file #;
+(new) OUTFILE    # Weights to pass on to next program, ExpWgt #;
+
+Set ! constant sets !
+ TYP (BAS,TAX);
+ SRC (dom,imp);
+ MOREDEM # More demanders # (HOU,INV,GOV);
+
+Set ! sets from original data !
+ REG # Regions #  read elements from file WORKSETS header "REG";
+ USER0 # All local users #  read elements from file WORKSETS header "USR0";
+ COM0 # Commodities # read elements from file WORKSETS header "COM0";
+ TRADES # Basic, exptax, imptax, margins #
+           read elements from file WORKSETS header "TRD";
+ IND0 = COM0;
+
+Set ! sets from WORKSETS file !
+ SPLITCOM # The commodities which are split #
+   read elements from file WORKSETS header "SCOM";
+ SPLITIND # The industries which are split #
+   read elements from file WORKSETS header "SCOM";
+ NEWCOM   # The new parts of SplitCom #
+   read elements from file WORKSETS header "NCOM";
+ NEWIND   # The new industries #
+   read elements from file WORKSETS header "NCOM";
+ ORGUSER  # Users which are not split #
+   read elements from file WORKSETS header "OUSR";
+ ORGCOM   # Commodities which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGIND   # Industries which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGCOST  # Costs which are not split #
+   read elements from file WORKSETS header "OCST";
+ COM1     # The complete enlarged commodity set #
+   read elements from file WORKSETS header "COM1";
+ IND1     # The complete enlarged industry set #
+   read elements from file WORKSETS header "COM1";
+ USER1    # The complete enlarged user set #
+   read elements from file WORKSETS header "USR1";
+ MORECOST # Non-commodity industry costs #
+   read elements from file WORKSETS header "MCST";
+
+COST0 # Complete original cost set # = COM0  + MORECOST;
+COST1 # Complete enlarged cost set # = COM1 + MORECOST;
+NEWSEC = NEWCOM intersect NEWIND;
+Subset
+  SPLITCOM is subset of COM0;
+  ORGCOM   is subset of COM0;
+  ORGCOM   is subset of COM1;
+  NEWCOM   is subset of COST1;
+  NEWCOM   is subset of COM1;
+  SPLITCOM is subset of COST0;
+  ORGCOST  is subset of COST0;
+  ORGCOST  is subset of COST1;
+  ORGUSER  is subset of USER0;
+  ORGUSER  is subset of USER1;
+  NEWIND   is subset of USER1;
+  IND1     is subset of USER1;
+  MOREDEM  is subset of USER1;
+  NEWIND   is subset of NEWCOM;
+  SPLITIND is subset of USER0;
+
+Mapping (onto) MapCom from COM1 to COM0;
+ Read (by_elements) MapCom from file WORKSETS header "MCMF";
+Mapping (onto) MapInd from IND1 to IND0;
+Read (by_elements) MapInd from file WORKSETS header "MCMF";
+
+Set MORECOLS (INV,HOU,GOV,EXP,lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+Set SUMCOLS0 = IND0 + MORECOLS;
+Subset USER0 is subset of SUMCOLS0;
+Set SUMCOLS1 = IND1 + MORECOLS;
+Subset USER1 is subset of SUMCOLS1;
+
+Set MOREWGT (Production, IntUse, Absorption, Exports, Imports);
+Set MOREWGTSUP (Production, Imports);
+Set MOREWGTDEM (IntUse, Absorption, Exports);
+Subset MOREWGTSUP is subset of MOREWGT;
+Subset MOREWGTDEM is subset of MOREWGT;
+
+Mapping (onto) MAPSUMCOLS from SUMCOLS1 to SUMCOLS0;
+Formula (by_elements) (all,m,MORECOLS) MAPSUMCOLS(m) = m;
+Formula (by_elements) (all,m,IND1) MAPSUMCOLS(m) = MapInd(m);
+
+Mapping (onto) MAPSUMROWS from COST1 to COST0;
+Formula (by_elements) (all,m,MORECOST) MAPSUMROWS(m) = m;
+Formula (by_elements) (all,m,COM1) MAPSUMROWS(m) = MapCom(m);
+
+! dummy variables and equations so Euler (loop) algorithm is allowed !
+Variable
+(no_split) unity; ! no_split --> unity has the same value (=1) at every step !
+(change) delUnity;
+Equation E_delUnity     delUnity =  unity;
+
+! get summary unexpanded data from original data file !
+Coefficient (parameter)
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) SUMMARY0(q,c,r)
+ # Unexpanded summary producer price flows table #;
+Read  SUMMARY0 from file SUMWGT header "SMRY";
+Write SUMMARY0   to file DIAG   header "SMRY"
+      longname  "Unexpanded summary producer price flows table [original GTAP]";
+
+Coefficient ! create a share version of SUMMARY0, region/world !
+(all,q,COST0)(all,c,SUMCOLS0) SUMMARY0_R(q,c)
+ # World unexpanded summary producer price flows table #;
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) REGSHR(q,c,r)
+ # Shares SUMMARY0/SUMMARY0_R #;
+ DEFREGSHR # Default regional share #;
+Formula
+ DEFREGSHR = 1/sum{r,REG,1.0};
+(all,q,COST0)(all,c,SUMCOLS0) SUMMARY0_R(q,c)=sum{r,REG, SUMMARY0(q,c,r)};
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) REGSHR(q,c,r) = DEFREGSHR;
+(all,q,COST0)(all,c,SUMCOLS0:SUMMARY0_R(q,c)<>0)(all,r,REG)
+         REGSHR(q,c,r) = SUMMARY0(q,c,r)/SUMMARY0_R(q,c);
+
+! Get summary user split data for:
+                 Production, IntUse, Absorption, Exports, Imports!
+Coefficient (parameter)
+(all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG) INWEIGHTS(n,m,r) # Summary weights #;
+Read  INWEIGHTS from file SUMSPLIT header "WGTS";
+Write INWEIGHTS to file   DIAG     header "WGTS"
+longname "# Input to FullSum: Summary weights #";
+Assertion (all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG) INWEIGHTS(n,m,r)>=0;
+
+Coefficient ! create a share version of weights, region/world !
+(all,n,NEWCOM)(all,m,MOREWGT)
+   WEIGHTS_R(n,m)   # Weights summed over regions #;
+(all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG)
+   WEIGHTSHR(n,m,r) # Weight shares, region/world #;
+Formula
+(all,n,NEWCOM)(all,m,MOREWGT) WEIGHTS_R(n,m) = sum{r,REG, INWEIGHTS(n,m,r)};
+(all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG)
+   WEIGHTSHR(n,m,r) = INWEIGHTS(n,m,r)/WEIGHTS_R(n,m);
+
+Coefficient (parameter)(all,q,COST1)(all,c,SUMCOLS1) SUMMARY1_R(q,c)
+ # Expanded world summary producer price flows table #;
+Read  SUMMARY1_R from file SUMSPLIT header "WSUM";
+Write SUMMARY1_R to file   DIAG     header "WSUM" 
+longname "# Input to FullSum: Expanded world summary producer price flows #";
+Coefficient
+(all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMSHR(q,c,r)
+    # Region shares used to split SUMMARY1_R into SUMMARY1X #;
+
+Subset NEWCOM is subset of SUMCOLS1;
+Subset ORGIND is subset of SUMCOLS1;
+Subset ORGIND is subset of SUMCOLS0;
+
+Formula
+(all,q,COST1)(all,c,SUMCOLS1)(all,r,REG)
+   SUMSHR(q,c,r) = SUMMARY0(MAPSUMROWS(q),MAPSUMCOLS(c),r); ! default !
+! for new sector rows of old IND columns, use production shares by region !
+(all,q,NEWCOM)(all,i,ORGIND)(all,r,REG)
+          SUMSHR(q,i,r)=REGSHR(MAPSUMROWS(q),i,r);
+
+! for new industry columns, use production shares by region !
+(all,q,COST1)(all,i,NEWCOM)(all,r,REG)SUMSHR(q,i,r)=WEIGHTSHR(i,"Production",r);
+! for new sector rows of INV, HOU, GOV, use absorption shares by region !
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"INV",r) = WEIGHTSHR(q,"Absorption",r);
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"HOU",r) = WEIGHTSHR(q,"Absorption",r);
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"GOV",r) = WEIGHTSHR(q,"Absorption",r);
+! for new sector rows of EXP, use export shares by region !
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"EXP",r) = WEIGHTSHR(q,"Exports",r);
+! for new sector rows of lessDomTax, use DomUse shares by region !
+(all,q,NEWCOM)(all,r,REG)
+ SUMSHR(q,"lessDomTax",r)=INWEIGHTS(q,"Production",r)-INWEIGHTS(q,"Exports",r);
+! for new sector import rows, use import shares by region !
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"lessImpTax",r) = WEIGHTSHR(q,"Imports",r);
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"lessTariff",r) = WEIGHTSHR(q,"Imports",r);
+(all,q,NEWCOM)(all,r,REG) SUMSHR(q,"lessImpCIF",r) = WEIGHTSHR(q,"Imports",r);
+
+Coefficient ! normalize SUMSHR to add to 1 over regions !
+(all,q,COST1)(all,c,SUMCOLS1) TOTSUMSHR_R(q,c) # Share sum...should=1 #;
+Formula
+(all,q,COST1)(all,c,SUMCOLS1) TOTSUMSHR_R(q,c) = sum{r,REG, SUMSHR(q,c,r)};
+(all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMSHR(q,c,r)= DEFREGSHR;
+(all,q,COST1)(all,c,SUMCOLS1:TOTSUMSHR_R(q,c)<>0.0)(all,r,REG)
+  SUMSHR(q,c,r)=SUMSHR(q,c,r)/TOTSUMSHR_R(q,c);
+
+! do the split !
+Coefficient
+(all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMMARY1X(q,c,r)
+    # Expanded multi-regional producer price flows table #;
+Formula (initial) (all,q,COST1)(all,c,SUMCOLS1)(all,r,REG)
+     SUMMARY1X(q,c,r) = SUMSHR(q,c,r)*SUMMARY1_R(q,c);
+! The WSUM and WGTS headers are required.
+However, if SMRY header is supplied, those values will be used
+and WSUM and WGTS values are irrelevant. !
+Read (IfHeaderExists) SUMMARY1X from file USERWGT header "SMRY";
+
+Formula (initial) ! avoiding zero flows !
+(all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMMARY1X(q,c,r)=SUMMARY1X(q,c,r)
++ if(SUMMARY1X(q,c,r)=0,0.00000001*SUMMARY0(MAPSUMROWS(q),MAPSUMCOLS(c),r));
+
+!  TABLO rules state that updated coefficients like SUMMARY1X
+   must not appear on the LHS of a Formula(Always) [see just below]. 
+   Hence the need for a new symbol, SUMMARY1R to be scaled. 
+   Formula next initializes SUMMARY1R to SUMMARY1RX at the start of each
+   iteration. Update statement near end "hands back" values for
+   SUMMARY1R to SUMMARY1RX, at the end of each iteration. !
+
+Coefficient (all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMMARY1(q,c,r)
+ # Expanded summary producer price flows table #;
+Formula
+ (all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMMARY1(q,c,r)=SUMMARY1X(q,c,r);
+
+! ************************* begin scaling operations ************************* !
+Coefficient ITER # Iteration count #;
+Formula (initial) ITER = 1;
+Update (change) ITER = 1;
+Set ITERS (ITER1-ITER100);
+
+! scale SUMMARY1 to add to SUMMARY0 !
+Coefficient
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) AGGSUMMARY1(q,c,r)
+  # Aggregated summary1 #;
+Formula
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) AGGSUMMARY1(q,c,r)
+ =  sum{q1,COST1:MAPSUMROWS(q1)=q,
+    sum{c1,SUMCOLS1:MAPSUMCOLS(c1)=c, SUMMARY1(q1,c1,r)}};
+(all,q,COST1)(all,c,SUMCOLS1)(all,r,REG)
+ SUMMARY1(q,c,r) = SUMMARY1(q,c,r)*SUMMARY0(MAPSUMROWS(q),MAPSUMCOLS(c),r)
+                          /ID01[AGGSUMMARY1(MAPSUMROWS(q),MAPSUMCOLS(c),r)];
+
+![[! commented out code to scale SUMMARY1 to add to WEIGHTS 
+Set ABSORP1 (INV,GOV,HOU);
+Subset ABSORP1 is subset of SUMCOLS1;
+Set IMPGROUP (lessImpTax,lessTariff,lessImpCIF);
+Subset IMPGROUP is subset of SUMCOLS1;
+
+! scale SUMMARY1 to add to WEIGHTS !
+Coefficient (all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG) SUMWEIGHTS(n,m,r)
+        # SUMMARY1 added to WEIGHTS format #;
+Formula
+ (all,s,NEWSEC)(all,r,REG) SUMWEIGHTS(s,"Production",r) =
+    sum{q,COST1, SUMMARY1(q,s,r)} - SUMMARY1(s,"lessDomTax",r);
+ (all,s,NEWSEC)(all,r,REG) SUMWEIGHTS(s,"IntUse",r) =
+                                    sum{i,IND1, SUMMARY1(s,i,r)};
+ (all,s,NEWSEC)(all,r,REG) SUMWEIGHTS(s,"Absorption",r) =
+                                     sum{a,ABSORP1, SUMMARY1(s,a,r)};
+ (all,s,NEWSEC)(all,r,REG) SUMWEIGHTS(s,"Exports",r) = SUMMARY1(s,"exp",r);
+ (all,s,NEWSEC)(all,r,REG) SUMWEIGHTS(s,"Imports",r) =
+ - [sum{k,IMPGROUP, SUMMARY1(s,k,r)}];
+
+Coefficient (all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG) SUMSCAL(n,m,r)
+        # SUMMARY1 scaling factor #;
+Formula  (all,n,NEWCOM)(all,m,MOREWGT)(all,r,REG)
+  SUMSCAL(n,m,r) = WEIGHTS(n,m,r)/SUMWEIGHTS(n,m,r);
+
+Formula
+(all,c,NEWCOM)(all,q,IMPGROUP)(all,r,REG)
+  SUMMARY1(c,q,r) = SUMMARY1(c,q,r)*SUMSCAL(c,"Imports",r);
+(all,c,NEWCOM)(all,r,REG)
+  SUMMARY1(c,"EXP",r) = SUMMARY1(c,"EXP",r)*SUMSCAL(c,"Exports",r);
+(all,c,NEWCOM)(all,q,ABSORP1)(all,r,REG)
+  SUMMARY1(c,q,r) = SUMMARY1(c,q,r)*SUMSCAL(c,"Absorption",r);
+(all,c,NEWCOM)(all,q,IND1)(all,r,REG)
+  SUMMARY1(c,q,r) = SUMMARY1(c,q,r)*SUMSCAL(c,"IntUse",r);
+
+(all,q,COST1)(all,i,NEWIND)(all,r,REG)
+  SUMMARY1(q,i,r) = SUMMARY1(q,i,r)*SUMSCAL(i,"Production",r);
+(all,c,NEWCOM)(all,r,REG) SUMMARY1(c,"lessDomTax",r) =
+                          SUMMARY1(c,"lessDomTax",r)*SUMSCAL(c,"Production",r);
+!]]!
+
+! ****** scale SUMMARY1 so that sector rowsums = sector colsums ****** !
+! we wish that
+POSROWSUM + NEGROWSUM = POSCOLSUM + NEGCOLSUM
+we achieve this by choosing k such that
+POSROWSUM*k + NEGROWSUM/k = POSCOLSUM/k + NEGCOLSUM*k
+[ ie, +ve A(i,j)-->A(i,j)*k(i)/k(j),   -ve A(i,j)-->A(i,j)*k(j)/k(i)  ]   
+let K = k*k, then 
+POSROWSUM*K + NEGROWSUM = POSCOLSUM + NEGCOLSUM*K
+POSROWSUM*K - NEGCOLSUM*K = POSCOLSUM - NEGROWSUM
+K*(POSROWSUM-NEGCOLSUM) = POSCOLSUM - NEGROWSUM
+K = (POSCOLSUM - NEGROWSUM)/(POSROWSUM-NEGCOLSUM)
+and k=SQRT(K) !
+Set SEC1 = COM1 intersect IND1;
+Subset COM1 is subset of SEC1; ! checking that COM1=IND1 !
+Subset IND1 is subset of SEC1; ! checking that COM1=IND1 !
+Coefficient
+(all,r,COM1)(all,z,REG) POSROWSUM(r,z) # Rowsum of positive parts #;
+(all,r,COM1)(all,z,REG) NEGROWSUM(r,z) # Rowsum of negative parts #;
+(all,c,IND1)(all,z,REG) POSCOLSUM(c,z) # Colsum of positive parts #;
+(all,c,IND1)(all,z,REG) NEGCOLSUM(c,z) # Colsum of negative parts #;
+(all,q,SEC1)(all,z,REG) SCALE(q,z)     # Scale factor #;
+(all,q,COST1)(all,c,SUMCOLS1)(all,z,REG) SUMSCALE(q,c,z);
+Formula
+(all,r,COM1)(all,z,REG) POSROWSUM(r,z) =
+         sum{c,SUMCOLS1:SUMMARY1(r,c,z)>0,SUMMARY1(r,c,z)};
+(all,r,COM1)(all,z,REG) NEGROWSUM(r,z) =
+         sum{c,SUMCOLS1:SUMMARY1(r,c,z)<0,SUMMARY1(r,c,z)};
+(all,c,IND1)(all,z,REG) POSCOLSUM(c,z) =
+         sum{r,   COST1:SUMMARY1(r,c,z)>0,SUMMARY1(r,c,z)};
+(all,c,IND1)(all,z,REG) NEGCOLSUM(c,z) =
+         sum{r,   COST1:SUMMARY1(r,c,z)<0,SUMMARY1(r,c,z)};
+(all,q,SEC1)(all,z,REG) SCALE(q,z) = [POSCOLSUM(q,z)-NEGROWSUM(q,z)]
+                                    /[POSROWSUM(q,z)-NEGCOLSUM(q,z)];
+(all,q,SEC1)(all,z,REG) SCALE(q,z) = SQRT[SCALE(q,z)];
+! now set +ve A(i,j)-->A(i,j)*k(i)/k(j)  and  -ve A(i,j)-->A(i,j)*k(j)/k(i) !
+(all,q,COST1)(all,c,SUMCOLS1)(all,z,REG) SUMSCALE(q,c,z) = 1;
+(all,q,COM1) (all,c,SUMCOLS1)(all,z,REG) SUMSCALE(q,c,z) = SCALE(q,z);
+(all,q,COST1)(all,c,IND1)(all,z,REG) SUMSCALE(q,c,z)=SUMSCALE(q,c,z)/SCALE(c,z);
+(all,q,COST1)(all,c,SUMCOLS1)(all,z,REG:SUMMARY1(q,c,z)<0)
+        SUMSCALE(q,c,z) = 1/SUMSCALE(q,c,z);
+! and finally do the scale !
+(all,q,COST1)(all,c,SUMCOLS1)(all,z,REG)
+       SUMMARY1(q,c,z)=SUMMARY1(q,c,z)*SUMSCALE(q,c,z);
+
+! ************************** end scaling operations ************************** !
+
+Coefficient ABSDIFF # Sum of changes in SUMMARY1 #;
+Formula  ABSDIFF =
+sum{q,COST1, sum{c,SUMCOLS1, sum{r,REG,ABS[SUMMARY1X(q,c,r)-SUMMARY1(q,c,r)]}}};
+
+Coefficient (all,i,ITERS) DELSUM(i)
+ # Sum of abs changes in SUMMARY1 #;
+Formula (initial) (all,i,ITERS) DELSUM(i) = 0;
+Update (change) (all,i,ITERS) DELSUM(i) = if ($pos(i)=Round(ITER), ABSDIFF);
+
+Update (explicit)
+ (all,q,COST1)(all,c,SUMCOLS1)(all,r,REG) SUMMARY1X(q,c,r)=SUMMARY1(q,c,r);
+
+PostSim (begin);
+
+Write DELSUM to file DIAG header "DLIT";
+
+Coefficient
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) SUMMARYCHKA(q,c,r)
+  # Postsim check that expanded summary adds to aggregated GTAP summary #;
+Formula
+(all,q,COST0)(all,c,SUMCOLS0)(all,r,REG) SUMMARYCHKA(q,c,r) = SUMMARY0(q,c,r) -
+    sum{q1,COST1:MAPSUMROWS(q1)=q,
+    sum{c1,SUMCOLS1:MAPSUMCOLS(c1)=c, SUMMARY1(q1,c1,r)}};
+Write SUMMARYCHKA to file DIAG header "SCKA";
+
+Coefficient
+(all,q,SEC1)(all,r,REG) SUMMARYCHKB(q,r)
+  # Postsim check that rowsum=colsum for expanded summary #;
+Formula
+(all,a,SEC1)(all,r,REG) SUMMARYCHKB(a,r) =
+          sum{q,COST1, SUMMARY1(q,a,r)} - sum{c,SUMCOLS1, SUMMARY1(a,c,r)};
+Write SUMMARYCHKB to file DIAG header "SCKB";
+
+Write SUMMARY1 to file OUTFILE header "SMRY"
+     longname "Scaled expanded summary producer price flows table ";
+
+Coefficient
+(all,q,COST1)(all,c,SUMCOLS1) SUMMARY_R(q,c)
+ # World Summary producer price flows table computed from scaled SMRY #;
+Formula
+(all,q,COST1)(all,c,SUMCOLS1) SUMMARY_R(q,c) = sum{r,REG, SUMMARY1(q,c,r)};
+Write SUMMARY_R to file OUTFILE header "WSUM";
+
+Set ABSORP (INV,GOV,HOU);
+Subset ABSORP is subset of SUMCOLS1;
+Set SEC = COM1 intersect IND1;
+
+Coefficient
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r)
+ # Summary producer price weights #;
+Formula
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r) = 0;
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Production",r) =
+    sum{q,COST1, SUMMARY1(q,s,r)} - SUMMARY1(s,"lessDomTax",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"IntUse",r) =
+                                    sum{i,IND1, SUMMARY1(s,i,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Absorption",r) =
+                                     sum{a,ABSORP, SUMMARY1(s,a,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Exports",r) =   SUMMARY1(s,"exp",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Imports",r) = -
+           [SUMMARY1(s,"lessImpCIF",r)
+               + SUMMARY1(s,"lessImpTax",r) + SUMMARY1(s,"lessTariff",r)];
+
+Subset NEWIND is subset of SEC;
+Write (all,s,NEWIND)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r)
+  to file OUTFILE header "WGTS"
+       longname "Summary weights computed from scaled SMRY";
+
+PostSim (end);
+
+!end of file !

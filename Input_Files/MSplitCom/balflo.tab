@@ -1,0 +1,568 @@
+! BALFLO.TAB  does complex scaling of new flows to satisfy constraints
+   and add to old flows !
+
+! Note: to conserve memory and allow larger splits without a GEMPACK licence
+  BalFlo operates only on the SPLIT part of the NATIONAL and TRADE arrays.
+  These split parts are merged into the main NATIONAL and TRADE arrays by
+  the next program, POSTBAL. !
+ 
+Zerodivide off;
+File   INFILE   # Expanded unscaled normalized GTAP data #;
+       WORKSETS # Sets used in expanding the database #;
+Set ! constant sets !
+ TYP (BAS,TAX);
+ SRC (dom,imp);
+Set ! sets from input data !
+ REG # Regions #  read elements from file INFILE header "REG";
+ USER # All local users #  read elements from file INFILE header "USER";
+ COST # All industry costs # read elements from file INFILE header "COST";
+ COM # Commodities # read elements from file INFILE header "COM";
+ TRADES # Basic, exptax, imptax, margins #
+           read elements from file INFILE header "TRD";
+
+Set ! sets from WORKSETS file !
+ NEWCOM   # The new parts of SplitCom #
+   read elements from file WORKSETS header "NCOM";
+ NEWIND   # The new industries #
+   read elements from file WORKSETS header "NCOM";
+ ORGUSER  # Users which are not split #
+   read elements from file WORKSETS header "OUSR";
+ ORGCOM   # Commodities which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGCOST  # Costs which are not split #
+   read elements from file WORKSETS header "OCST";
+ SPLITCOM # Original commodities which are split #
+   read elements from file WORKSETS header "SCOM";
+ SPLITIND # Original industries which are split #
+   read elements from file WORKSETS header "SIND";
+
+Subset
+  ORGCOM   is subset of COM;
+  NEWCOM   is subset of COST;
+  NEWCOM   is subset of COM;
+  ORGCOST  is subset of COST;
+  ORGUSER  is subset of USER;
+  NEWIND   is subset of USER;
+ ! SPLITCOM is subset of COM;
+  SPLITIND is subset of USER;!
+
+Mapping NEW2SPLITCOM from NEWCOM to SPLITCOM;
+Read (by_elements) NEW2SPLITCOM from file WORKSETS header "MCOM";
+Mapping NEW2SPLITIND from NEWIND to SPLITIND;
+Read (by_elements) NEW2SPLITIND from file WORKSETS header "MIND";
+
+Coefficient ! expanded part of original data !
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROW(n,s,u,r,t)   # New rows of national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  COL(c,s,u,r,t)   # New cols of national matrix #;
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSS(n,s,u,r,t) # New intersection of national matrix #;
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADE(x,n,f,t)   # New part of trade matrix #;
+Read
+ ROW   from file INFILE header "NROW";
+ COL   from file INFILE header "NCOL";
+ CROSS from file INFILE header "NCRS";
+ TRADE from file INFILE header "NTRD";
+
+!*************** control totals **************************!
+! read coefficients showing original row, original col, and original crossing !
+Coefficient
+(parameter)(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ORGROW(c,s,u,r,t) # SplitCom rows of the original national matrix #;
+(parameter)(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ORGCOL(c,s,i,r,t) # SplitInd columns of the original national matrix #;
+(parameter)(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ORGCROSS(c,s,i,r,t) # Split sector row/col intersect of orig national matrix#;
+(parameter)(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  ORGTRADE(x,c,f,t) # The SplitCom bit of the original trade matrix #;
+Read
+ ORGROW   from file INFILE header "OROW";
+ ORGCOL   from file INFILE header "OCOL";
+ ORGCROSS from file INFILE header "OCRS";
+ ORGTRADE from file INFILE header "OTRD";
+
+! Change Dec 2008
+Previous scaling method, simple scaling, multiplied all elements by a factor k.
+That is, elements are altered by the transformation V(i)-->V(i)*k.
+Here, k = TARG/TOT    where TARG is the target and TOT is the sum of elements.
+Clearly, the method fails if (with non-zero TARG) either: 
+   all elements are zero, 
+or positive and negative elements cancel out. 
+Furthermore, if positive and negative elements NEARLY cancel out,
+very large adjustments could be made.
+
+New method applies the transformation:
+   for positive elements: V(i)-->V(i)*k.
+   for negative elements: V(i)-->V(i)/k.
+k can be found from the formula
+   POS*k + NEG/k = TARG  where POS is the sum of +ve elements, NEG the -ve sum.
+Note, if POS=0  we have NEG = TARG.k   or k=NEG/TARG
+   or if NEG=0  we have POS.k = TARG   or k=TARG/POS
+   or if TARG=0 we have POS.k.k = -NEG or k= sqrt(-NEG/POS) 
+Otherwise, we must form the quadratic:
+   POS*k*k - TARG*k + NEG = 0 
+recall a.x.x + b.x + c = 0  --> x = [-b+sqrt(b.b-4a.c)]/[2.a]
+   a=POS  b=-TARG  c=NEG
+so k = [-b+sqrt(b.b-4a.c)]/[2.a]
+so k = [TARG + sqrt(TARG^2 - 4.POS.NEG)]/(2.POS)
+
+Let: TOTABS = sum of absolute values
+   ABS(TOT) = absolute value of sum
+We can replace NEG and POS by terms in TOTABS and ABS(TOT) as follows:
+   NEG = (TOT - TOTABS)/2         
+   POS = (TOT + TOTABS)/2    since POS = TOT - NEG
+note  POS.NEG = (1/4)(TOT^2 - TOTABS^2) 
+Then     k = [TARG + sqrt(TARG^2 - 4.POS.NEG)]/(2.POS)
+becomes  k = [TARG + sqrt(TARG^2 - TOT^2 + TOTABS^2)]/[TOT + TOTABS]
+
+TOTABS and ABS(TOT) help us distinguish various special cases:
+   allzero: TOTABS=0
+ same-sign: TOTABS=ABS(TOT)
+mixed-sign: TOTABS>ABS(TOT)
+
+Actions to follow in various cases are:  
+  Target=0   and elements
+    all-zero         : do nothing or scale to zero
+    same-sign        : set or scale to zero 
+    mixed-sign       : apply complex formula 
+  Target<>0  and elements
+    all-zero         : do nothing -- failure 
+    same-sign        : apply simple formula 
+    mixed-sign       : apply complex formula 
+SUMMARY:
+    if allzero         do nothing
+    else if same-sign  apply simple formula
+    else               apply complex formula
+
+As described above, if presented with all-negative elements and a positive
+target, both methods will use a uniform negative scale to hit the target: so
+signs would be reversed.That feature is switched off here (see note below).
+!
+
+!*************** current totals **************************!
+! scale new current cells to add to original cell !
+Coefficient
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWTOT(c,s,u,r,t) # Current total #;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLTOT(c,s,i,r,t) # Current total #;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSTOT(c,s,i,r,t) # Current total #;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  TRADETOT(x,c,f,t) # Current total #;
+Formula
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWTOT(c,s,u,r,t) = sum{cc,NEWCOM:NEW2SPLITCOM(cc)=c, ROW(cc,s,u,r,t)};
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLTOT(c,s,i,r,t) = sum{uu,NEWIND:NEW2SPLITIND(uu)=i, COL(c,s,uu,r,t)};
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSTOT(c,s,i,r,t) = sum{cc,NEWCOM:NEW2SPLITCOM(cc)=c,
+                        sum{uu,NEWIND:NEW2SPLITIND(uu)=i, CROSS(cc,s,uu,r,t)}};
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  TRADETOT(x,c,f,t) = sum{cc,NEWCOM:NEW2SPLITCOM(cc)=c, TRADE(x,cc,f,t)};
+
+Coefficient
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ABSROWTOT(c,s,u,r,t) # Current total of absoute values #;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ABSCOLTOT(c,s,i,r,t) # Current total of absoute values  #;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ABSCROSSTOT(c,s,i,r,t) # Current total of absoute values  #;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  ABSTRADETOT(x,c,f,t) # Current total of absoute values  #;
+Formula
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ABSROWTOT(c,s,u,r,t) = sum{cc,NEWCOM:NEW2SPLITCOM(cc)=c,ABS[ROW(cc,s,u,r,t)]};
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ABSCOLTOT(c,s,i,r,t) = sum{uu,NEWIND:NEW2SPLITIND(uu)=i,ABS[COL(c,s,uu,r,t)]};
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ABSCROSSTOT(c,s,i,r,t) = sum{cc,NEWCOM:NEW2SPLITCOM(cc)=c,
+                     sum{uu,NEWIND:NEW2SPLITIND(uu)=i,ABS[CROSS(cc,s,uu,r,t)]}};
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  ABSTRADETOT(x,c,f,t) = sum{cc,NEWCOM:NEW2SPLITCOM(cc)=c,ABS[TRADE(x,cc,f,t)]};
+
+Coefficient
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWSCALE(c,s,u,r,t) # Scale factor #;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLSCALE(c,s,i,r,t) # Scale factor #;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSSCALE(c,s,i,r,t) # Scale factor #;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  TRADESCALE(x,c,f,t) # Scale factor #;
+
+Formula ! set scales to 1 by default, in case scaling is impossible !
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWSCALE(c,s,u,r,t) = 1;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLSCALE(c,s,i,r,t) = 1;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSSCALE(c,s,i,r,t) = 1;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  TRADESCALE(x,c,f,t) = 1;
+
+Formula ! set scales to TARGET/TOTAL, for use in non-mixed sign case !
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)
+ (all,t,TYP:ROWTOT(c,s,u,r,t)<>0)
+  ROWSCALE(c,s,u,r,t) = ORGROW(c,s,u,r,t)/ROWTOT(c,s,u,r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)
+ (all,t,TYP:COLTOT(c,s,i,r,t)<>0)
+  COLSCALE(c,s,i,r,t) = ORGCOL(c,s,i,r,t)/COLTOT(c,s,i,r,t);
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)
+ (all,t,TYP:CROSSTOT(c,s,i,r,t)<>0)
+  CROSSSCALE(c,s,i,r,t) = ORGCROSS(c,s,i,r,t)/CROSSTOT(c,s,i,r,t);
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)
+ (all,t,REG:TRADETOT(x,c,f,t)<>0)
+  TRADESCALE(x,c,f,t) = ORGTRADE(x,c,f,t)/TRADETOT(x,c,f,t);
+
+Coefficient ! identify mixed sign case !
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWMIX(c,s,u,r,t)   # Flag, 1 if sub-elements are of mixed sign, else 0 #;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLMIX(c,s,i,r,t)   # Flag, 1 if sub-elements are of mixed sign, else 0 #;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSMIX(c,s,i,r,t) # Flag, 1 if sub-elements are of mixed sign, else 0 #;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  TRADEMIX(x,c,f,t)   # Flag, 1 if sub-elements are of mixed sign, else 0 #;
+Formula ! mixed if  {TOTABS>ABS[TOT]} !
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWMIX(c,s,u,r,t)   = if {ABSROWTOT(c,s,u,r,t)>ABS[ROWTOT(c,s,u,r,t)], 1};
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLMIX(c,s,i,r,t)   = if {ABSCOLTOT(c,s,i,r,t)>ABS[COLTOT(c,s,i,r,t)], 1};
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSMIX(c,s,i,r,t) = if {ABSCROSSTOT(c,s,i,r,t)>ABS[CROSSTOT(c,s,i,r,t)], 1};
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  TRADEMIX(x,c,f,t)   = if {ABSTRADETOT(x,c,f,t)>ABS[TRADETOT(x,c,f,t)], 1};
+
+! in mixed sign case, apply quadratic formula
+   SCALE = [TARG + sqrt{TARG^2 - TOT^2 +TOTABS^2}]/[TOT + TOTABS]
+nb: if mixed [ie,TOTABS>ABS(TOT)] denominator [TOT + TOTABS] must be > 0  !
+Formula
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)
+ (all,t,TYP:ROWMIX(c,s,u,r,t)>0)
+  ROWSCALE(c,s,u,r,t) = {ORGROW(c,s,u,r,t) +
+SQRT[ORGROW(c,s,u,r,t)^2 - ROWTOT(c,s,u,r,t)^2 + ABSROWTOT(c,s,u,r,t)^2]}
+   /{ROWTOT(c,s,u,r,t)+ABSROWTOT(c,s,u,r,t)};
+
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)
+ (all,t,TYP:COLMIX(c,s,i,r,t)>0)
+  COLSCALE(c,s,i,r,t) = {ORGCOL(c,s,i,r,t) +
+SQRT[ORGCOL(c,s,i,r,t)^2 - COLTOT(c,s,i,r,t)^2 + ABSCOLTOT(c,s,i,r,t)^2]}
+   /{COLTOT(c,s,i,r,t)+ABSCOLTOT(c,s,i,r,t)};
+
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)
+ (all,t,TYP:CROSSMIX(c,s,i,r,t)>0)
+  CROSSSCALE(c,s,i,r,t) = {ORGCROSS(c,s,i,r,t) +
+SQRT[ORGCROSS(c,s,i,r,t)^2 - CROSSTOT(c,s,i,r,t)^2 + ABSCROSSTOT(c,s,i,r,t)^2]}
+   /{CROSSTOT(c,s,i,r,t)+ABSCROSSTOT(c,s,i,r,t)};
+
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)
+ (all,t,REG:TRADEMIX(x,c,f,t)>0)
+  TRADESCALE(x,c,f,t) = {ORGTRADE(x,c,f,t) +
+SQRT[ORGTRADE(x,c,f,t)^2 - TRADETOT(x,c,f,t)^2 + ABSTRADETOT(x,c,f,t)^2]}
+   /{TRADETOT(x,c,f,t)+ABSTRADETOT(x,c,f,t)};
+
+Formula ! prevent sign switching !
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)
+ (all,t,TYP:ROWSCALE(c,s,u,r,t)<0)
+  ROWSCALE(c,s,u,r,t) = 1;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)
+ (all,t,TYP:COLSCALE(c,s,i,r,t)<0)
+  COLSCALE(c,s,i,r,t) = 1;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)
+ (all,t,TYP:CROSSSCALE(c,s,i,r,t)<0)
+  CROSSSCALE(c,s,i,r,t) = 1;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)
+ (all,t,REG:TRADESCALE(x,c,f,t)<0)
+  TRADESCALE(x,c,f,t) = 1;
+
+Coefficient ! current split elements scaled to add to original cells !
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NEWROW(n,s,u,r,t)   # New rows of national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCOL(c,s,u,r,t)   # New cols of national matrix #;
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCROSS(n,s,u,r,t) # New intersection of national matrix #;
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  NEWTRADE(x,n,f,t)   # New part of trade matrix #;
+
+!  TABLO rules state that updated coefficients (ROW,COL,CROSS,TRADE)
+   must not appear on the LHS of a Formula(Always) [see just below]. 
+   Hence the need for new symbols (NEWROW,NEWCOL,NEWCROSS,NEWTRADE) 
+   which are scaled to add to original cells, and which appear in formulae
+   for sales and supply totals. Update statements below "hand back" values for,
+   eg, NEWROW to ROW, at the end of each iteration. !
+
+! applying the schema:
+  (all,b,BITS: (Mixed=0) or (INPUTS(b)>0))  INPUTS(b) = INPUTS(b)*SCALE;
+  (all,b,BITS: (Mixed>0) and (INPUTS(b)<0)) INPUTS(b) = INPUTS(b)/SCALE(p); !
+!Zerodivide default 0;  needed for "was" forms !
+Formula
+!was (all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NEWROW(n,s,u,r,t)   = ROW(n,s,u,r,t)*ROWSCALE(NEW2SPLITCOM(n),s,u,r,t);
+           *ORGROW(NEW2SPLITCOM(n),s,u,r,t)/ROWTOT(NEW2SPLITCOM(n),s,u,r,t);!
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)
+  (all,t,TYP: (ROWMIX(NEW2SPLITCOM(n),s,u,r,t)=0) or (ROW(n,s,u,r,t)>0))
+    NEWROW(n,s,u,r,t)   = ROW(n,s,u,r,t)*ROWSCALE(NEW2SPLITCOM(n),s,u,r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)
+  (all,t,TYP: (ROWMIX(NEW2SPLITCOM(n),s,u,r,t)>0) and (ROW(n,s,u,r,t)<0))
+    NEWROW(n,s,u,r,t)   = ROW(n,s,u,r,t)/ROWSCALE(NEW2SPLITCOM(n),s,u,r,t);
+
+! was (all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCOL(c,s,u,r,t)   = COL(c,s,u,r,t)
+            *ORGCOL(c,s,NEW2SPLITIND(u),r,t)/COLTOT(c,s,NEW2SPLITIND(u),r,t);!
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)
+  (all,t,TYP: (COLMIX(c,s,NEW2SPLITIND(u),r,t)=0) or (COL(c,s,u,r,t)>0))
+    NEWCOL(c,s,u,r,t)   = COL(c,s,u,r,t)*COLSCALE(c,s,NEW2SPLITIND(u),r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)
+  (all,t,TYP: (COLMIX(c,s,NEW2SPLITIND(u),r,t)>0) and (COL(c,s,u,r,t)<0))
+    NEWCOL(c,s,u,r,t)   = COL(c,s,u,r,t)/COLSCALE(c,s,NEW2SPLITIND(u),r,t);
+
+! was (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCROSS(n,s,u,r,t) = CROSS(n,s,u,r,t)
+            *ORGCROSS(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t)
+            /CROSSTOT(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t);!
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)
+ (all,t,TYP: (CROSSMIX(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t)=0)
+   or (CROSS(n,s,u,r,t)>0)) NEWCROSS(n,s,u,r,t)
+    = CROSS(n,s,u,r,t)*CROSSSCALE(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)
+ (all,t,TYP: (CROSSMIX(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t)>0)
+   and (CROSS(n,s,u,r,t)<0)) NEWCROSS(n,s,u,r,t)
+    = CROSS(n,s,u,r,t)/CROSSSCALE(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t);
+
+! was (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  NEWTRADE(x,n,f,t)   = TRADE(x,n,f,t)
+            *ORGTRADE(x,NEW2SPLITCOM(n),f,t)/TRADETOT(x,NEW2SPLITCOM(n),f,t);!
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)
+ (all,t,REG: (TRADEMIX(x,NEW2SPLITCOM(n),f,t)=0) or (TRADE(x,n,f,t)>0))
+   NEWTRADE(x,n,f,t)   = TRADE(x,n,f,t)*TRADESCALE(x,NEW2SPLITCOM(n),f,t);
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)
+ (all,t,REG: (TRADEMIX(x,NEW2SPLITCOM(n),f,t)>0) and (TRADE(x,n,f,t)<0))
+   NEWTRADE(x,n,f,t)   = TRADE(x,n,f,t)/TRADESCALE(x,NEW2SPLITCOM(n),f,t);
+
+! Zerodivide off;   needed for "was" forms  !
+
+!**********************************************************************!
+Variable ! percent changes in flows !
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  prow(n,s,u,r,t)   # New rows of national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  pcol(c,s,u,r,t)   # New cols of national matrix #;
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  pcross(n,s,u,r,t) # New intersection of national matrix #;
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  ptrade(x,n,f,t)   # New part of trade matrix #;
+
+Variable ! ordinary changes in flows !
+(change)(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  delrow(n,s,u,r,t)   # New rows of national matrix #;
+(change)(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  delcol(c,s,u,r,t)   # New cols of national matrix #;
+(change)(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  delcross(n,s,u,r,t) # New intersection of national matrix #;
+(change)(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  deltrade(x,n,f,t)   # New part of trade matrix #;
+
+Equation ! relate ordinary changes in flows to percent changes !
+E_delrow (all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+ delrow(n,s,u,r,t) = 0.01*NEWROW(n,s,u,r,t)*prow(n,s,u,r,t);
+E_delcol (all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+ delcol(c,s,u,r,t) = 0.01*NEWCOL(c,s,u,r,t)*pcol(c,s,u,r,t);
+E_delcross (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+ delcross(n,s,u,r,t) = 0.01*NEWCROSS(n,s,u,r,t)*pcross(n,s,u,r,t);
+E_deltrade (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+ deltrade(x,n,f,t)  = 0.01*NEWTRADE(x,n,f,t)*ptrade(x,n,f,t);
+Substitute
+delrow   using E_delrow;
+delcol   using E_delcol;
+delcross using E_delcross;
+deltrade using E_deltrade;
+
+!**********************************************************************!
+! sum of local plus world demands for domestic  
+  should = industry costs!
+Set NEWSEC # Set to include both NEWCOM and NEWIND # = NEWCOM intersect NEWIND;
+Subset NEWCOM is subset of NEWSEC;
+Subset NEWIND is subset of NEWSEC;
+
+Variable (no_split) unity;
+Coefficient FRAC # Proportion of the difference to be removed #;
+Formula (initial) FRAC = 0.02;
+Update (explicit) FRAC = min(1,FRAC+0.02);
+! effect of above is that FRAC commences at 0.02, and increases by 0.02 at each
+  step until it gets to 1, where it stays. So at least 70 iterations are needed!
+
+Coefficient
+(all,n,NEWCOM)(all,r,REG) SALES(n,r) # Sales at basic value #;
+(all,i,NEWIND)(all,r,REG) COSTS(i,r) # Industry costs #;
+(all,n,NEWSEC)(all,r,REG) DOMDIF(n,r) # Costs - sales #;
+Formula
+(all,n,NEWCOM)(all,r,REG) SALES(n,r) =
+   sum{u,ORGUSER,  NEWROW(n,"dom",u,r,"BAS")}
++  sum{u,NEWIND, NEWCROSS(n,"dom",u,r,"BAS")}
++  sum{t,REG,    NEWTRADE("BASIC",n,r,t)};
+(all,i,NEWIND)(all,r,REG) COSTS(i,r) =
+   sum{k,ORGCOST, sum{s,SRC, sum{t,TYP, NEWCOL(k,s,i,r,t)}}}
+ + sum{k,NEWCOM,  sum{s,SRC, sum{t,TYP, NEWCROSS(k,s,i,r,t)}}};
+(all,n,NEWSEC)(all,r,REG) DOMDIF(n,r) = COSTS(n,r) - SALES(n,r);
+
+Variable
+(change)(all,n,NEWCOM)(all,r,REG) delsales(n,r) # Sales at basic value #;
+(change)(all,i,NEWIND)(all,r,REG) delcosts(i,r) # Industry costs #;
+(change)(all,n,NEWSEC)(all,r,REG) deldomdif(n,r) # Costs - sales #;
+Equation
+E_delsales (all,n,NEWCOM)(all,r,REG) delsales(n,r) =
+   sum{u,ORGUSER,  delrow(n,"dom",u,r,"BAS")}
++  sum{u,NEWIND, delcross(n,"dom",u,r,"BAS")}
++  sum{t,REG,    deltrade("BASIC",n,r,t)};
+
+E_delcosts (all,i,NEWIND)(all,r,REG) delcosts(i,r) =
+   sum{k,ORGCOST, sum{s,SRC, sum{t,TYP, delcol(k,s,i,r,t)}}}
+ + sum{k,NEWCOM,  sum{s,SRC, sum{t,TYP, delcross(k,s,i,r,t)}}};
+
+E_deldomdif (all,n,NEWSEC)(all,r,REG)
+   deldomdif(n,r) = delcosts(n,r) - delsales(n,r);
+
+E_domscal (all,n,NEWSEC)(all,r,REG)
+   deldomdif(n,r) =  - FRAC*DOMDIF(n,r)*unity;
+! if FRAC=0.4, 40% of the discrepancy will be removed !
+
+!**********************************************************************!
+! sum of local import demands should = sum trade matrix !
+Coefficient
+(all,n,NEWCOM)(all,r,REG) IMPDEM(n,r) # Import demand #;
+(all,n,NEWCOM)(all,r,REG) IMPSUP(n,r) # Import supply #;
+(all,n,NEWCOM)(all,r,REG) IMPDIF(n,r) # Import supply - demand #;
+Formula
+(all,n,NEWCOM)(all,r,REG)
+      IMPDEM(n,r) = sum{u,ORGUSER, NEWROW(n,"imp",u,r,"BAS")}
+                  + sum{u,NEWIND,  NEWCROSS(n,"imp",u,r,"BAS")};
+(all,n,NEWCOM)(all,r,REG)
+      IMPSUP(n,r) = sum{t,REG, sum{x,TRADES, NEWTRADE(x,n,t,r)}};
+(all,n,NEWCOM)(all,r,REG)
+      IMPDIF(n,r) = IMPSUP(n,r) - IMPDEM(n,r);
+
+Variable
+(change)(all,n,NEWCOM)(all,r,REG) delimpdem(n,r) # Import demand #;
+(change)(all,n,NEWCOM)(all,r,REG) delimpsup(n,r) # Import supply #;
+(change)(all,n,NEWCOM)(all,r,REG) delimpdif(n,r) # Import supply - demand #;
+Equation
+E_delimpdem (all,n,NEWCOM)(all,r,REG)
+   delimpdem(n,r) = sum{u,ORGUSER, delrow(n,"imp",u,r,"BAS")}
+                  + sum{u,NEWIND,  delcross(n,"imp",u,r,"BAS")};
+
+E_delimpsup (all,n,NEWCOM)(all,r,REG)
+   delimpsup(n,r) = sum{t,REG, sum{x,TRADES, deltrade(x,n,t,r)}};
+
+E_delimpdif (all,n,NEWCOM)(all,r,REG)
+   delimpdif(n,r) =  delimpsup(n,r) - delimpdem(n,r);
+
+E_impscal (all,n,NEWCOM)(all,r,REG)
+   delimpdif(n,r) =  - FRAC*IMPDIF(n,r)*unity;
+! if FRAC=0.4, 40% of the discrepancy will be removed !
+
+!**********************************************************************!
+Coefficient
+(all,s,SRC) ISDOM(s) # Binary dummy #;
+(all,s,SRC) ISIMP(s) # Binary dummy #;
+Formula
+(all,s,SRC) ISDOM(s) = 1;
+            ISDOM("imp") = 0;
+(all,s,SRC) ISIMP(s) = 1 - ISDOM(s);
+
+Variable
+(all,i,NEWSEC)(all,r,REG) domscal(i,r) # Dom supply=demand scaler #;
+(all,n,NEWCOM)(all,r,REG) impscal(n,r) # Imp supply=demand scaler #;
+
+!
+domscal is used to increase costs and decrease sales
+  suppose initially costs were 20% less than sales
+  then we should increase costs by 10% and decrease sales by 10%
+
+impscal used to increase supply and decrease demand
+  suppose initially supply (from TRADE) were 20% less than demand (NATIONAL)
+  then we should increase supply by 10% and decrease demand by 10%
+!
+
+Coefficient (parameter) TRADESCAL
+# Normally 1, set to 0 to prevent trade matrix changing #;
+Read TRADESCAL from file INFILE header "TSCA";
+
+Equation ! explain percent changes in flows !
+E_prow (all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+ prow(n,s,u,r,t) =  - ISDOM(s)*domscal(n,r) - ISIMP(s)*impscal(n,r);
+E_pcol (all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+ pcol(c,s,u,r,t) = domscal(u,r);
+E_pcross (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+ pcross(n,s,u,r,t) = domscal(u,r)-ISDOM(s)*domscal(n,r)-ISIMP(s)*impscal(n,r);
+E_ptrade (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+ ptrade(x,n,f,t)  = TRADESCAL*[impscal(n,t) - domscal(n,f)];
+Substitute
+prow   using E_prow;
+pcol   using E_pcol;
+pcross using E_pcross;
+ptrade using E_ptrade;
+
+!**********************************************************************!
+!Update   these update statements allowed sign change
+(explicit)(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROW(n,s,u,r,t) = NEWROW(n,s,u,r,t) + delrow(n,s,u,r,t);
+(explicit)(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  COL(c,s,u,r,t) = NEWCOL(c,s,u,r,t) +  delcol(c,s,u,r,t);
+(explicit)(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSS(n,s,u,r,t) = NEWCROSS(n,s,u,r,t) +  delcross(n,s,u,r,t);
+(explicit)(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+ TRADE(x,n,f,t) = NEWTRADE(x,n,f,t) +  deltrade(x,n,f,t);!
+
+Update  ! revised form of update statement prevents sign change !
+(explicit)(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROW(n,s,u,r,t) = NEWROW(n,s,u,r,t)
+ + 0.01*NEWROW(n,s,u,r,t)*max[-99,prow(n,s,u,r,t)];
+(explicit)(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  COL(c,s,u,r,t) = NEWCOL(c,s,u,r,t)
+ + 0.01*NEWCOL(c,s,u,r,t)*max[-99,pcol(c,s,u,r,t)];
+(explicit)(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSS(n,s,u,r,t) = NEWCROSS(n,s,u,r,t)
+ + 0.01*NEWCROSS(n,s,u,r,t)*max[-99,pcross(n,s,u,r,t)];
+(explicit)(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+ TRADE(x,n,f,t) = NEWTRADE(x,n,f,t)
+ + 0.01*NEWTRADE(x,n,f,t)*max[-99,ptrade(x,n,f,t)];
+
+! next code fragment computes total sum of absolute differences [TOTDIF] at each
+  step, and stores this in the appropriate element of an array TOTDIFFS !
+Set ITERS # For difference reports # (ITER1-ITER100);
+Set ITREP (DOMDIF,IMPDIF,ABSDIF,FRAC);
+Coefficient
+  ITER # Iteration count #;
+  DOMDIFF # Sum of absolute values of DOM differences #;
+  IMPDIFF # Sum of absolute values of IMP differences #;
+  TOTDIFF # Sum of absolute values of DOM+IMP differences #;
+  (all,i,ITERS)(all,q,ITREP) TOTDIFFS(i,q)
+ # Sum of absolute values of differences, and FRAC #;
+Formula
+  DOMDIFF   = sum{n,NEWSEC,sum{r,REG, ABS[DOMDIF(n,r)]}};
+  IMPDIFF   = sum{n,NEWSEC,sum{r,REG, ABS[IMPDIF(n,r)]}};
+  TOTDIFF   = DOMDIFF + IMPDIFF;
+ (initial) ITER = 1;
+ (initial) (all,i,ITERS)(all,q,ITREP) TOTDIFFS(i,q) = 0;
+Update
+(change)  ITER = 1; ! ie, increase ITER by 1 after each step !
+(change) (all,i,ITERS) TOTDIFFS(i,"DOMDIF") = if ($pos(i)=Round(ITER), DOMDIFF);
+(change) (all,i,ITERS) TOTDIFFS(i,"IMPDIF") = if ($pos(i)=Round(ITER), IMPDIFF);
+(change) (all,i,ITERS) TOTDIFFS(i,"ABSDIF") = if ($pos(i)=Round(ITER), TOTDIFF);
+(change) (all,i,ITERS) TOTDIFFS(i,"FRAC")   = if ($pos(i)=Round(ITER), FRAC);
+! above line has the effect:  TOTDIFFS(ITER) = FRAC !
+
+PostSim (begin);
+File (new) DIAG # Diagnostic file #;
+Write
+domscal   to file DIAG header "DSCL" longname "Dom supply=demand scale factor";
+impscal   to file DIAG header "MSCL" longname "Imp supply=demand scale factor";
+TOTDIFFS  to file DIAG header "ITER"
+ longname "Sum of absolute values of differences, and FRAC, at each iteration";
+PostSim (end);
+
+! end of file !

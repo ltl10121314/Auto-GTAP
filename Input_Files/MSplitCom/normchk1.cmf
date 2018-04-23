@@ -1,0 +1,9 @@
+auxiliary files = normchek;
+check-on-read elements = yes; 
+cpu=yes ;  
+log only = yes;   
+! Input files:
+File InFile = work\splitflo.har;      ! Expanded unscaled normalized GTAP data
+! Output files:
+File Diag   = work\<cmf>.har; ! Diagnostic file
+

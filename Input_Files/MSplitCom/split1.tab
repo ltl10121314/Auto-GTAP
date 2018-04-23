@@ -1,0 +1,195 @@
+! SPLIT1.TAB  Performs preliminary work for splitting GTAP database 
+* reads and checks new sector sets and mappings in input\secsplit.har
+* creates work\splitwgt.har: a dummy user file of splitting weight
+!
+File ! inputs !
+       GTAPSETS # Original GTAP sets file #;
+       SECSPLIT # Specifies SplitCom and NewCom #;
+       INPAR    # Old parameters file #;
+! outputs !
+ (new) WORKSETS # Sets used for splitting data #;
+ (new) OUTPAR   # New parameters file #;
+ (new) SPLITWGT # Initial dummy user file of (simplified?) splitting weight #;
+ (new) AGGSUPP  # Input deck for AggHAR #;
+Set ! standard GTAP sets !
+REG        # Regions #         read elements from file GTAPSETS header "H1";
+TRAD_COMM0 # Traded comms #    read elements from file GTAPSETS header "H2";
+MARG_COMM  # Margin comms #    read elements from file GTAPSETS header "MARG";
+CGDS_COMM  # Investment good # read elements from file GTAPSETS header "H9";
+ENDW_COMM  # Primary factors # read elements from file GTAPSETS header "H6";
+Set  ! consequential GTAP sets !
+PROD_COMM0 # Produced commodities  # = TRAD_COMM0 + CGDS_COMM;
+Set
+ IND0 # Industries # = TRAD_COMM0;
+ COM0 # Commodities # = TRAD_COMM0;
+ FAC # Primary factors # = ENDW_COMM;
+ MAR # International trade margin commodities # = MARG_COMM;
+Subset MAR is subset of COM0;
+Set
+ NONMAR # Commodities not used as margins # = COM0 - MAR;
+ MOREDEM  # More demanders # (HOU,INV,GOV);
+ USER     = IND0 + MOREDEM;
+ SRC (dom,imp);
+ PRODTAX (PTAX);
+ MORECOST # Non-commodity industry costs # = FAC + PRODTAX;
+ COST  # All industry costs # = COM0 + MORECOST;
+Subset MAR is subset of COST;
+
+Set OSEC  # Sectors of original GTAP data # ! just checking !
+ read elements from file SECSPLIT header "OSEC";
+Subset OSEC is subset of COM0;
+Subset COM0 is subset of OSEC;
+
+Set COM1 # Complete enlarged (post-split) commodity set #
+ read elements from file SECSPLIT header "NSEC";
+
+Set SPLITCOM  # Original sectors to be split #
+ read elements from file SECSPLIT header "SSEC";
+Subset  SPLITCOM is subset of NONMAR;
+
+Mapping (onto) MapCom from COM1 to COM0;
+Read (by_elements) MapCom from file SECSPLIT header "MCOM";
+
+Coefficient (all,c,COM0) MAPCOUNT(c) # No of corresponding new sectors #;
+Formula     (all,c,COM0) MAPCOUNT(c) = sum{q,COM1:MapCom(q)=c,1.0};
+
+Set NEWCOM # The new parts of SplitCom # = (all,q,COM1:MAPCOUNT(MapCom(q))>1);
+
+Set OVERLAP = NEWCOM intersect COM0; ! should be empty set !
+Assertion
+# New sectors must not have same name as original sectors # sum{o,OVERLAP,1}=0;
+Set ORGCOM # Commodities which are not split # = COM1 - NEWCOM;
+Subset ORGCOM is subset of COM0; ! implies unsplit sectors must keep same name !
+
+Set
+IND1  # The expanded IND set # = COM1;
+USER0 # The original user set # = IND0 + MOREDEM;
+USER1 # The expanded user set # = IND1 + MOREDEM;
+COST0 # Complete original cost set # = COM0  + MORECOST;
+COST1 # Complete enlarged cost set # = COM1 + MORECOST;
+NEWUSER = NEWCOM;
+SPLITUSER = SPLITCOM;
+ORGUSER # Users which are not split # = USER1 - NEWUSER;
+ORGCOST # Costs which are not split # = COST1 - NEWCOM;
+Subset SPLITUSER is subset of USER;
+Subset ORGUSER is subset of USER;
+Subset ORGCOST is subset of COST;
+Subset MAR is subset of COM1; ! MAR is never split !
+Set    NONMAR1 # Non-margin commodities # = COM1 - MAR;
+Set XX   (BASIC,                    !  exports at source market prices !
+          EXPTAX,                   !  trade tax levied at source !
+          IMPTAX);                  !  trade tax levied at dest !
+Set TRADES = XX + MARG_COMM;        !  + international trade margins !
+Set SPLITIND # Original industries which are split #
+   read elements from file SECSPLIT header "SSEC";
+
+Mapping (onto) MapComx from NEWCOM to SPLITCOM;
+Formula (by_elements) (all,n,NEWCOM) MapComx(n)=MapCom(n);
+
+Write
+(Set) SPLITCOM to file WORKSETS header "SCOM";
+(Set) SPLITIND to file WORKSETS header "SIND";
+(Set) NEWCOM   to file WORKSETS header "NCOM";
+(Set) ORGUSER  to file WORKSETS header "OUSR";
+(Set) ORGCOM   to file WORKSETS header "OCOM";
+(Set) ORGCOST  to file WORKSETS header "OCST";
+(Set) COM0     to file WORKSETS header "COM0";
+(Set) COM1     to file WORKSETS header "COM1";
+(Set) USER0    to file WORKSETS header "USR0";
+(Set) USER1    to file WORKSETS header "USR1";
+(Set) COST0    to file WORKSETS header "CST0";
+(Set) COST1    to file WORKSETS header "CST1";
+(Set) REG      to file WORKSETS header "REG";
+(Set) MAR      to file WORKSETS header "MAR";
+(Set) FAC      to file WORKSETS header "FAC";
+(Set) MORECOST to file WORKSETS header "MCST";
+(Set) CGDS_COMM to file WORKSETS header "INV";
+(Set) TRADES   to file WORKSETS header "TRD";
+ (by_elements) MapCom  to file WORKSETS header "MCMF";
+ (by_elements) MapComx to file WORKSETS header "MCOM";
+ (by_elements) MapComx to file WORKSETS header "MIND";
+!************* Write simplified split values **********************************!
+!Coefficient DEFSHR # Default splitting share #;
+Formula     DEFSHR = 1/sum{n,NEWCOM,1};
+Coefficient (all,n,NEWCOM) WGT0(n) # Simplest splitting weight #;
+Formula     (all,n,NEWCOM) WGT0(n) = 1/MAPCOUNT(MapCom(n));
+Write WGT0 to file SPLITWGT header "WGT0";!
+
+Set MORECOLS (INV,HOU,GOV,EXP,lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+Set SUMCOLS1 = IND1 + MORECOLS;
+Set NEGCOLS (lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+Subset NEGCOLS is subset of MORECOLS;
+
+Coefficient (all,q,COST1)(all,c,SUMCOLS1) SUMMARY1_R(q,c)
+ # Expanded world summary producer price flows table #;
+Formula
+ (all,q,COST1)(all,c,SUMCOLS1) SUMMARY1_R(q,c) = Random(1,6);
+ (all,q,COST1)(all,c,NEGCOLS)  SUMMARY1_R(q,c) = -Random(1,6);
+
+Write SUMMARY1_R to file SPLITWGT header "WSUM";
+
+Set MOREWGT (Production, IntUse, Absorption, Exports, Imports);
+Coefficient
+ (all,c,NEWCOM)(all,w,MOREWGT)(all,r,REG) WEIGHTS(c,w,r) # Summary weights #;
+Formula
+ (all,c,NEWCOM)(all,w,MOREWGT)(all,r,REG) WEIGHTS(c,w,r) = Random(4,9);
+ (all,c,NEWCOM)(all,w,MOREWGT)(all,r,REG: WEIGHTS(c,w,r)<5) WEIGHTS(c,w,r)=0;
+Write WEIGHTS to file SPLITWGT header "WGTS";
+
+!************* Write new parameters file **********************************!
+! Elasticity values for new sectors are just set equal to the value
+  for the old (split) sector !
+Set ! these two sets are named to make the new parameters file look standard !
+ TRAD_COMM # Enlarged TRAD_COMM # = COM1;
+ PROD_COMM # Enlarged PROD_COMM # = COM1 + CGDS_COMM;
+Mapping TRADMAP from TRAD_COMM to TRAD_COMM0;
+Mapping PRODMAP from PROD_COMM to PROD_COMM0;
+Formula (all,t,TRAD_COMM) TRADMAP(t) = MapCom(t);
+Formula (all,t,TRAD_COMM) PRODMAP(t) = MapCom(t);
+Formula                   PRODMAP("CGDS") = "CGDS";
+Coefficient ! original parameters !
+(all,t,TRAD_COMM0)(all,r,REG) SUBPAR0(t,r) # CDE substitution parameter #;
+(all,t,TRAD_COMM0)(all,r,REG) INCPAR0(t,r) # CDE expansion parameter #;
+(all,t,TRAD_COMM0) ESUBD0(t)  # Dom-imp CES (Armington) #;
+(all,t,TRAD_COMM0) ESUBM0(t)  # Imp-imp CES (Armington) #;
+(all,p,PROD_COMM0) ESUBVA0(p) # CES between primary factors #;
+(all,p,PROD_COMM0) ESUBT0(p)  # CES between composite intermediate inputs #;
+Read
+ SUBPAR0 from file INPAR header "SUBP";
+ INCPAR0 from file INPAR header "INCP";
+ ESUBD0  from file INPAR header "ESBD";
+ ESUBM0  from file INPAR header "ESBM";
+ ESUBVA0 from file INPAR header "ESBV";
+ ESUBT0  from file INPAR header "ESBT";
+Coefficient ! expanded parameters !
+(all,t,TRAD_COMM)(all,r,REG) SUBPAR(t,r) # CDE substitution parameter #;
+(all,t,TRAD_COMM)(all,r,REG) INCPAR(t,r) # CDE expansion parameter #;
+(all,t,TRAD_COMM) ESUBD(t) # Dom-imp CES (Armington) #;
+(all,t,TRAD_COMM) ESUBM(t) # Imp-imp CES (Armington) #;
+(all,p,PROD_COMM) ESUBVA(p) # CES between primary factors #;
+(all,p,PROD_COMM) ESUBT(p) # CES between composite intermediate inputs #;
+Formula
+(all,t,TRAD_COMM)(all,r,REG) SUBPAR(t,r) = SUBPAR0(TRADMAP(t),r);
+(all,t,TRAD_COMM)(all,r,REG) INCPAR(t,r) = INCPAR0(TRADMAP(t),r);
+(all,t,TRAD_COMM) ESUBD(t)  = ESUBD0(TRADMAP(t));
+(all,t,TRAD_COMM) ESUBM(t)  = ESUBM0(TRADMAP(t));
+(all,p,PROD_COMM) ESUBVA(p) = ESUBVA0(PRODMAP(p));
+(all,p,PROD_COMM) ESUBT(p)  = ESUBT0(PRODMAP(p));
+Write
+ SUBPAR to file OUTPAR header "SUBP" longname "CDE substitution parameter";
+ INCPAR to file OUTPAR header "INCP" longname "CDE expansion parameter";
+ ESUBD  to file OUTPAR header "ESBD" longname "dom-imp CES (Armington)";
+ ESUBM  to file OUTPAR header "ESBM" longname "imp-imp CES (Armington)";
+ ESUBVA to file OUTPAR header "ESBV" longname "CES between primary factors";
+ ESUBT  to file OUTPAR header "ESBT"
+       longname "CES between composite intermediate inputs";
+Transfer unwritten from file INPAR to file OUTPAR; !copy unchanged params !
+!******************************************************!
+! mapping file for AggHar !
+Mapping PRODMAP2 from PROD_COMM to PROD_COMM0;
+Formula (all,t,PROD_COMM) PRODMAP2(t) = PRODMAP(t);
+Write
+(Set) PROD_COMM0 to file AGGSUPP header "PCM0";
+(Set) PROD_COMM  to file AGGSUPP header "PCOM";
+(by_elements) PRODMAP2 to file AGGSUPP header "MCOM";
+!end of file !

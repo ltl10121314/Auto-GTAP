@@ -1,0 +1,23 @@
+auxiliary files = fullsum;
+check-on-read elements = warn; ! Optional: very often needed
+cpu=yes ; ! Optional: Reports CPU times for various stages
+log file = yes;  ! Optional
+
+! Input files:
+File SUMWGT    = work\normchk0.har; ! To get SMRY for original GTAP data 
+File WORKSETS  = work\worksets.har; ! Sets used in expanding the database
+File SUMSPLIT  = work\sumsplit.har; ! Scaled WGTS and WSUM from SumSplit program
+File USERWGT   = input\userwgt.har; ! Initial user file (to get SMRY, if avail)
+
+! Output files:
+File OUTFILE  = work\fullsum.har;  ! weights to pass on to next program, ExpWgt
+File DIAG     = work\Dgfullsum.har;! Diagnostic file
+! Updated files:
+Updated File USERWGT = work\FullSum.upd; ! unused, diagnostic only
+exogenous unity;
+rest endogenous;
+Method = Euler;
+Steps =50; ! must not exceed 100
+shock unity=1;
+Verbal description = construct and/or scale SUMMARY1 spliting weights ;
+

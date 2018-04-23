@@ -1,0 +1,248 @@
+! SPLITFLO.TAB   uses full splitting weights to expand normalized flows data !
+! note: input weights need not add to 1, this program normalizes them !
+Zerodivide off;
+File
+       ORGDATA  # Original normalized GTAP data #;
+       WORKSETS # Sets used in expanding the database #;
+       EXPWGT   # Proportions for splitting SplitCom into NewCom #;
+ (new) OUTFILE  # Expanded normalized GTAP data #;
+
+Set ! constant sets !
+ TYP (BAS,TAX);
+ SRC (dom,imp);
+Set ! sets from original data !
+ REG # Regions #  read elements from file ORGDATA header "REG";
+ USER0 # All local users #  read elements from file ORGDATA header "USER";
+ COST0 # All industry costs # read elements from file ORGDATA header "COST";
+ COM0 # Commodities # read elements from file ORGDATA header "COM";
+ TRADES # Basic, exptax, imptax, margins #
+           read elements from file ORGDATA header "TRD";
+
+Coefficient ! original flows !
+(all,c,COST0)(all,s,SRC)(all,u,USER0)(all,r,REG)(all,t,TYP)
+  NATIONAL0(c,s,u,r,t) # Original flows #;
+(all,x,TRADES)(all,c,COM0)(all,f,REG)(all,t,REG)TRADE0(x,c,f,t)#Original flows#;
+Read
+ NATIONAL0 from file ORGDATA header "NATL";
+ TRADE0    from file ORGDATA header "TRAD";
+
+Set ! sets from WORKSETS file !
+ SPLITCOM # The commodities which are split #
+   read elements from file WORKSETS header "SCOM";
+ SPLITIND # The industries which are split #
+   read elements from file WORKSETS header "SCOM";
+ NEWCOM   # The new parts of SplitCom #
+   read elements from file WORKSETS header "NCOM";
+ NEWIND   # The new industries #
+   read elements from file WORKSETS header "NCOM";
+ ORGUSER  # Users which are not split #
+   read elements from file WORKSETS header "OUSR";
+ ORGCOM   # Commodities which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGCOST  # Costs which are not split #
+   read elements from file WORKSETS header "OCST";
+ COM1     # The complete enlarged commodity set #
+   read elements from file WORKSETS header "COM1";
+ IND1     # The complete enlarged industry set #
+   read elements from file WORKSETS header "COM1";
+ USER1    # The complete enlarged user set #
+   read elements from file WORKSETS header "USR1";
+ COST1 # The complete enlarged cost set #
+   read elements from file WORKSETS header "CST1";
+
+Subset
+  SPLITCOM is subset of COM0;
+  ORGCOM   is subset of COM0;
+  ORGCOM   is subset of COM1;
+  NEWCOM   is subset of COST1;
+  NEWCOM   is subset of COM1;
+  SPLITCOM is subset of COST0;
+  ORGCOST  is subset of COST0;
+  ORGCOST  is subset of COST1;
+  ORGUSER  is subset of USER0;
+  ORGUSER  is subset of USER1;
+  NEWIND   is subset of USER1;
+  SPLITIND is subset of USER0;
+
+Mapping (onto) MapCom from COM1 to COM0;
+ Read (by_elements) MapCom from file WORKSETS header "MCMF";
+Mapping (onto) MapComx from NEWCOM to SPLITCOM;
+Formula (by_elements) (all,n,NEWCOM) MapComx(n)=MapCom(n);
+
+Coefficient DEFSHR # Default splitting share #;
+Formula     DEFSHR = 1/sum{n,NEWCOM,1};
+
+!********* CREATE ENLARGED TRADE MATRIX *********!
+Coefficient ! splitter EXPWGT !
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADEWGT(x,n,f,t)   # Shares for new coms in trade matrix #;
+Read TRADEWGT from file EXPWGT header "TWGT";
+
+Coefficient ! original row, original col, and original crossing !
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  ORGTRADE(x,c,f,t) # The SplitCom bit of the original trade matrix #;
+
+Formula     (all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+  ORGTRADE(x,c,f,t) = TRADE0(x,c,f,t);
+Write ORGTRADE to file OUTFILE header "OTRD";
+
+Coefficient (all,x,TRADES)(all,c,COM1)(all,f,REG)(all,t,REG)
+ TRADE1(x,c,f,t) # Enlarged trade matrix #;
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+ TRADETOT(x,c,f,t) # Temp total #;
+Zerodivide default DEFSHR;
+
+Formula ! normalize trade EXPWGT to add to 1 !
+(all,x,TRADES)(all,c,SPLITCOM)(all,f,REG)(all,t,REG)
+   TRADETOT(x,c,f,t)= sum{n,NEWCOM:MapComx(n)=c, TRADEWGT(x,n,f,t)};
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG:TRADETOT(x,MapComx(n),f,t)>0)
+   TRADEWGT(x,n,f,t)= TRADEWGT(x,n,f,t)/ TRADETOT(x,MapComx(n),f,t);
+Zerodivide off;
+
+Formula
+(all,x,TRADES)(all,c,COM1)(all,f,REG)(all,t,REG)
+     TRADE1(x,c,f,t)=42; ! should all be overwritten..check only !
+(all,x,TRADES)(all,o,ORGCOM)(all,f,REG)(all,t,REG)
+     TRADE1(x,o,f,t)=TRADE0(x,o,f,t);
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+     TRADE1(x,n,f,t)= TRADEWGT(x,n,f,t)*ORGTRADE(x,MapComx(n),f,t);
+Write TRADE1 to file OUTFILE header "TRAD";
+
+! store new part separately !
+Coefficient (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+ NEWTRADE(x,n,f,t) # New part of trade matrix #;
+Formula     (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+ NEWTRADE(x,n,f,t) = TRADE1(x,n,f,t);
+Write NEWTRADE to file OUTFILE header "NTRD";
+
+!********* CREATE ENLARGED NATIONAL MATRIX *********!
+
+Coefficient ! splitter EXPWGT !
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWWGT(n,s,u,r,t)   # Shares for new rows of national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  COLWGT(c,s,u,r,t)   # Shares for new cols of national matrix #;
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSSWGT(n,s,u,r,t) # Shares for new intersection of national matrix #;
+Read
+ ROWWGT   from file EXPWGT header "RWGT";
+ COLWGT   from file EXPWGT header "CWGT";
+ CROSSWGT from file EXPWGT header "XWGT";
+
+Coefficient ! enlarged database !
+(all,c,COST1)(all,s,SRC)(all,u,USER1)(all,r,REG)(all,t,TYP)
+  NATIONAL1(c,s,u,r,t) # Expanded GTAP national data #;
+
+! make coefficients showing original row, original col, and original crossing !
+Coefficient
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ORGROW(c,s,u,r,t) # SplitCom rows of the original national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ORGCOL(c,s,i,r,t) # SplitInd columns of the original national matrix #;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ORGCROSS(c,s,i,r,t) # Split sector row/col intersect of orig national matrix#;
+Formula
+
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ORGROW(c,s,u,r,t) = NATIONAL0(c,s,u,r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ORGCOL(c,s,i,r,t)  = NATIONAL0(c,s,i,r,t);
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  ORGCROSS(c,s,i,r,t) = NATIONAL0(c,s,i,r,t);
+
+Write
+ORGROW   to file OUTFILE header "OROW";
+ORGCOL   to file OUTFILE header "OCOL";
+ORGCROSS to file OUTFILE header "OCRS";
+
+Mapping NEW2SPLITCOM from NEWCOM to SPLITCOM;
+Read (by_elements) NEW2SPLITCOM from file WORKSETS header "MCOM";
+Mapping NEW2SPLITIND from NEWIND to SPLITIND;
+Read (by_elements) NEW2SPLITIND from file WORKSETS header "MIND";
+
+Coefficient ! normalize splitter shares to add to one!
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWTOT(c,s,u,r,t) # Temp total #;
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLTOT(c,s,i,r,t) # Temp total #;
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSTOT(c,s,i,r,t) # Temp total #;
+Formula
+(all,c,SPLITCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWTOT(c,s,u,r,t) = sum{n,NEWCOM:NEW2SPLITCOM(n)=c, ROWWGT(n,s,u,r,t)};
+(all,c,ORGCOST)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  COLTOT(c,s,i,r,t) = sum{u,NEWIND:NEW2SPLITIND(u) =i, COLWGT(c,s,u,r,t)};
+(all,c,SPLITCOM)(all,s,SRC)(all,i,SPLITIND)(all,r,REG)(all,t,TYP)
+  CROSSTOT(c,s,i,r,t) = sum{n,NEWCOM:NEW2SPLITCOM(n)=c,
+                        sum{u,NEWIND:NEW2SPLITIND(u) =i, CROSSWGT(n,s,u,r,t)}};
+Zerodivide default DEFSHR;
+Formula
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  ROWWGT(n,s,u,r,t) =  ROWWGT(n,s,u,r,t)/  ROWTOT(NEW2SPLITCOM(n),s,u,r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  COLWGT(c,s,u,r,t) = COLWGT(c,s,u,r,t)/COLTOT(c,s,NEW2SPLITIND(u),r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSSWGT(n,s,u,r,t) = CROSSWGT(n,s,u,r,t)
+            /CROSSTOT(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t);
+Zerodivide off;
+
+Formula
+(all,c,COST1)(all,s,SRC)(all,u,USER1)(all,r,REG)(all,t,TYP)
+  NATIONAL1(c,s,u,r,t) = 42; ! should all be overwritten..check only !
+(all,c,ORGCOST)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NATIONAL1(c,s,u,r,t) = NATIONAL0(c,s,u,r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NATIONAL1(n,s,u,r,t) = ROWWGT(n,s,u,r,t)* ORGROW(NEW2SPLITCOM(n),s,u,r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NATIONAL1(c,s,u,r,t) = COLWGT(c,s,u,r,t)*ORGCOL(c,s,NEW2SPLITIND(u),r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NATIONAL1(n,s,u,r,t) =
+     CROSSWGT(n,s,u,r,t)*ORGCROSS(NEW2SPLITCOM(n),s,NEW2SPLITIND(u),r,t);
+Write NATIONAL1 to file OUTFILE header "NATL";
+
+! store new parts separately !
+Coefficient
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NEWROW(n,s,u,r,t) # New rows of national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCOL(c,s,u,r,t) # New cols of national matrix #;
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCROSS(n,s,u,r,t) # New intersection of national matrix #;
+Formula
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NEWROW(n,s,u,r,t) = NATIONAL1(n,s,u,r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCOL(c,s,u,r,t) = NATIONAL1(c,s,u,r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCROSS(n,s,u,r,t) = NATIONAL1(n,s,u,r,t);
+Write
+NEWROW   to file OUTFILE header "NROW";
+NEWCOL   to file OUTFILE header "NCOL";
+NEWCROSS to file OUTFILE header "NCRS";
+
+Set ! create and write changed sets !
+ IND # Industries #          read elements from file WORKSETS header "COM1";
+ COM # Commodities #         read elements from file WORKSETS header "COM1";
+ USER # All local users #    read elements from file WORKSETS header "USR1";
+ COST # All industry costs # read elements from file WORKSETS header "CST1";
+Write
+ (Set) IND  to file OUTFILE header "IND";
+ (Set) COM  to file OUTFILE header "COM";
+ (Set) COST to file OUTFILE header "COST";
+ (Set) USER to file OUTFILE header "USER";
+
+Transfer "TSCA"    from file EXPWGT to file OUTFILE;
+
+Transfer "REG"  from file ORGDATA to file OUTFILE;
+Transfer "MAR"  from file ORGDATA to file OUTFILE;
+Transfer "FAC"  from file ORGDATA to file OUTFILE;
+Transfer "INV"  from file ORGDATA to file OUTFILE;
+Transfer "TRD"  from file ORGDATA to file OUTFILE;
+Transfer "EVOA" from file ORGDATA to file OUTFILE;
+Transfer "SAVE" from file ORGDATA to file OUTFILE;
+Transfer "VKB"  from file ORGDATA to file OUTFILE;
+Transfer "VDEP" from file ORGDATA to file OUTFILE;
+Transfer "DPSM" from file ORGDATA to file OUTFILE;
+Transfer "VST"  from file ORGDATA to file OUTFILE;
+
+! end of file !
