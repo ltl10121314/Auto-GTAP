@@ -25,7 +25,7 @@ config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 CleanWorkFiles(config.simulation_list)
 for simulation_name in config.simulation_list:
-    CopyInputFiles(config.sim_property(simulation_name, "input_directory"), simulation_name)
+    CopyInputFiles(config.subfolder_to_copy(simulation_name))
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   simulation_name, config.sim_property(simulation_name, "shock")).create("Gas")
     if config.sim_property(simulation_name, "modify_har"):

@@ -23,3 +23,15 @@ class CreateConfig(object):
 
     def sim_property(self, simulation_name: str, property_name: str):
         return self.yaml_file["simulations"][simulation_name][property_name]
+
+    def subfolder_to_copy(self, simulation_name: str):
+        simulation_folders = self.yaml_file["simulations"][simulation_name]["input_directory"]
+
+        try:
+            other_folders = self.yaml_file["simulations"][simulation_name]["other_input_directories"]
+        except ImportError:
+            other_folders = []
+
+        all_folders = simulation_folders + other_folders
+
+        return all_folders
