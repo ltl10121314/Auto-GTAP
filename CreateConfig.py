@@ -9,7 +9,7 @@ import yaml
 class CreateConfig(object):
     """Creates config information from yaml file"""
 
-    __slots__ = ["yaml_file_location", "yaml_file", "simulation_list", "input_directory_list","model_paths"]
+    __slots__ = ["yaml_file_location", "yaml_file", "simulation_list", "input_directory_list", "model_csv_paths"]
 
     def __init__(self, yaml_file_location: str) -> None:
         with open(yaml_file_location, 'r') as f:
@@ -21,7 +21,8 @@ class CreateConfig(object):
         self.model_csv_paths = []
         for simulation in self.simulation_list:
             self.input_directory_list.append(self.sim_property(simulation, "input_directory"))
-            model_csv_path=simulation+"//"+self.sim_property(simulation, "input_directory")+simulation+".csv"
+            model_csv_path = simulation + "//" + self.sim_property(simulation,
+                                                                   "input_directory") + "//sim_" + simulation + ".csv"
             self.model_csv_paths.append(model_csv_path)
 
     def sim_property(self, simulation_name: str, property_name: str):

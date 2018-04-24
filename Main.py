@@ -54,9 +54,8 @@ for simulation_name in config.simulation_list:
 # Copy results to output directory
 databaseSL4 = ImportCSV_SL4(config.model_csv_paths).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
-os.chdir("Work_Files")
 ExportDictionary("Results.csv", databaseMod)
 
-os.chdir("..")
 # Put results in output directory
+os.chdir("..")
 CreateOutput()
