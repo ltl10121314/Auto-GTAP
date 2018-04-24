@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-4-13"
+__altered__ = "2018-4-24"
 
 # Import methods
 # Import External Methods
@@ -25,9 +25,9 @@ config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 CleanWorkFiles(config.simulation_list)
 for simulation_name in config.simulation_list:
-    CopyInputFiles(config.subfolder_to_copy(simulation_name))
+    CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
-                  simulation_name, config.sim_property(simulation_name, "shock")).create("Gas")
+                  config.sim_property(simulation_name, "input_directory"), config.sim_property(simulation_name, "shock")).create("Gas")
     if config.sim_property(simulation_name, "modify_har"):
         ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
                   config.yaml_file["parameter_modifications"][
@@ -36,7 +36,7 @@ for simulation_name in config.simulation_list:
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
 for simulation_name in config.simulation_list:
-    os.chdir("Work_Files\\{0}".format(simulation_name))
+    os.chdir("Work_Files\\{0}\\{1}".format(simulation_name,config.sim_property(simulation_name, "input_directory")))
     # Create GSS and GST files for shocks and model gemsim
     CreateSTI(config.sim_property(simulation_name, "model_file_name"), "NA", "gtap")
     subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "model_file_name")))
@@ -52,7 +52,7 @@ for simulation_name in config.simulation_list:
 
 # Import simulation results into a single database
 # Copy results to output directory
-databaseSL4 = ImportCSV_SL4(config.simulation_list).create()
+databaseSL4 = ImportCSV_SL4(config.model_csv_paths).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
 os.chdir("Work_Files")
 ExportDictionary("Results.csv", databaseMod)

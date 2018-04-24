@@ -9,18 +9,16 @@ from typing import List
 class ImportCSV_SL4(object):
     """Imports the CSV Files created by SLTOHT"""
 
-    __slots__ = ["simulation_list"]
+    __slots__ = ["file_path_list"]
 
-    def __init__(self, simulation_list: List[str]) -> None:
-        self.simulation_list = simulation_list
+    def __init__(self, file_path_list: List[str]) -> None:
+        self.file_path_list = file_path_list
 
-    def filecontents(self, simulation_name) -> List[str]:
+    def filecontents(self, filepath) -> List[str]:
         """
         Reads the CSV file into memory
         :return:
         """
-        filename = "sim_{0}.csv".format(simulation_name)
-        filepath = "Work_Files//" + simulation_name + "//" + filename
         with open(filepath, "r") as reader:  # Read the csv file
             return [line for line in reader.readlines() if
                     line != " \n"]  # deletes lines that are nothing but line breaks
@@ -31,7 +29,7 @@ class ImportCSV_SL4(object):
         :return:
         """
         variable_values = {}
-        for simulation in self.simulation_list:
+        for file_path in self.file_path_list:
             name_variable = []
 
             list_variable_properties = [
@@ -41,7 +39,7 @@ class ImportCSV_SL4(object):
                 "Changes"
             ]
 
-            for line in self.filecontents(simulation):
+            for line in self.filecontents(file_path):
                 # checks if line contains name of variable by looking if it begins with "! The" and ends with "#" and a line break
                 if line[0:7] == " ! The " and line[-5:] == "part\n":
                     # Variable name is between the 7th character of the line and the first space after that character
@@ -52,7 +50,7 @@ class ImportCSV_SL4(object):
                         # line defines name of matrix if its equal to array name followed by "("
                         variable_index = line.split(",")[0].strip()
                         variable_value = line.split(",")[1].strip()
-                        key = (simulation, name_variable, variable_index)
+                        key = (file_path, name_variable, variable_index)
                         variable_values[key] = variable_value
 
         return variable_values

@@ -19,6 +19,7 @@ class SimulationCMF(object):
         self.model_folder = model_folder
         self.shock_type = shock_type
 
+
     def shockedsectors(self):
         list_shocked_sectors = self.simulation_name
         return list_shocked_sectors
@@ -120,5 +121,6 @@ class SimulationCMF(object):
                           + line_list_shocks
 
         # Create final file
-        with open("Work_Files\\" + self.model_folder + "\\" + cmf_file_name, "w+") as writer:  # Create the empty file
+        cmf_file_name_with_path = "Work_Files\\" +self.simulation_name+"\\"+ self.model_folder + "\\" + cmf_file_name
+        with open(cmf_file_name_with_path, "w+") as writer:  # Create the empty file
             writer.writelines(line_list_total)  # write the line list to the file
