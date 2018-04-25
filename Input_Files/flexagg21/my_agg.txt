@@ -1,0 +1,323 @@
+!
+!      AGGREGATION TEMPLATE FOR GTAP 8 DATA BASE
+!                                               (BN, NV 17-NOV-2011)
+!
+!  NOTES:
+!
+!         a. All lines starting with ! are ignored.
+!
+!         b. Comments after ! are also ignored.
+!
+!	  c. Empty lines are ignored.
+!
+!	  d. Header names are used by the GEMPACK programs to 
+!	     read the data, do not change them.
+!
+!         e. Sections 2, 4, and 6, are detailed listings of the
+!	     regions, sectors, and endowments included in the 
+!	     relevant GTAP version shipped with flexagg. Unless
+!	     you know exactly what you are doing you should not 
+!	     subtract/add lines to these sections.
+!	     
+!	  f. If you do not see the point of the warning above, do not 
+!	     change the number of lines in sections 2, 4, and 6.
+!
+!         g. In sections 1, 3, and 5, a number of lines to be
+!            filled in are provided. Additional lines can be
+!            added as needed. Unused lines should be removed.
+!
+!         h. Names for aggregated commodities/regions/factors can
+!            include 12 characters. These can include letters, digits
+!            and the characters '@' and '_'. The first character in
+!            the name must be a letter.
+!
+! Send comments on the use of this form to mcdougar@purdue.edu
+!
+! 1. AGGREGATED COMMODITIES
+!
+!    In this section, the user fills in:
+!
+!           a) Number of aggregated commodities (XX STRINGS)
+!	    b) short names for agregated commodities
+!           c) (optional) explanatory text to the right of !
+!
+!    Please note that in this section additional lines
+!    may be added as needed and unused lines should be
+!    removed.
+
+3 STRINGS LENGTH 12 header "H2" longname "Set TRAD_COMM traded commodities";
+food        ! agriculture and food processing
+mnfc        ! manufacturing
+serv        ! services
+
+! 2. COMMODITY AGGREGATION MAPPING
+!
+!   In this section the user fills in the short name of
+!   the appropriate aggregated commodity (from the previous
+!   list) for each GTAP commodity. The number of strings (57)
+!   shouldn't be changed unless you know what you're doing.
+
+57 STRINGS LENGTH 12 header "DCOM" longname "Sectoral aggregation mapping";
+food  !  pdr paddy rice                                     
+food  !  wht wheat                                          
+food  !  gro cereal grains nec                              
+food  !  v_f vegetables, fruit, nuts                        
+food  !  osd oil seeds                                      
+food  !  c_b sugar cane, sugar beet                         
+food  !  pfb plant-based fibers                             
+food  !  ocr crops nec                                      
+food  !  ctl bovine cattle, sheep and goats, horses         
+food  !  oap animal products nec                            
+food  !  rmk raw milk                                       
+food  !  wol wool, silk-worm cocoons                        
+mnfc   !  frs forestry                                       
+mnfc  !  fsh fishing                                        
+mnfc  !  coa coal                                           
+mnfc  !  oil oil                                            
+mnfc  !  gas gas                                            
+mnfc  !  omn minerals nec                                   
+food  !  cmt bovine cattle, sheep and goat meat products    
+food  !  omt meat products                                  
+food  !  vol vegetable oils and fats                        
+food  !  mil dairy products                                 
+food  !  pcr processed rice                                 
+food  !  sgr sugar                                          
+food  !  ofd food products nec                              
+food  !  b_t beverages and tobacco products                 
+mnfc  !  tex textiles                                       
+mnfc  !  wap wearing apparel                                
+mnfc  !  lea leather products                               
+mnfc  !  lum wood products                                  
+mnfc  !  ppp paper products, publishing                     
+mnfc  !  p_c petroleum, coal products                       
+mnfc  !  crp chemical, rubber, plastic products             
+mnfc  !  nmm mineral products nec                           
+mnfc  !  i_s ferrous metals                                 
+mnfc  !  nfm metals nec                                     
+mnfc  !  fmp metal products                                 
+mnfc  !  mvh motor vehicles and parts                       
+mnfc  !  otn transport equipment nec                        
+mnfc  !  ele electronic equipment                           
+mnfc  !  ome machinery and equipment nec                    
+mnfc  !  omf manufactures nec                               
+serv  !  ely electricity                                    
+serv  !  gdt gas manufacture, distribution                  
+serv  !  wtr water                                          
+serv  !  cns construction                                   
+serv  !  trd trade                                          
+serv  !  otp transport nec                                  
+serv  !  wtp water transport                                
+serv  !  atp air transport                                  
+serv  !  cmn communication                                  
+serv  !  ofi financial services nec                         
+serv  !  isr insurance                                      
+serv  !  obs business services nec                          
+serv  !  ros recreational and other services                
+serv  !  osg public admin. and defence, education, health   
+serv  !  dwe ownership of dwellings                         
+
+! 3. AGGREGATED REGIONS
+!
+!   In this section, the user fills in:
+!      	    a) Number of aggregated regions (XX STRINGS)
+!           b) names
+!           c) (optional) explanatory text to the right of !
+!
+!    Please note that in this section additional lines
+!    may be added as needed and unused lines should be
+!    removed.
+
+3 STRINGS LENGTH 12 header "H1" longname "Set REG regions";
+NAFTA     ! North America
+EU25      ! European Union 25
+ROW       ! Rest of the World
+
+! 4. REGIONAL AGGREGATION MAPPING
+!
+!  In this section, the user fills in the short
+!  name for the aggregated region to which each
+!  of the GTAP regions belong. The number of 
+!  strings (113) shouldn't be changed unless you 
+!  know what you're doing.
+129 STRINGS LENGTH 12 header "DREG" longname "Regional aggregation mapping";
+ROW ! aus Australia
+ROW ! nzl New Zealand
+ROW ! xoc Rest of Oceania
+ROW ! chn China
+ROW ! hkg Hong Kong
+ROW ! jpn Japan
+ROW ! kor Korea
+ROW ! mng Mongolia
+ROW ! twn Taiwan
+ROW ! xea Rest of East Asia
+ROW ! khm Cambodia
+ROW ! idn Indonesia
+ROW ! lao Lao People's Democratic Republ
+ROW ! mys Malaysia
+ROW ! phl Philippines
+ROW ! sgp Singapore
+ROW ! tha Thailand
+ROW ! vnm Viet Nam
+ROW ! xse Rest of Southeast Asia
+ROW ! bgd Bangladesh
+ROW ! ind India
+ROW ! npl Nepal
+ROW ! pak Pakistan
+ROW ! lka Sri Lanka
+ROW ! xsa Rest of South Asia
+NAFTA ! can Canada
+NAFTA ! usa United States of America
+NAFTA ! mex Mexico
+NAFTA ! xna Rest of North America
+ROW ! arg Argentina
+ROW ! bol Bolivia
+ROW ! bra Brazil
+ROW ! chl Chile
+ROW ! col Colombia
+ROW ! ecu Ecuador
+ROW ! pry Paraguay
+ROW ! per Peru
+ROW ! ury Uruguay
+ROW ! ven Venezuela
+ROW ! xsm Rest of South America
+ROW ! cri Costa Rica
+ROW ! gtm Guatemala
+ROW ! hnd Honduras
+ROW ! nic Nicaragua
+ROW ! pan Panama
+ROW ! slv El Salvador
+ROW ! xca Rest of Central America
+ROW ! xcb Caribbean
+EU25 ! aut Austria
+EU25 ! bel Belgium
+EU25 ! cyp Cyprus
+EU25 ! cze Czech Republic
+EU25 ! dnk Denmark
+EU25 ! est Estonia
+EU25 ! fin Finland
+EU25 ! fra France
+EU25 ! deu Germany
+EU25 ! grc Greece
+EU25 ! hun Hungary
+EU25 ! irl Ireland
+EU25 ! ita Italy
+EU25 ! lva Latvia
+EU25 ! ltu Lithuania
+EU25 ! lux Luxembourg
+EU25 ! mlt Malta
+EU25 ! nld Netherlands
+EU25 ! pol Poland
+EU25 ! prt Portugal
+EU25 ! svk Slovakia
+EU25 ! svn Slovenia
+EU25 ! esp Spain
+EU25 ! swe Sweden
+EU25 ! gbr United Kingdom
+ROW ! che Switzerland
+ROW ! nor Norway
+ROW ! xef Rest of EFTA
+ROW ! alb Albania
+ROW ! bgr Bulgaria
+ROW ! blr Belarus
+ROW ! hrv Croatia
+ROW ! rou Romania
+ROW ! rus Russian Federation
+ROW ! ukr Ukraine
+ROW ! xee Rest of Eastern Europe
+ROW ! xer Rest of Europe
+ROW ! kaz Kazakhstan
+ROW ! kgz Kyrgyztan
+ROW ! xsu Rest of Former Soviet Union
+ROW ! arm Armenia
+ROW ! aze Azerbaijan
+ROW ! geo Georgia
+ROW ! bhr Bharain
+ROW ! irn Iran Islamic Republic of
+ROW ! isr Israel
+ROW ! kwt Kuwait
+ROW ! omn Oman
+ROW ! qat Qatar
+ROW ! sau Saudi Arabia
+ROW ! tur Turkey
+ROW ! are United Arab Emirates
+ROW ! xws Rest of Western Asia
+ROW ! egy Egypt
+ROW ! mar Morocco
+ROW ! tun Tunisia
+ROW ! xnf Rest of North Africa
+ROW ! cmr Cameroon
+ROW ! civ Cote d'Ivoire
+ROW ! gha Ghana
+ROW ! nga Nigeria
+ROW ! sen Senegal
+ROW ! xwf Rest of Western Africa
+ROW ! xcf Central Africa
+ROW ! xac South Central Africa
+ROW ! eth Ethiopia
+ROW ! ken Kenya
+ROW ! mdg Madagascar
+ROW ! mwi Malawi
+ROW ! mus Mauritius
+ROW ! moz Mozambique
+ROW ! tza Tanzania
+ROW ! uga Uganda
+ROW ! zmb Zambia
+ROW ! zwe Zimbabwe
+ROW ! xec Rest of Eastern Africa
+ROW ! bwa Botswana
+ROW ! nam Namibia
+ROW ! zaf South Africa
+ROW ! xsc Rest of South African Customs
+ROW ! xtw Rest of the World
+
+! 5. AGGREGATED ENDOWMENTS
+!
+!   In this section, the default endowment aggregation for GTAP
+!   version 5 has been specified. Users may change the aggregation
+!   following these rules:
+!       a) Additional lines may be added as needed and unused lines
+!          should be removed.
+!       b) If the aggregated database is to be used with the GTAP
+!          model, one of the aggregated endowment names should be
+!          "capital", since this plays a key role in the model.
+!       c) Specify the classification of the aggregated factor,
+!          whether sluggish or mobile. There should be at least one
+!          sluggish and at least one mobile factor.
+!       d) Specify a value for the elasticity of transformation,
+!          "ETRAE".  A number must be given for all endowments,
+!          mobile or sluggish, though its value matters only for
+!          the sluggish endowments.
+
+3 STRINGS LENGTH 12 header "H6" longname "Set ENDW_COMM endowment commodities";
+land    ! land    
+labor   ! labor  
+capital ! capital
+
+3 integer header "SLUG" 
+longname "Sluggish (1) or mobile (0) endowments";
+1 ! land   
+0 ! labor  
+0 ! capital
+
+3 real header "ETRE" longname "Value of ETRAE for endowments";
+-0.500 ! land   
+-2.000 ! labor  
+-1.000 ! capital
+
+! 6. ENDOWMENT AGGREGATION MAPPING
+!  In this section, the user fills in the short
+!  name for the aggregated endowment to which each
+!  of the GTAP endowments belong. The number of strings (5)
+!  shouldn't be changed unless you know what you're doing.
+!
+!Sample line follows:
+!land	!  LAN   Land                            
+
+5 STRINGS LENGTH 12 header "DEND" longname "Endowment aggregation mapping";
+land    !  LAN   Land                          
+labor   !  ULA   UnSkLab                       
+labor   !  SLA   SkLab                         
+capital !  CAP   Capital                       
+land    !  NTR   NatRes                        
+
+! END OF FILE

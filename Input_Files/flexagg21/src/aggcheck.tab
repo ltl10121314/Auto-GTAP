@@ -1,0 +1,71 @@
+!============================================================================! 
+! AGGDAT.TAB: Data Aggregation TAB file                                      !
+! GTAP Data Base Version 6 (2004)                                             ! 
+! This file reads the global data, aggregates the value flows, and           !
+!      generates an aggregated database.                                     !
+!============================================================================!
+
+EQUATION (NONE);
+
+!============================================================================!
+! Input files                                                                !
+!============================================================================!
+
+
+FILE DSETS     # Set specification for disaggregate data #;
+FILE ASETS     # Set specification for aggregate data    #;
+
+!============================================================================!
+! Output file                                                                !
+!============================================================================!
+ 
+FILE (new) checkmap;
+
+
+!============================================================================!
+! Sets for dis-aggregate data                                                !
+!============================================================================!
+
+SET DREG       # REGIONS #
+    READ ELEMENTS FROM FILE DSETS HEADER "H1";
+
+SET DTRAD_COMM # TRADED COMMODITIES #
+    READ ELEMENTS FROM FILE DSETS HEADER "H2";
+
+SET DENDW_COMM  # ENDOWMENT COMMODITIES # 
+    READ ELEMENTS FROM FILE DSETS HEADER "H6";
+
+!============================================================================!
+! Sets for aggregate data                                                    !
+!============================================================================!
+
+SET REG       # REGIONS IN AGGREGATE DATA SET #
+    READ ELEMENTS FROM FILE ASETS HEADER "H1";
+
+SET TRAD_COMM # TRADED COMMODITIES #
+    READ ELEMENTS FROM FILE ASETS HEADER "H2";
+
+SET ENDW_COMM  # ENDOWMENT COMMODITIES # 
+    READ ELEMENTS FROM FILE ASETS HEADER "H6";
+
+!============================================================================!
+!                    READING AGGREGATION SCHEME                              !
+!============================================================================!
+
+MAPPING COM FROM DTRAD_COMM TO TRAD_COMM; 
+         READ (BY_ELEMENTS) COM FROM FILE ASETS HEADER "DCOM";
+
+MAPPING REGD FROM DREG TO REG; 
+         READ (BY_ELEMENTS) REGD FROM FILE ASETS HEADER "DREG";
+
+MAPPING ENDD FROM DENDW_COMM TO ENDW_COMM; 
+         READ (BY_ELEMENTS) ENDD FROM FILE ASETS HEADER "DEND";
+ 
+
+write (set) REG to file checkmap header "REG"; 
+write (set) TRAD_COMM to file checkmap header "TRAD"; 
+write (set) ENDW_COMM to file checkmap header "ENDW"; 
+
+!write (by_elements) D2AMARG TO FILE GSETS HEADER "MMAR" longname
+    "Margin commodities aggregation mapping";!
+!====================== END OF FILE AGGDAT.TAB ==============================!

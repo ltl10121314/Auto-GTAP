@@ -1,0 +1,962 @@
+!============================================================================! 
+! AGGDAT.TAB: Data Aggregation TAB file                                      !
+! GTAP Data Base Version 6 (2004)                                             ! 
+! This file reads the global data, aggregates the value flows, and           !
+!      generates an aggregated database.                                     !
+!============================================================================!
+
+EQUATION (NONE);
+
+!============================================================================!
+! Input files                                                                !
+!============================================================================!
+
+FILE DDATA     # Disaggregate data in GTAP notation      #;
+FILE DSETS     # Set specification for disaggregate data #;
+FILE ASETS     # Set specification for aggregate data    #;
+
+!============================================================================!
+! Output file                                                                !
+!============================================================================!
+ 
+FILE (NEW)      ADATA       # Aggregated data in GTAP notation      #;
+
+
+!============================================================================!
+! Sets for dis-aggregate data                                                !
+!============================================================================!
+
+SET DREG       # REGIONS #
+    READ ELEMENTS FROM FILE DSETS HEADER "H1";
+
+SET DTRAD_COMM # TRADED COMMODITIES #
+    READ ELEMENTS FROM FILE DSETS HEADER "H2";
+
+SET DMARG_COMM # MARGIN COMMODITIES #
+    READ ELEMENTS FROM FILE DSETS HEADER "MARG";
+
+SUBSET DMARG_COMM IS SUBSET OF DTRAD_COMM ;                             
+
+SET DENDW_COMM  # ENDOWMENT COMMODITIES # 
+    READ ELEMENTS FROM FILE DSETS HEADER "H6";
+
+SET CGDS_COMM  # CAPITAL GOODS # 
+    READ ELEMENTS FROM FILE DSETS HEADER "H9";
+
+SET TARSET # Components of tariff #   
+    read elements from file DSETS header "TAR";
+
+SET DPROD_COMM # produced commodities # = DTRAD_COMM Union CGDS_COMM;
+
+SET DIR (domestic, imported) ;
+
+!============================================================================!
+! Sets for aggregate data                                                    !
+!============================================================================!
+
+SET REG       # REGIONS IN AGGREGATE DATA SET #
+    READ ELEMENTS FROM FILE ASETS HEADER "H1";
+
+SET TRAD_COMM # TRADED COMMODITIES #
+    READ ELEMENTS FROM FILE ASETS HEADER "H2";
+
+SET ENDW_COMM  # ENDOWMENT COMMODITIES # 
+    READ ELEMENTS FROM FILE ASETS HEADER "H6";
+
+SET PROD_COMM # produced commodities # = TRAD_COMM Union CGDS_COMM;
+
+!============================================================================!
+!                    READING AGGREGATION SCHEME                              !
+!============================================================================!
+
+MAPPING COM FROM DTRAD_COMM TO TRAD_COMM; 
+         READ (BY_ELEMENTS) COM FROM FILE ASETS HEADER "DCOM";
+
+MAPPING REGD FROM DREG TO REG; 
+         READ (BY_ELEMENTS) REGD FROM FILE ASETS HEADER "DREG";
+
+MAPPING ENDD FROM DENDW_COMM TO ENDW_COMM; 
+         READ (BY_ELEMENTS) ENDD FROM FILE ASETS HEADER "DEND";
+ 
+
+!Define the set of aggregated margin commmodities on the fly:!
+!The question here is: Does atrad_comm's element "i" contain at least one
+element in dmarg_comm? To answer this, we first create a unit vector of
+dimension dtrad_comm:!
+
+COEFFICIENT (all,c,DTRAD_COMM) UNITVEC(c) #Auxiliary unit vector#;
+FORMULA (all,c,DTRAD_COMM) UNITVEC(c)=1;
+
+!then, the answer is found by aggregating UNITVEC from dtrad_comm to atrad_comm  
+including only those elements in dmarg_commm. The idea is that those atrad_comm
+that do not contain any dmarg_comm will have a value of zero.
+In GEMPACK notation:!
+
+COEFFICIENT (all,i,TRAD_COMM) ISAMAR(i) #Is an Aggregated Margin Commodity?#;
+FORMULA (all,i,TRAD_COMM)
+ISAMAR(i)= sum{c, DMARG_COMM: COM(c) eq i, UNITVEC(c) };
+
+!Thus, If ISAMAR(i) > 0, the answer is yes:!
+
+SET MARG_COMM = (all, i, TRAD_COMM : ISAMAR(i)>0);
+
+!The last step is to define a mapping from dmarg_comm to amarg_comm based on
+the mapping from dtrad_comm to atrad_comm!
+
+MAPPING D2AMARG from  DMARG_COMM to MARG_COMM;
+FORMULA (all,c,DMARG_COMM) D2AMARG(c)=COM(c);
+
+!<End of Dynamic Aggregated Margin Set Definition!
+!!
+
+!============================================================================!
+! Read values from dis-aggregate database.                                   !
+! There are 30 vectors to read                                               !
+!============================================================================!
+
+!============================================================================!
+!              base revenues and expenditures at agent's prices              !
+!============================================================================!
+
+
+COEFFICIENT (all,i,DENDW_COMM)(all,r,DREG)                    EVOA(i,r)
+         ! 1  value of commodity i output in 
+           region r. ! ;
+
+COEFFICIENT (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)  EVFA(i,j,r)
+         ! 2  producer expenditure on i by industry j,
+           in region r, valued at agent's prices ! ;
+
+COEFFICIENT (all,r,DREG)                                     SAVE(r)
+         ! 3  expenditure on net savings in region r
+           valued at agent's prices ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG) VIFA(i,j,r)
+         ! 4  purchases of imported i r for use in j
+           in region r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG) VDFA(i,j,r)
+         ! 5  purchases of domestic i r for use in j
+           in region r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VIPA(i,r)
+         ! 6  private household expenditure on 
+           imported i ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VDPA(i,r)
+         ! 7  private household expenditure on 
+           domestic i in r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VIGA(i,r)
+         ! 8  government household expenditure on 
+           imported i ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VDGA(i,r)
+         ! 9  government household expenditure on 
+           domestic i in r ! ;
+
+COEFFICIENT (all, r, DREG)                                   VKB(r)
+         ! 10  value of beginning-of-period capital 
+            stock, in region r ! ;
+
+COEFFICIENT (all, r, DREG)                                   VDEP(r)
+         ! 11  value of capital depreciation, in r ! ;
+
+COEFFICIENT (all, r, DREG)                                   POP(r)
+         ! population, in r ! ;
+
+
+!============================================================================!
+!              base revenues and expenditures at market prices               !
+!============================================================================!
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       VXMD(i,r,s)
+         ! 12  exports of commodity i from region r to
+            destination s valued at market prices
+            (tradeables only)  ! ;
+
+COEFFICIENT (all,i,DMARG_COMM)(all,r,DREG)                   VST(i,r)
+         ! 13  exports of commodity i from region r for
+            international transportation valued at 
+            market prices (tradeables only)  ! ;
+
+COEFFICIENT (all,i,DMARG_COMM)(all,j,DTRAD_COMM)(all,r,DREG)(all,s,DREG)
+                                                             VTWR(i,j,r,s)
+         ! 13a usage of margin i in movement of freight j
+            from region r to region s! ;
+
+COEFFICIENT (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)  VFM(i,j,r)
+         ! 14  producer expenditure on i by industry j,
+            in region r, valued at market prices ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG) VIFM(i,j,r)
+         ! 15  purchases of imports i for use in j 
+            in region r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG) VDFM(i,j,r)
+         ! 16  purchases of domestic i r for use in j 
+            in region r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VIPM(i,r)
+         ! 17  private household expenditure 
+            on i in r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VDPM(i,r)
+         ! 18  private household expenditure on 
+            domestic i in r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VIGM(i,r)
+         ! 19  gov't household expenditure on i in r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                   VDGM(i,r)
+         ! 20  government household expenditure on 
+            domestic i in r ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       VIMS(i,r,s)
+         ! 21  imports of commodity i from region r 
+            to s, valued at domestic market prices ! ;
+
+!============================================================================!
+!              base revenues and expenditures at world prices                !
+!============================================================================!
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       VXWD(i,r,s)
+         ! 22  exports of commodity i from region r to
+            destination s valued fob 
+            (tradeables only)  ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       VIWS(i,r,s)
+         ! 23  imports of commodity i from region r 
+            to s, valued cif (tradeables only)  ! ;
+
+!============================================================================!
+!                         import tax revenues                                !
+!============================================================================!
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       ADREV(i,r,s)
+           ! 24  revenue associated with antidumping duties ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       TARIFREV(i,r,s)
+           ! 25  revenue associated with tariffs ! ;
+
+!============================================================================!
+!                         export tax revenues                                !
+!============================================================================!
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       PUREV(i,r,s)
+           ! 26  revenue associated with the price undertakings ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       MFAREV(i,r,s)
+           ! 27  revenue associated with the MFA ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       VERREV(i,r,s)
+           ! 28  revenue associated with the VERs ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)       XTREV(i,r,s)
+           ! 29  revenue associated with the other export 
+            taxes/subsidies ! ;
+
+!============================================================================!
+!                  output, input and factor subsidies                        !
+!============================================================================!
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,r,DREG)                    OSEP(i,r)
+           ! 30  ordinary output subsidy expenditures ! ;
+
+COEFFICIENT (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)(all,d,DIR)
+ISEP(i,j,r,d)
+           ! 31  input subsidy expenditures ! ;
+
+COEFFICIENT (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)  FBEP(i,j,r)
+           ! 32  factor-based subsidy expenditures ! ;
+
+COEFFICIENT (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)  FTRV(i,j,r)
+           ! factor employment tax revenue ! ;
+
+!============================================================================!
+!                               other data                                   !
+!============================================================================!
+
+COEFFICIENT (all,r,DREG)                                     DPSM(r)
+         ! 33  sum of distribution parameters in the in regional
+           household demand system ! ;
+
+Coefficient (all,d,TARSET)(all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)
+    VTSS(d,i,r,s) # Imports of i from r to s including tariff components #;
+         ! 34  Imports of i from r to s including tariff components !
+
+
+!----------------------------------------------------------------------------!
+!                   Reading basedata.                                        !
+!----------------------------------------------------------------------------!
+
+READ (all,i,DENDW_COMM)(all,r,DREG)                             EVOA(i,r)
+         FROM FILE DDATA HEADER "EVOA" ;
+
+READ (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)           EVFA(i,j,r)
+         FROM FILE DDATA HEADER "EVFA" ;
+
+READ (all,r,DREG)                                              SAVE(r)
+         FROM FILE DDATA HEADER "SAVE" ;
+
+READ (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)          VIFA(i,j,r)
+         FROM FILE DDATA HEADER "VIFA" ;
+
+READ (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)          VDFA(i,j,r)
+         FROM FILE DDATA HEADER "VDFA" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VIPA(i,r)
+         FROM FILE DDATA HEADER "VIPA" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VDPA(i,r)
+         FROM FILE DDATA HEADER "VDPA" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VIGA(i,r)
+         FROM FILE DDATA HEADER "VIGA" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VDGA(i,r)
+         FROM FILE DDATA HEADER "VDGA" ;
+
+READ (all,r,DREG)                                              VKB(r)
+         FROM FILE DDATA HEADER "VKB" ;
+
+READ (all,r,DREG)                                              VDEP(r)
+         FROM FILE DDATA HEADER "VDEP" ;
+
+READ (all,r,DREG)                                              POP(r)
+         FROM FILE DDATA HEADER "POP" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)                VXMD(i,r,s)
+         FROM FILE DDATA HEADER "VXMD" ;
+
+READ (all,i,DMARG_COMM)(all,r,DREG)                             VST(i,r)
+         FROM FILE DDATA HEADER "VST" ;
+
+READ (all,i,DMARG_COMM)(all,j,DTRAD_COMM)(all,r,DREG)(all,s,DREG)
+                                                               VTWR(i,j,r,s)
+         FROM FILE DDATA HEADER "VTWR" ;
+
+READ (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)           VFM(i,j,r)
+         FROM FILE DDATA HEADER "VFM" ;
+
+READ (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)          VIFM(i,j,r)
+         FROM FILE DDATA HEADER "VIFM" ;
+
+READ (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)          VDFM(i,j,r)
+         FROM FILE DDATA HEADER "VDFM" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VIPM(i,r)
+         FROM FILE DDATA HEADER "VIPM" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VDPM(i,r)
+         FROM FILE DDATA HEADER "VDPM" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VIGM(i,r)
+         FROM FILE DDATA HEADER "VIGM" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                            VDGM(i,r)
+         FROM FILE DDATA HEADER "VDGM" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)                VIMS(i,r,s)
+         FROM FILE DDATA HEADER "VIMS" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)                VXWD(i,r,s)
+         FROM FILE DDATA HEADER "VXWD" ;
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)                VIWS(i,r,s)
+         FROM FILE DDATA HEADER "VIWS" ;
+
+READ (all,r,DREG)                                              DPSM(r)
+         FROM FILE DDATA HEADER "DPSM" ;
+
+READ (all,d,TARSET)(all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)  VTSS(d,i,r,s)
+        FROM FILE DDATA header "VTSS";
+
+!----------------------------------------------------------------------------!
+!               Reading tax revenues / subsidy expenditures                  !
+!----------------------------------------------------------------------------!
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)               ADREV(i,r,s)
+         FROM FILE DDATA HEADER "ADRV";
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)               TARIFREV(i,r,s)
+         FROM FILE DDATA HEADER "TFRV";
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)               PUREV(i,r,s)
+         FROM FILE DDATA HEADER "PURV";
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)               MFAREV(i,r,s)
+         FROM FILE DDATA HEADER "MFRV";
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)               VERREV(i,r,s)
+         FROM FILE DDATA HEADER "VRRV";
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)(all,s,DREG)               XTREV(i,r,s)
+         FROM FILE DDATA HEADER "XTRV";
+
+READ (all,i,DTRAD_COMM)(all,r,DREG)                           OSEP(i,r)
+         FROM FILE DDATA HEADER "OSEP";
+
+READ (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)(all,d,DIR) ISEP(i,j,r,d)
+         FROM FILE DDATA HEADER "ISEP";
+
+READ (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)         FBEP(i,j,r)
+         FROM FILE DDATA HEADER "FBEP";
+
+READ (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)         FTRV(i,j,r)
+         FROM FILE DDATA HEADER "FTRV";
+
+!============================================================================!
+! AGGREGATION of all data variables                                          !
+!============================================================================!
+
+!============================================================================!
+! Here we aggregate all 30 data vectors across commodities and regions       !
+! We attach a "C" in front of disaggregate variable names,                   !
+! i.e., aggregating EVOA(i,r) across regions and commodities will give us    !
+! CEVOA(i,n)                                                                 !
+!============================================================================!
+
+COEFFICIENT (all,i,ENDW_COMM)(all,n,REG)                      CEVOA(i,n);
+
+FORMULA (all,i,ENDW_COMM)(all,n,REG)
+     CEVOA(i,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(r,DREG:       REGD(r) EQ n , EVOA(e,r)));
+
+COEFFICIENT (all,i,ENDW_COMM)(all,t,PROD_COMM)(all,n,REG)    CEVFA(i,t,n);
+
+FORMULA (all,i,ENDW_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CEVFA(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,DTRAD_COMM: COM(j) EQ t, 
+     SUM(r,DREG:       REGD(r) EQ n , EVFA(e,j,r))));
+
+FORMULA (all,i,ENDW_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CEVFA(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,CGDS_COMM, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  EVFA(e,j,r))));
+
+
+COEFFICIENT (all,n,REG)                                       CSAVE(n);
+
+FORMULA (all,n,REG)
+     CSAVE(n) =
+     SUM(r,DREG: REGD(r) EQ n, SAVE(r));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,PROD_COMM)(all,n,REG)   CVIFA(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CVIFA(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,DTRAD_COMM: COM(j) EQ t,
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIFA(i,j,r))));
+
+FORMULA (all,c,TRAD_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CVIFA(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,CGDS_COMM,
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIFA(i,j,r))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,PROD_COMM)(all,n,REG)   CVDFA(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CVDFA(c,t,n) =
+     SUM(j,DTRAD_COMM: COM(j) EQ t,
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDFA(i,j,r))));
+
+FORMULA (all,c,TRAD_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CVDFA(c,t,n) =
+     SUM(j,CGDS_COMM,
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDFA(i,j,r))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVIPA(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVIPA(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIPA(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVDPA(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVDPA(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDPA(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVIGA(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVIGA(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIGA(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVDGA(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVDGA(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDGA(i,r)));
+     
+COEFFICIENT (all,n,REG)                                       CVKB(n);
+
+FORMULA (all,n,REG)
+     CVKB(n) =
+     SUM(r,DREG: REGD(r) EQ n, VKB(r));
+     
+COEFFICIENT (all,n,REG)                                       CVDEP(n);
+
+FORMULA (all,n,REG)
+     CVDEP(n) =
+     SUM(r,DREG: REGD(r) EQ n, VDEP(r));
+
+
+COEFFICIENT (all,n,REG)                                       CPOP(n);
+
+FORMULA (all,n,REG)
+     CPOP(n) =
+     SUM(r,DREG: REGD(r) EQ n, POP(r));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)         CVXMD(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CVXMD(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  VXMD(i,r,s))));
+
+COEFFICIENT (all,c,MARG_COMM)(all,n,REG)                     CVST(c,n);
+
+FORMULA (all,c,MARG_COMM)(all,n,REG)
+     CVST(c,n) =
+     SUM(i,DMARG_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VST(i,r)));
+
+COEFFICIENT (all,c,MARG_COMM)(all,d,TRAD_COMM)(all,t,REG)(all,n,REG)
+                                                             CVTWR(c,d,t,n);
+
+FORMULA (all,c,MARG_COMM)(all,d,TRAD_COMM)(all,t,REG)(all,n,REG)
+    CVTWR(c,d,t,n) =
+    SUM(i,DMARG_COMM: COM(i) EQ c,
+    SUM(j,DTRAD_COMM: COM(j) EQ d,
+    SUM(r,DREG:       REGD(r) EQ t,
+    SUM(s,DREG:       REGD(s) EQ n, VTWR(i,j,r,s)))));
+
+COEFFICIENT (all,i,ENDW_COMM)(all,t,PROD_COMM)(all,n,REG)    CVFM(i,t,n);
+
+FORMULA (all,i,ENDW_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CVFM(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,DTRAD_COMM: COM(j) EQ t, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VFM(e,j,r))));
+
+FORMULA (all,i,ENDW_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CVFM(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,CGDS_COMM, 
+     SUM(r,DREG:       REGD(r) EQ n ,  VFM(e,j,r))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,PROD_COMM)(all,n,REG)   CVIFM(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CVIFM(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,DTRAD_COMM: COM(j) EQ t,
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIFM(i,j,r))));
+
+FORMULA (all,c,TRAD_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CVIFM(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,CGDS_COMM,
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIFM(i,j,r))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,PROD_COMM)(all,n,REG)   CVDFM(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CVDFM(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,DTRAD_COMM: COM(j) EQ t,
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDFM(i,j,r))));
+
+FORMULA (all,c,TRAD_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CVDFM(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,CGDS_COMM,
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDFM(i,j,r))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVIPM(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVIPM(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIPM(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVDPM(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVDPM(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDPM(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVIGM(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVIGM(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VIGM(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     CVDGM(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     CVDGM(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  VDGM(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)         CVIMS(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CVIMS(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  VIMS(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)         CVXWD(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CVXWD(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  VXWD(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)         CVIWS(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CVIWS(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  VIWS(i,r,s))));
+
+COEFFICIENT (all,d,TARSET)(all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+CVTSS(d,c,t,n);
+
+FORMULA (all,d,TARSET)(all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CVTSS(d,c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r)EQ t   , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  VTSS(d,i,r,s))));
+
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)         CADREV(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CADREV(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  ADREV(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)       CTARIFREV(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CTARIFREV(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  TARIFREV(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)         CPUREV(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CPUREV(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  PUREV(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)        CMFAREV(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CMFAREV(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  MFAREV(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)        CVERREV(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CVERREV(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  VERREV(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)        CXTREV(c,t,n);
+
+FORMULA (all,c,TRAD_COMM)(all,t,REG)(all,n,REG)
+     CXTREV(c,t,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c,
+     SUM(r,DREG:       REGD(r) EQ t  , 
+     SUM(s,DREG:       REGD(s) EQ n  ,  XTREV(i,r,s))));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,n,REG)                     COSEP(c,n);
+
+FORMULA (all,c,TRAD_COMM)(all,n,REG)
+     COSEP(c,n) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  OSEP(i,r)));
+
+COEFFICIENT (all,c,TRAD_COMM)(all,t,PROD_COMM)(all,n,REG)(all,d,DIR)
+CISEP(c,t,n,d);
+
+FORMULA (all,c,TRAD_COMM)(all,t,TRAD_COMM)(all,n,REG)(all,d,DIR)
+     CISEP(c,t,n,d) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,DTRAD_COMM: COM(j) EQ t,
+     SUM(r,DREG:       REGD(r) EQ n  ,  ISEP(i,j,r,d))));
+
+FORMULA (all,c,TRAD_COMM)(all,t,CGDS_COMM)(all,n,REG)(all,d,DIR)
+     CISEP(c,t,n,d) =
+     SUM(i,DTRAD_COMM: COM(i) EQ c, 
+     SUM(j,CGDS_COMM,
+     SUM(r,DREG:       REGD(r) EQ n  ,  ISEP(i,j,r,d))));
+
+COEFFICIENT (all,i,ENDW_COMM)(all,t,PROD_COMM)(all,n,REG)    CFBEP(i,t,n);
+
+FORMULA (all,i,ENDW_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CFBEP(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,DTRAD_COMM: COM(j) EQ t, 
+     SUM(r,DREG:       REGD(r) EQ n , FBEP(e,j,r))));
+
+FORMULA (all,i,ENDW_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CFBEP(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,CGDS_COMM, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  FBEP(e,j,r))));
+
+COEFFICIENT (all,i,ENDW_COMM)(all,t,PROD_COMM)(all,n,REG)    CFTRV(i,t,n);
+
+FORMULA (all,i,ENDW_COMM)(all,t,TRAD_COMM)(all,n,REG)
+     CFTRV(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,DTRAD_COMM: COM(j) EQ t, 
+     SUM(r,DREG:       REGD(r) EQ n , FTRV(e,j,r))));
+
+FORMULA (all,i,ENDW_COMM)(all,t,CGDS_COMM)(all,n,REG)
+     CFTRV(i,t,n) =
+     SUM(e,DENDW_COMM: ENDD(e) EQ i,
+     SUM(j,CGDS_COMM, 
+     SUM(r,DREG:       REGD(r) EQ n  ,  FTRV(e,j,r))));
+
+COEFFICIENT (all,n,REG)                                       CDPSM(n);
+
+FORMULA (all,n,REG)
+     CDPSM(n) =
+     SUM(r,DREG: REGD(r) EQ n, DPSM(r)) /
+     SUM(r,DREG: REGD(r) EQ n, 1.0);
+
+
+!============================================================================!
+!                     WRITING OF GLOBAL DATABASE                             !
+!============================================================================!
+
+! next statement checks that DVER is present on input flows file,
+  and places it first on output !
+Transfer "DVER" from file DDATA to file ADATA;
+
+
+! next statement checks that DREL is present on input flows file,
+  and places it first on output !
+Transfer "DREL" from file DDATA to file ADATA;
+
+write
+    CSAVE to file ADATA header "SAVE" longname
+    "Savings - Net Expenditure at Agents' Prices";
+write
+    CVKB to file ADATA header "VKB" longname 
+    "Capital Stock - Value at Beginning-of-Period";
+write
+    CVDEP to file ADATA header "VDEP" longname 
+    "Capital Stock - Value of Depreciation";
+write
+    CPOP to file ADATA header "POP" longname 
+    "Population";
+write
+    CVDGA to file ADATA header "VDGA" longname 
+    "Government - Domestic Purchases at Agents' Prices";
+write
+    CVIGA to file ADATA header "VIGA" longname 
+    "Government - Imports at Agents' Prices";
+write
+    CVDGM to file ADATA header "VDGM" longname 
+    "Government - Domestic Purchases at Market Prices";
+write
+    CVIGM to file ADATA header "VIGM" longname 
+    "Government - Imports at Market Prices";
+write
+    CVDPA to file ADATA header "VDPA" longname 
+    "Private Households - Domestic Purchases at Agents' Prices";
+write
+    CVIPA to file ADATA header "VIPA" longname 
+    "Private Households - Imports at Agents' Prices";
+write
+    CVDPM to file ADATA header "VDPM" longname 
+    "Private Households - Domestic Purchases at Market Prices";
+write
+    CVIPM to file ADATA header "VIPM" longname 
+    "Private Households - Imports at Market Prices";
+write
+    CEVOA to file ADATA header "EVOA" longname
+    "Endowments - Output at Agents' Prices";
+write
+    CEVFA to file ADATA header "EVFA" longname
+    "Endowments - Firms' Purchases at Agents' Prices";
+write
+    CVFM to file ADATA header "VFM" longname
+    "Endowments - Firms' Purchases at Market Prices";
+write
+    CVDFA to file ADATA header "VDFA" longname
+    "Intermediates - Firms' Domestic Purchases at Agents' Prices";
+write
+    CVIFA to file ADATA header "VIFA" longname
+    "Intermediates - Firms' Imports at Agents' Prices";
+write
+    CVDFM to file ADATA header "VDFM" longname
+    "Intermediates - Firms' Domestic Purchases at Market Prices";
+write
+    CVIFM to file ADATA header "VIFM" longname
+    "Intermediates - Firms' Imports at Market Prices";
+write
+    CVIMS to file ADATA header "VIMS" longname
+    "Trade - Bilateral Imports at Market Prices";
+write
+    CVIWS to file ADATA header "VIWS" longname
+    "Trade - Bilateral Imports at World Prices";
+write
+    CVXMD to file ADATA header "VXMD" longname
+    "Trade - Bilateral Exports at Market Prices";
+write
+    CVXWD to file ADATA header "VXWD" longname
+    "Trade - Bilateral Exports at World Prices";
+write
+    CVST to file ADATA header "VST" longname
+    "Trade - Exports for International Transportation, Market Prices";
+write
+    CVTWR to file ADATA header "VTWR" longname
+    "Trade - Margins for International Transportation, World Prices";
+write
+    CFBEP to file ADATA header "FBEP" longname
+    "Protection - Factor-Based Subsidies";
+write
+    CFTRV to file ADATA header "FTRV" longname
+    "Taxes - Factor Employment Tax Revenue";
+
+write
+    CISEP to file ADATA header "ISEP" longname
+    "Protection - Intermediate Input Subsidies";
+write
+    COSEP to file ADATA header "OSEP" longname
+    "Protection - Ordinary Output Subsidies";
+write
+    CADREV to file ADATA header "ADRV" longname
+    "Protection - Anti-Dumping Duty";
+write
+    CTARIFREV to file ADATA header "TFRV" longname
+    "Protection - Ordinary Import Duty";
+write
+    CPUREV to file ADATA header "PURV" longname
+    "Protection - Price Undertaking Export Tax Equivalent";
+write
+    CVERREV to file ADATA header "VRRV" longname
+    "Protection - VER Export Tax Equivalent";
+write
+    CMFAREV to file ADATA header "MFRV" longname
+    "Protection - MFA Export Tax Equivalent";
+write
+    CXTREV to file ADATA header "XTRV" longname
+    "Protection - Ordinary Export Tax";
+write
+    CDPSM to file ADATA header "DPSM" longname
+    "Sum of Distribution Parameters in Household Demand System";
+
+write
+    CVTSS to file ADATA header "VTSS" longname
+    "Value of Imports including different tariff components";
+
+!============================================================================!
+!                     WRITING OF SETS  AND MAPS                              !
+!============================================================================!
+
+File (new) GSETS;
+
+! next statement checks that DVER is present on input flows file,
+  and places it first on output !
+Transfer "DVER" from file DDATA to file GSETS;
+
+
+! next statement checks that DREL is present on input flows file,
+  and places it first on output !
+Transfer "DREL" from file DDATA to file GSETS;
+
+
+!Aggregated Sets!
+
+write (set) REG TO FILE GSETS HEADER "H1" longname
+    "Set REG regions";
+
+write (set) TRAD_COMM TO FILE GSETS HEADER "H2" longname
+    "Set TRAD_COMM traded commodities";
+
+write (set) ENDW_COMM TO FILE GSETS HEADER "H6" longname
+    "Set ENDW_COMM endowment commodities";
+
+write (set) MARG_COMM TO FILE GSETS HEADER "MARG" longname
+    "Set MARG_COMM margin commodities";
+
+write (set) CGDS_COMM  TO FILE GSETS HEADER "H9" longname
+    "Set CGDS_COMM capital good commodities";
+
+
+!DisAggregated Sets!
+
+write (set) DREG TO FILE GSETS HEADER "DH1" longname
+    "Set DREG dissagregated regions";
+
+write (set) DTRAD_COMM TO FILE GSETS HEADER "DH2" longname
+    "Set DTRAD_COMM dissagregated traded commodities";
+
+write (set) DENDW_COMM TO FILE GSETS HEADER "DH6" longname
+    "Set DENDW_COMM dissagregated endowment commodities";
+
+write (set) DMARG_COMM TO FILE GSETS HEADER "DMAR" longname
+    "Set DMARG_COMM dissagregated margin commodities";
+
+write (set) TARSET TO FILE GSETS HEADER "TARS" longname
+    "Set TARSET Components of Tariff";
+
+!Mappings!
+ 
+write (by_elements) COM TO FILE GSETS HEADER "MCOM" longname
+    "Sectoral aggregation mapping";
+
+write (by_elements) REGD TO FILE GSETS HEADER "MREG" longname
+    "Regional aggregation mapping";
+
+write (by_elements) ENDD TO FILE GSETS HEADER "MEND" longname
+    "Factor endowments aggregation mapping";
+
+write (by_elements) D2AMARG TO FILE GSETS HEADER "MMAR" longname
+    "Margin commodities aggregation mapping";
+
+!BN Nov 2011!
+
+!Transfer the headers that need no change in aggregation!
+
+Transfer "DEC" from file DSETS to file GSETS ;
+
+Transfer "PYS" from file DSETS to file GSETS ;
+
+Transfer "AGRI" from file DSETS to file GSETS ;
+
+Transfer "DREG" from file DSETS to file GSETS ;
+ 
+!====================== END OF FILE AGGDAT.TAB ==============================!

@@ -1,0 +1,186 @@
+!============================================================================!
+! AGGEMISS.TAB: Carbon Emissions Data Aggregation TAB File                   !
+! GTAP Data Base Version 8 (2011)                                            !
+! This file reads the global carbon emissions data.                          !
+! Aggregates Fuel Commodities as well                                        !
+!============================================================================!
+
+Equation (none);
+
+!============================================================================!
+! Input files                                                                !
+!============================================================================!
+
+File DDATA #Disaggregate data in GTAP notation#;
+File DSETS #Set specification for disaggregate data#;
+File ASETS #Set specification for aggregate data#;
+
+!============================================================================!
+! Output files                                                               !
+!============================================================================!
+
+File (new) EMISS # Aggregated carbon emissions data #;
+
+!============================================================================!
+! Sets for dis-aggregate data                                                !
+!============================================================================!
+
+Set DREG #Regions#
+    read elements from file DSETS header "H1";
+
+Set DTRAD_COMM #Traded commodities#
+    read elements from file DSETS header "H2";
+
+Set CGDS_COMM # capital goods commodities # (CGDS);
+
+Set DPROD_COMM # produced commodities # = DTRAD_COMM union CGDS_COMM;
+
+Set DFUEL_COMM #fuel commodities#
+    read elements from file DDATA header "FC";
+Subset DFUEL_COMM IS SUBSET OF DTRAD_COMM;
+
+!============================================================================!
+! Sets for aggregate data                                                    !
+!============================================================================!
+
+Set REG #Regions in aggregate data set#
+    read elements from file ASETS header "H1";
+
+Set TRAD_COMM #Traded commodities#
+    read elements from file ASETS header "H2";
+
+Set PROD_COMM # produced commodities # = TRAD_COMM union CGDS_COMM;
+
+! ===========================================================================!
+!                    READING AGGREGATION SCHEME                              !
+! ===========================================================================!
+
+Mapping COM from DTRAD_COMM to TRAD_COMM;
+         Read (BY_ELEMENTS) COM from file ASETS header "DCOM";
+
+Mapping REGD from DREG to REG;
+         Read (BY_ELEMENTS) REGD from file ASETS header "DREG";
+
+!Define the set of aggregated fuel commmodities on the fly:!
+!The question here is: Does atrad_comm's element "i" contain at least one
+element in dfuel_comm? To answer this, we first create a unit vector of
+dimension dtrad_comm:!
+
+COEFFICIENT (all,c,DTRAD_COMM) UNITVEC(c) #Auxiliary unit vector#;
+FORMULA (all,c,DTRAD_COMM) UNITVEC(c)=1;
+
+!then, the answer is found by aggregating UNITVEC from dtrad_comm to atrad_comm
+including only those elements in dfuel_commm. The idea is that those atrad_comm
+that do not contain any dfuel_comm will have a value of zero.
+In GEMPACK notation:!
+
+COEFFICIENT (all,i,TRAD_COMM) ISAEGY(i) #Is an Aggregated Fuel Commodity?#;
+FORMULA (all,i,TRAD_COMM)
+ISAEGY(i)= sum{c, DFUEL_COMM: COM(c) eq i, UNITVEC(c) };
+
+!Thus, If ISAEGY(i) > 0, the answer is yes:!
+
+SET FUEL_COMM = (all, i, TRAD_COMM : ISAEGY(i)>0);
+
+!The last step is to define a mapping from dfuel_comm to fuel_comm based on
+the mapping from dtrad_comm to atrad_comm!
+
+MAPPING D2AEGY from  DFUEL_COMM to FUEL_COMM;
+FORMULA (all,c,DFUEL_COMM) D2AEGY(c)=COM(c);
+
+!============================================================================!
+! Read values from dis-aggregate database.                                   !
+!============================================================================!
+
+Coefficient (all,i,DFUEL_COMM)(all,j,DPROD_COMM)(all,r,DREG)      MDF(i,j,r)
+    # emissions from intermediate usage of domestic product #;
+
+Coefficient (all,i,DFUEL_COMM)(all,j,DPROD_COMM)(all,r,DREG)      MIF(i,j,r)
+    # emissions from intermediate usage of domestic product #;
+
+Coefficient (all,i,DFUEL_COMM)(all,r,DREG)                        MDG(i,r)
+    # emissions from government consumption of domestic product #;
+
+Coefficient (all,i,DFUEL_COMM)(all,r,DREG)                        MIG(i,r)
+    # emissions from government consumption of imports #;
+
+Coefficient (all,i,DFUEL_COMM)(all,r,DREG)                        MDP(i,r)
+    # emissions from private consumption of domestic product #;
+
+Coefficient (all,i,DFUEL_COMM)(all,r,DREG)                        MIP(i,r)
+    # emissions from private consumption of imports #;
+
+!----------------------------------------------------------------------------!
+!                   Reading disaggregated data                               !
+!----------------------------------------------------------------------------!
+
+Read MDF from file DDATA header "MDF";
+Read MIF from file DDATA header "MIF";
+Read MDG from file DDATA header "MDG";
+Read MIG from file DDATA header "MIG";
+Read MDP from file DDATA header "MDP";
+Read MIP from file DDATA header "MIP";
+
+
+!============================================================================!
+! AGGREGATION of coefficients                                                !
+!============================================================================!
+
+Coefficient (all,i,FUEL_COMM)(all,j,PROD_COMM)(all,r,REG)          CMDF(i,j,r);
+Formula (all,i,FUEL_COMM)(all,j,TRAD_COMM)(all,r,REG)
+    CMDF(i,j,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                   sum{k,DTRAD_COMM: COM(k) eq j,
+                   sum{s,DREG: REGD(s)  eq r, MDF(l,k,s) }}};
+Formula (all,i,FUEL_COMM)(all,j,CGDS_COMM)(all,r,REG)
+    CMDF(i,j,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                   sum{s,DREG: REGD(s)  eq r, MDF(l,j,s) }};
+Write
+    CMDF to file EMISS header "MDF"
+    longname "emissions from intermediate usage of domestic product, Mt CO2";
+
+Coefficient (all,i,FUEL_COMM)(all,j,PROD_COMM)(all,r,REG)          CMIF(i,j,r);
+Formula (all,i,FUEL_COMM)(all,j,TRAD_COMM)(all,r,REG)
+    CMIF(i,j,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                   sum{k,DTRAD_COMM: COM(k) eq j,
+                   sum{s,DREG: REGD(s)  eq r, MIF(l,k,s) }}};
+Formula (all,i,FUEL_COMM)(all,j,CGDS_COMM)(all,r,REG)
+    CMIF(i,j,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                   sum{s,DREG: REGD(s)  eq r, MIF(l,j,s) }};
+Write
+    CMIF to file EMISS header "MIF"
+    longname "emissions from intermediate usage of imports, Mtoe";
+
+Coefficient (all,i,FUEL_COMM)(all,r,REG)                            CMDG(i,r);
+Formula (all,i,FUEL_COMM)(all,r,REG)
+    CMDG(i,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                 sum{s,DREG: REGD(s)  eq r,MDG(l,s) }};
+Write
+    CMDG to file EMISS header "MDG"
+    longname "emissions from government consumption of domestic product, Mtoe";
+
+Coefficient (all,i,FUEL_COMM)(all,r,REG)                            CMIG(i,r);
+Formula (all,i,FUEL_COMM)(all,r,REG)
+    CMIG(i,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                 sum{s,DREG: REGD(s)  eq r,MIG(l,s) }};
+Write
+    CMIG to file EMISS header "MIG"
+    longname "emissions from government consumption of imports, Mtoe";
+
+Coefficient (all,i,FUEL_COMM)(all,r,REG)                            CMDP(i,r);
+Formula (all,i,FUEL_COMM)(all,r,REG)
+    CMDP(i,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                 sum{s,DREG: REGD(s)  eq r,MDP(l,s) }};
+Write
+    CMDP to file EMISS header "MDP"
+    longname "emissions from private consumption of domestic product, Mtoe";
+
+Coefficient (all,i,FUEL_COMM)(all,r,REG)                            CMIP(i,r);
+Formula (all,i,FUEL_COMM)(all,r,REG)
+    CMIP(i,r) = sum{l,DFUEL_COMM: D2AEGY(l) eq i,
+                 sum{s,DREG: REGD(s)  eq r,MIP(l,s) }};
+Write
+    CMIP to file EMISS header "MIP"
+    longname "emissions from private consumption of imports, Mtoe";
+
+
+!======================= END OF FILE AGGEMISS.TAB ============================!
