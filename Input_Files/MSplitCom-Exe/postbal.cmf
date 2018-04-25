@@ -1,0 +1,15 @@
+auxiliary files = postbal;
+check-on-read elements = yes; 
+cpu = yes;  
+log only = yes;
+! Input files:
+File INFILE   = work\splitflo.har; ! Unscaled expanded normalized GTAP data
+File BALOUT   = work\balflo.har;   ! Scaled new parts of National and trade matrices
+File WORKSETS = work\worksets.har; ! Sets used in expanding the database
+! Output files:
+File OUTFILE  = work\postbal.har;  ! Expanded normalized scaled GTAP data
+File   NUWGT  = work\finalwgt.har; ! Weights computed from expanded scaled data
+
+
+
+

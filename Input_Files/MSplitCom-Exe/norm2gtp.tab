@@ -1,0 +1,219 @@
+File
+        INFILE # Normalized GTAP data - containing flows and sets #;
+ (new) OUTFILE # Standard GTAP flows file #;
+ (new) NEWSETS # Standard GTAP sets file #;
+
+Coefficient VERNUM # Format of GTAP data #;
+Formula     VERNUM = 5;
+Write
+ VERNUM to file NEWSETS header "DVER";
+ VERNUM to file OUTFILE header "DVER";
+
+Set ! the standard data-dependent GTAP sets !
+REG       # Regions in the model # read elements from file INFILE header "REG";
+TRAD_COMM # Traded commodities # read elements from file INFILE header "COM";
+MARG_COMM # Margin commodities # read elements from file INFILE header "MAR";
+CGDS_COMM # Investment user # read elements from file INFILE header "INV";
+ENDW_COMM # Primary factors # read elements from file INFILE header "FAC";
+
+Write
+(Set) REG       to file NEWSETS header "H1";
+(Set) TRAD_COMM to file NEWSETS header "H2";
+(Set) MARG_COMM to file NEWSETS header "MARG";
+(Set) CGDS_COMM to file NEWSETS header "H9";
+(Set) ENDW_COMM to file NEWSETS header "H6";
+
+Set PROD_COMM # Produced commodities  # = TRAD_COMM + CGDS_COMM;
+Subset MARG_COMM is subset of TRAD_COMM;
+
+Set
+ MOREDEM # More demanders # (HOU,INV,GOV);
+ USER = TRAD_COMM + MOREDEM;
+ SRC (dom,imp);
+ PRODTAX (PTAX);
+ MORECOST = ENDW_COMM + PRODTAX;
+ COST # More industry costs # = TRAD_COMM + MORECOST;
+
+Set TYP (BAS,Tax);
+Coefficient
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,u,r,t);
+Read NATIONAL from file INFILE header "NATL";
+
+Coefficient (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+ PUR(c,s,u,r) # Bas + tax sum of National #;
+Formula     (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+ PUR(c,s,u,r) = sum{t,TYP, NATIONAL(c,s,u,r,t)};
+Coefficient (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+ BAS(c,s,u,r) # Basic part of National #;
+Formula     (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+ BAS(c,s,u,r) =  NATIONAL(c,s,u,r,"bas");
+
+! TRADE matrix: for each COM*REG*REG this has 6 layers:!
+Set XX   (BASIC,                    !  exports at source market prices !
+          EXPTAX,                   !  trade tax levied at source !
+          IMPTAX);                  !  trade tax levied at dest !
+Set TRADES = XX + MARG_COMM;        !  international trade margins !
+Coefficient
+(all,x,TRADES)(all,c,TRAD_COMM)(all,f,REG)(all,t,REG)   TRADE(x,c,f,t);
+Read TRADE from file INFILE header "TRAD";
+
+Coefficient ! copy over some headers unchanged !
+(all,e,ENDW_COMM)(all,r,REG) EVOA(e,r)# Endowments - Output at Agents' Prices #;
+(all,r,REG) SAVE(r) # Savings - Net Expenditure at Agents' Prices #;
+(all,r,REG) VKB(r) # Capital Stock - Value at Beginning-of-Period #;
+(all,r,REG) VDEP(r) # Capital Stock - Value of Depreciation #;
+(all,r,REG) DPARSUM(r)
+ # Sum of Distribution Parameters in Household Demand System #;
+(all,m,MARG_COMM)(all,r,REG) VST(m,r)
+ # Trade - Exports for International Transportation, Market Prices #;
+ 
+Read
+ VST     from file INFILE header "VST";
+ EVOA    from file INFILE header "EVOA";
+ SAVE    from file INFILE header "SAVE";
+ VKB     from file INFILE header "VKB ";
+ VDEP    from file INFILE header "VDEP";
+ DPARSUM from file INFILE header "DPSM";
+
+Write ! copy over some headers unchanged !
+ EVOA to file OUTFILE header "EVOA" longname
+ " Endowments - Output at Agents' Prices ";
+ VKB to file OUTFILE header "VKB " longname
+ "Capital Stock - Value at Beginning-of-Period";
+ VDEP to file OUTFILE header "VDEP" longname
+ "Capital Stock - Value of Depreciation";
+ DPARSUM to file OUTFILE header "DPSM" longname
+ "Sum of Distribution Parameters in Household Demand System";
+ SAVE to file OUTFILE header "SAVE" longname
+ "Savings - Net Expenditure at Agents' Prices";
+ VST to file OUTFILE header "VST " longname
+ "Trade - Exports for International Transportation, Market Prices";
+Coefficient
+(all,c,TRAD_COMM)(all,r,REG) VDGA(c,r)
+ # Intermediates - Government Domestic Purchases at Agents' Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VDGM(c,r)
+ # Intermediates - Government Domestic Purchases at Market Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VIGA(c,r)
+ # Intermediates - Government Imports at Agents' Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VIGM(c,r)
+ # Intermediates - Government Imports at Market Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VDPA(c,r)
+ # Intermediates - Household Domestic Purchases at Agents' Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VDPM(c,r)
+ # Intermediates - Household Domestic Purchases at Market Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VIPA(c,r)
+ # Intermediates - Household Imports at Agents' Prices #;
+(all,c,TRAD_COMM)(all,r,REG) VIPM(c,r)
+ # Intermediates - Household Imports at Market Prices #;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) EVFA(e,p,r)
+ # Endowments - Firms' Purchases at Agents' Prices #;
+(all,c,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VDFA(c,p,r)
+ # Intermediates - Firms' Domestic Purchases at Agents' Prices #;
+(all,c,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VIFA(c,p,r)
+ # Intermediates - Firms' Imports at Agents' Prices #;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) VFM(e,p,r)
+ # Endowments - Firms' Purchases at Market Prices #;
+(all,c,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VIFM(c,p,r)
+ # Intermediates - Firms' Imports at Market Prices #;
+(all,c,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VDFM(c,p,r)
+ # Intermediates - Firms' Domestic Purchases at Market Prices #;
+(all,c,TRAD_COMM)(all,r,REG)(all,a,REG) VIMS(c,r,a)
+ # Trade - Bilateral Imports at Market Prices #;
+(all,c,TRAD_COMM)(all,r,REG)(all,a,REG) VIWS(c,r,a)
+ # Trade - Bilateral Imports at World Prices #;
+(all,c,TRAD_COMM)(all,r,REG)(all,a,REG) VXWD(c,r,a)
+ # Trade - Bilateral Exports at World Prices #;
+(all,c,TRAD_COMM)(all,r,REG)(all,a,REG) VXMD(c,r,a)
+ # Trade - Bilateral Exports at Market Prices #;
+(all,m,MARG_COMM)(all,c,TRAD_COMM)(all,r,REG)(all,a,REG) VTMFSD(m,c,r,a)
+ # Margins on International Trade #;
+
+Formula
+(all,c,TRAD_COMM)(all,r,REG) VDGA(c,r) = PUR(c,"dom","Gov",r);
+(all,c,TRAD_COMM)(all,r,REG) VDGM(c,r) = BAS(c,"dom","Gov",r);
+(all,c,TRAD_COMM)(all,r,REG) VIGA(c,r) = PUR(c,"imp","Gov",r);
+(all,c,TRAD_COMM)(all,r,REG) VIGM(c,r) = BAS(c,"imp","Gov",r);
+
+(all,c,TRAD_COMM)(all,r,REG) VDPA(c,r) = PUR(c,"dom","Hou",r);
+(all,c,TRAD_COMM)(all,r,REG) VDPM(c,r) = BAS(c,"dom","Hou",r);
+(all,c,TRAD_COMM)(all,r,REG) VIPA(c,r) = PUR(c,"imp","Hou",r);
+(all,c,TRAD_COMM)(all,r,REG) VIPM(c,r) = BAS(c,"imp","Hou",r);
+
+(all,c,TRAD_COMM)(all,p,TRAD_COMM)(all,r,REG)
+  VDFA(c,p,r) = PUR(c,"dom",p,r);
+(all,c,TRAD_COMM)(all,p,TRAD_COMM)(all,r,REG)
+  VIFA(c,p,r) = PUR(c,"imp",p,r);
+(all,c,TRAD_COMM)(all,p,TRAD_COMM)(all,r,REG)
+  VIFM(c,p,r) = BAS(c,"imp",p,r);
+(all,c,TRAD_COMM)(all,p,TRAD_COMM)(all,r,REG)
+  VDFM(c,p,r) = BAS(c,"dom",p,r);
+
+(all,c,TRAD_COMM)(all,p,CGDS_COMM)(all,r,REG)
+  VDFA(c,p,r) = PUR(c,"dom","INV",r);
+(all,c,TRAD_COMM)(all,p,CGDS_COMM)(all,r,REG)
+  VIFA(c,p,r) = PUR(c,"imp","INV",r);
+(all,c,TRAD_COMM)(all,p,CGDS_COMM)(all,r,REG)
+  VIFM(c,p,r) = BAS(c,"imp","INV",r);
+(all,c,TRAD_COMM)(all,p,CGDS_COMM)(all,r,REG)
+  VDFM(c,p,r) = BAS(c,"dom","INV",r);
+
+(all,e,ENDW_COMM)(all,p,TRAD_COMM)(all,r,REG) VFM(e,p,r) = BAS(e,"dom",p,r);
+(all,e,ENDW_COMM)(all,p,CGDS_COMM)(all,r,REG) VFM(e,p,r) = BAS(e,"dom","INV",r);
+
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+            VXMD(i,f,t)   = TRADE("BASIC",i,f,t);
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+            VXWD(i,f,t) =  TRADE("EXPTAX",i,f,t)+ TRADE("BASIC",i,f,t);
+(all,m,MARG_COMM)(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+            VTMFSD(m,i,f,t) =  TRADE(m,i,f,t);
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+             VIMS(i,f,t) = sum{x,TRADES, TRADE(x,i,f,t)};
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+             VIWS(i,f,t) = VIMS(i,f,t) - TRADE("IMPTAX",i,f,t);
+
+(all,e,ENDW_COMM)(all,p,TRAD_COMM)(all,r,REG) EVFA(e,p,r) =PUR(e,"dom",p,r);
+(all,e,ENDW_COMM)(all,p,CGDS_COMM)(all,r,REG) EVFA(e,p,r) =PUR(e,"dom","INV",r);
+
+!(all,e,ENDW_COMM)(all,r,REG) EVOA(e,r) = sum{p,TRAD_COMM, Bas(e,"dom",p,r)}
+                                                       +  Bas(e,"dom","INV",r);!
+
+Write
+ VDGA to file OUTFILE header "VDGA" longname
+ "Intermediates - Government Domestic Purchases at Agents' Prices";
+ VDGM to file OUTFILE header "VDGM" longname
+ "Intermediates - Government Domestic Purchases at Market Prices";
+ VIGA to file OUTFILE header "VIGA" longname
+ "Intermediates - Government Imports at Agents' Prices";
+ VIGM to file OUTFILE header "VIGM" longname
+ "Intermediates - Government Imports at Market Prices";
+ VDPA to file OUTFILE header "VDPA" longname
+ "Intermediates - Household Domestic Purchases at Agents' Prices";
+ VDPM to file OUTFILE header "VDPM" longname
+ "Intermediates - Household Domestic Purchases at Market Prices";
+ VIPA to file OUTFILE header "VIPA" longname
+ "Intermediates - Household Imports at Agents' Prices";
+ VIPM to file OUTFILE header "VIPM" longname
+ "Intermediates - Household Imports at Market Prices";
+ EVFA to file OUTFILE header "EVFA" longname
+ "Endowments - Firms' Purchases at Agents' Prices";
+ VDFA to file OUTFILE header "VDFA" longname
+ "Intermediates - Firms' Domestic Purchases at Agents' Prices";
+ VIFA to file OUTFILE header "VIFA" longname
+ "Intermediates - Firms' Imports at Agents' Prices";
+ VFM to file OUTFILE header "VFM " longname
+ "Endowments - Firms' Purchases at Market Prices";
+ VIFM to file OUTFILE header "VIFM" longname
+ "Intermediates - Firms' Imports at Market Prices";
+ VDFM to file OUTFILE header "VDFM" longname
+ "Intermediates - Firms' Domestic Purchases at Market Prices";
+ VIMS to file OUTFILE header "VIMS" longname
+ "Trade - Bilateral Imports at Market Prices";
+ VIWS to file OUTFILE header "VIWS" longname
+ "Trade - Bilateral Imports at World Prices";
+ VXWD to file OUTFILE header "VXWD" longname
+ "Trade - Bilateral Exports at World Prices";
+ VXMD to file OUTFILE header "VXMD" longname
+ "Trade - Bilateral Exports at Market Prices";
+ VTMFSD to file OUTFILE header "VTWR"longname "Margins on International Trade";
+

@@ -1,0 +1,255 @@
+! NORMCHEK.TAB
+ Program to check identities and summarize GTAP database in normalized form !
+
+File
+       INFILE # Normalized GTAP data - containing flows and sets #;
+ (new) DIAG   # Diagnostic output #;
+
+Set
+ REG # Regions in the model # read elements from file INFILE header "REG";
+ IND # Industries # read elements from file INFILE header "IND";
+ COM # Commodities # read elements from file INFILE header "COM";
+ FAC # Primary factors # read elements from file INFILE header "FAC";
+ MAR # International trade margin commodities #
+      read elements from file INFILE header "MAR";
+
+Set
+MOREDEM  # More demanders #  (HOU,INV,GOV);
+USER     = IND + MOREDEM;
+SRC (dom,imp);
+PRODTAX (PTAX);
+MORECOST # Non-commodity industry costs # = FAC + PRODTAX;
+COST  # All industry costs # = COM + MORECOST;
+SEC # Set to compare COM and IND # = COM intersect IND;
+Subset MAR is subset of COST;
+Subset MAR is subset of COM;
+
+Set TYP (Bas,Tax);
+Set TRADEX(BASIC,                   !  exports at source market prices !
+          EXPTAX,                   !  trade tax levied at source !
+          IMPTAX);                  !  trade tax levied at dest !
+                                    !  then add international trade margins !
+Set TRADES # Basic, exptax, imptax, margins # = TRADEX + MAR;
+Set DIFFREP # Set for reporting differences # (Supply,Demand,Diff,Percent);
+
+Coefficient
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,u,r,t) # GTAP national data #;
+(all,x,TRADES)(all,c,COM)(all,f,REG)(all,t,REG)
+  TRADE(x,c,f,t)      # GTAP trade data #;
+(all,m,MAR)(all,r,REG) VST(m,r)
+ # Trade - Exports for International Transportation, Market Prices #;
+Read
+ VST      from file INFILE header "VST";
+ NATIONAL from file INFILE header "NATL";
+ TRADE    from file INFILE header "TRAD";
+
+Coefficient
+(all,x,TRADES)(all,c,COM)(all,t,REG) TRADE_F(x,c,t)# TRADE summed over sources#;
+(all,x,TRADES)(all,c,COM)(all,f,REG) TRADE_T(x,c,f)# TRADE summed over dests #;
+(all,c,COM)(all,r,REG) DOMSALES(c,r) # Local sales at basic value #;
+(all,c,COM)(all,r,REG) EXPSALES(c,r) # Export sales at basic value #;
+(all,c,COM)(all,r,REG) SALES(c,r) # Sales at basic value #;
+(all,i,IND)(all,r,REG) COSTS(i,r) # Industry costs #;
+Formula
+(all,x,TRADES)(all,c,COM)(all,t,REG) TRADE_F(x,c,t)= sum{f,REG,TRADE(x,c,f,t)};
+(all,x,TRADES)(all,c,COM)(all,f,REG) TRADE_T(x,c,f)= sum{t,REG,TRADE(x,c,f,t)};
+(all,c,COM)(all,r,REG) DOMSALES(c,r) = sum{u,USER, NATIONAL(c,"dom",u,r,"BAS")};
+(all,c,COM)(all,f,REG) EXPSALES(c,f) = TRADE_T("BASIC",c,f);
+(all,c,COM)(all,r,REG) SALES(c,r) = DOMSALES(c,r) + EXPSALES(c,r);
+(all,m,MAR)(all,r,REG) SALES(m,r) = SALES(m,r) + VST(m,r);
+(all,i,IND)(all,r,REG) COSTS(i,r) =
+sum{k,COST, sum{s,SRC, sum{t,TYP, NATIONAL(k,s,i,r,t)}}};
+Write
+ DOMSALES to file DIAG header "DSAL";
+ EXPSALES to file DIAG header "ESAL";
+
+! Check that
+  sum of local plus world demands for domestic (and marginx) = industry costs!
+Coefficient
+(all,x,SEC)(all,r,REG)(all,d,DIFFREP) CHECK1(x,r,d) # Costs-sales report #;
+(all,x,SEC)(all,r,REG) CHECK1A(x,r) # Costs-sales check: should be tiny #;
+Formula
+(all,x,SEC)(all,r,REG)(all,d,DIFFREP) CHECK1(x,r,d) = 0;
+(all,i,SEC)(all,r,REG)  CHECK1(i,r,"Supply") = COSTS(i,r);
+(all,c,SEC)(all,r,REG)  CHECK1(c,r,"Demand") = SALES(c,r);
+(all,x,SEC)(all,r,REG)
+   CHECK1(x,r,"Diff") = CHECK1(x,r,"Supply") - CHECK1(x,r,"Demand");
+(all,x,SEC)(all,r,REG:CHECK1(x,r,"Supply")<>0)
+   CHECK1(x,r,"Percent") = 100* CHECK1(x,r,"Diff")/CHECK1(x,r,"Supply");
+(all,x,SEC)(all,r,REG) CHECK1A(x,r) = CHECK1(x,r,"Diff");
+Write
+ CHECK1  to file DIAG header "CHK1";
+ CHECK1A to file DIAG header "CK1A";
+
+! Check that sum of local import demands = sum trade matrix !
+Coefficient
+(all,c,COM)(all,r,REG)
+  IMPDEM(c,r)  # Regional demand for imports #;
+(all,c,COM)(all,r,REG)
+  IMPSUP(c,r)  # Regional supply of imports #;
+(all,c,COM)(all,r,REG)(all,d,DIFFREP)
+  CHECK2(c,r,d) # Import demand-supply report #;
+(all,c,COM)(all,r,REG)
+  CHECK2A(c,r)  # Import demand-supply check: should be tiny #;
+Formula
+(all,c,COM)(all,r,REG) IMPDEM(c,r) = sum{u,USER, NATIONAL(c,"imp",u,r,"BAS")};
+(all,c,COM)(all,t,REG) IMPSUP(c,t) = sum{x,TRADES, TRADE_F(x,c,t)};
+(all,c,COM)(all,r,REG)(all,d,DIFFREP) CHECK2(c,r,d) = 0;
+(all,c,COM)(all,r,REG) CHECK2(c,r,"Supply") = IMPSUP(c,r);
+(all,c,COM)(all,r,REG) CHECK2(c,r,"Demand") = IMPDEM(c,r);
+(all,c,COM)(all,r,REG)
+   CHECK2(c,r,"Diff") = CHECK2(c,r,"Supply") - CHECK2(c,r,"Demand");
+(all,c,COM)(all,r,REG:CHECK2(c,r,"Supply")<>0)
+   CHECK2(c,r,"Percent") = 100* CHECK2(c,r,"Diff")/CHECK2(c,r,"Supply");
+(all,c,COM)(all,r,REG) CHECK2A(c,r) = CHECK2(c,r,"Diff");
+Write
+ CHECK2  to file DIAG header "CHK2";
+ CHECK2A to file DIAG header "CK2A";
+
+! Check that sum of locally made margins = sum of trade margins !
+Coefficient
+(all,m,MAR)(all,d,DIFFREP)
+  CHECK3(m,d) # Margins demand-supply report #;
+(all,m,MAR)
+  CHECK3A(m)  # Margins demand-supply check: should be tiny #;
+Formula
+(all,m,MAR)(all,d,DIFFREP)  CHECK3(m,d) =0;
+(all,m,MAR) CHECK3(m,"Demand") = sum{t,REG,sum{c,COM,TRADE_F(m,c,t)}};
+(all,m,MAR) CHECK3(m,"Supply") =sum{r,REG, VST(m,r)};
+(all,x,MAR) CHECK3(x,"Diff") = CHECK3(x,"Supply") - CHECK3(x,"Demand");
+(all,x,MAR:CHECK3(x,"Supply")<>0)
+   CHECK3(x,"Percent") = 100* CHECK3(x,"Diff")/CHECK3(x,"Supply");
+(all,x,MAR) CHECK3A(x) = CHECK3(x,"Diff");
+Write
+ CHECK3  to file DIAG header "CHK3";
+ CHECK3A to file DIAG header "CK3A";
+
+Set DIFFS (dom,imp,MAR);
+Coefficient (all,d,DIFFS) ABSDIFF(d) # Sum of absolute values of discrepancies#;
+Formula
+ABSDIFF("dom") = sum{r,REG, sum{x,SEC,ABS[CHECK1A(x,r)]}};
+ABSDIFF("imp") = sum{r,REG, sum{x,SEC,ABS[CHECK2A(x,r)]}};
+ABSDIFF("mar") = sum{x,MAR,ABS[CHECK3A(x)]};
+
+Write
+ ABSDIFF  to file DIAG header "ADIF";
+
+![[!
+Mapping UMAP from USER to MainUser; !nb: no USER maps to EXP!
+Formula
+ (all,i,IND) UMAP(i) = i;   
+ (all,i,INV) UMAP(i) = i;   
+  UMAP("HOU")="HOU";
+  UMAP("GOV")="GOV";
+  UMAP("MAR")="MAR";
+!]]!
+
+Set MAINUSER2 (INT,HOU,INV,GOV,MAR,EXP);
+Subset MOREDEM is subset of MAINUSER2;
+Coefficient
+ (all,c,COM)(all,s,SRC)(all,m,MAINUSER2)(all,r,REG) UREP(c,s,m,r) #Use summary#;
+Formula
+ (all,c,COM)(all,s,SRC)(all,m,MAINUSER2)(all,r,REG) UREP(c,s,m,r) = 0;
+ (all,c,COM)(all,s,SRC)(all,m,MOREDEM)(all,r,REG)
+    UREP(c,s,m,r) = NATIONAL(c,s,m,r,"Bas");
+ (all,c,COM)(all,s,SRC)(all,r,REG)
+    UREP(c,s,"INT",r) = sum{i,IND, NATIONAL(c,s,i,r,"Bas")};
+ (all,c,COM)(all,r,REG)
+    UREP(c,"dom","EXP",r) = EXPSALES(c,r);
+Write UREP to file DIAG header "UREP";
+
+Coefficient ! this check is really a repeat of checks 1 and 2 !
+ (all,c,COM)(all,s,SRC)(all,r,REG)(all,d,DIFFREP)
+ CHECK4(c,s,r,d) # Dom and imp demand-supply report #;
+ (all,c,COM)(all,s,SRC)(all,r,REG)
+ CHECK4A(c,s,r) # Dom and imp demand-supply check: should be tiny #;
+Formula
+ (all,c,COM)(all,s,SRC)(all,r,REG)(all,d,DIFFREP) CHECK4(c,s,r,d) = 0;
+ (all,c,COM)(all,s,SRC)(all,r,REG)
+   CHECK4(c,s,r,"Demand") = sum{m,MAINUSER2,UREP(c,s,m,r)};
+(all,c,MAR)(all,r,REG)
+   CHECK4(c,"Dom",r,"Demand") = CHECK4(c,"Dom",r,"Demand")+VST(c,r);
+(all,c,SEC)(all,r,REG)
+   CHECK4(c,"dom",r,"Supply") = COSTS(c,r);
+ (all,c,COM)(all,t,REG)
+   CHECK4(c,"imp",t,"Supply") = sum{x,TRADES, TRADE_F(x,c,t)};
+ (all,c,COM)(all,s,SRC)(all,r,REG)
+  CHECK4(c,s,r,"Diff") = CHECK4(c,s,r,"Supply") - CHECK4(c,s,r,"Demand");
+ (all,c,COM)(all,s,SRC)(all,r,REG:CHECK4(c,s,r,"Supply")<>0)
+  CHECK4(c,s,r,"Percent") = 110*CHECK4(c,s,r,"Diff")/CHECK4(c,s,r,"Supply");
+ (all,c,COM)(all,s,SRC)(all,r,REG)
+  CHECK4A(c,s,r) = CHECK4(c,s,r,"Diff");
+Write
+ CHECK4  to file DIAG header "CHK4";
+ CHECK4A to file DIAG header "CK4A";
+
+Set MORECOLS (INV,HOU,GOV,EXP,lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+Set SUMCOLS = IND + MORECOLS;
+Subset USER is subset of SUMCOLS;
+
+Coefficient
+(all,q,COST)(all,c,SUMCOLS)(all,r,REG) SUMMARY(q,c,r)
+ # Summary producer price flows table #;
+Formula
+(all,i,COST)(all,j,SUMCOLS)(all,r,REG) SUMMARY(i,j,r) = 0;
+(all,i,COST)(all,j,USER)(all,r,REG)
+  SUMMARY(i,j,r) = sum{t,TYP,sum{s,SRC, NATIONAL(i,s,j,r,t)}};
+(all,i,COM)(all,f,REG) SUMMARY(i,"exp",f)
+  = sum{x,TRADEX,TRADE_T(x,i,f)} - TRADE_T("imptax",i,f);
+
+(all,i,MAR)(all,r,REG) SUMMARY(i,"exp",r) = SUMMARY(i,"exp",r)+ VST(i,r);
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessDomTax",r) =
+ - sum{u,USER, NATIONAL(i,"dom",u,r,"TAX")} - TRADE_T("expTax",i,r);
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessImpTax",r) =
+ - sum{u,USER, NATIONAL(i,"imp",u,r,"TAX")};
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessTariff",r) = - TRADE_F("impTax",i,r);
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessImpCIF",r) =
+  TRADE_F("impTax",i,r) - sum{x,TRADES, TRADE_F(x,i,r)};
+Write SUMMARY to file DIAG header "SMRY";
+
+Coefficient
+(all,q,COST)(all,c,SUMCOLS) SUMMARY_R(q,c)
+ # World Summary producer price flows table #;
+Formula
+(all,q,COST)(all,c,SUMCOLS) SUMMARY_R(q,c) = sum{r,REG, SUMMARY(q,c,r)};
+Write SUMMARY_R to file DIAG header "WSUM";
+
+Coefficient
+(all,s,SEC)(all,r,REG) SUMBAL(s,r) # Summary balance -- should be tiny #;
+Formula (all,s,SEC)(all,r,REG) SUMBAL(s,r) =
+         sum{q,COST, SUMMARY(q,s,r)} - sum{j,SUMCOLS, SUMMARY(s,j,r)};
+Write SUMBAL to file DIAG header "SBAL";
+
+Set ABSORP (INV,GOV,HOU);
+Subset ABSORP is subset of SUMCOLS;
+
+Set MOREWGT (Production, IntUse, Absorption, Exports, Imports);
+Coefficient
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r)
+ # Summary producer price weights #;
+ (all,s,SEC)(all,r,REG) WGTBAL(s,r)
+ #Summary weights check:[Production+Imports]-[IntUse+Absorption+Exports]#;
+Formula
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r) = 0;
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Production",r) =
+    sum{q,COST, SUMMARY(q,s,r)} - SUMMARY(s,"lessDomTax",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"IntUse",r) =
+                                    sum{i,IND, SUMMARY(s,i,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Absorption",r) =
+                                     sum{a,ABSORP, SUMMARY(s,a,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Exports",r) =   SUMMARY(s,"exp",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Imports",r) = -
+[SUMMARY(s,"lessImpCIF",r)+SUMMARY(s,"lessImpTax",r)+SUMMARY(s,"lessTariff",r)];
+ (all,s,SEC)(all,r,REG) WGTBAL(s,r) =
+   WEIGHTS(s,"Production",r) + WEIGHTS(s,"Imports",r)
+- [WEIGHTS(s,"IntUse",r) + WEIGHTS(s,"Absorption",r) + WEIGHTS(s,"Exports",r)];
+Write
+ WEIGHTS to file DIAG header "WGTS";
+ WGTBAL  to file DIAG header "WGTB";
+
+! end of file !

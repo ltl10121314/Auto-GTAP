@@ -1,0 +1,11 @@
+auxiliary files = splitflo;
+check-on-read elements = yes; 
+cpu = yes;  
+log only = yes;
+! Input files:
+File ORGDATA  = work\orig.har;    ! Original normalized GTAP data
+File WORKSETS = work\worksets.har;! Sets used in expanding the database
+File EXPWGT   = work\expwgt.har;  ! Proportions for splitting SplitCom into NewCom
+! Output files:
+File OUTFILE  = work\splitflo.har; ! Expanded normalized un-rassed GTAP data
+

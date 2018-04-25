@@ -1,0 +1,20 @@
+auxiliary files = balflo;
+check-on-read elements = yes;  
+cpu = yes ;  
+start with mmnz = 950000; ! optional 
+NRP = yes;     ! yes: means do not re-use pivots
+log file = yes;
+! Input files:
+File WORKSETS = work\WORKSETS.har;     ! Sets used in expanding the database
+File INFILE   = work\splitflo.har;     ! Expanded unscaled normalized GTAP data
+! Output files:
+File DIAG     = work\dgbalflo.har;     ! Diagnostic file (post-sim)
+Solution file = work\balflo;           ! Diagnostic value only -- rarely used
+Updated File INFILE = work\balflo.har; ! Expanded scaled normalized GTAP data
+! Solution method
+method = euler ;
+steps = 90 ;    ! do not increase >100 steps; at least 70 are needed
+Exogenous unity ; 
+Rest endogenous; 
+Verbal Description = scale split flows till balanced;
+shock unity=1;
