@@ -1,0 +1,15 @@
+auxiliary files = aggdat;
+check-on-read elements = warn; ! Optional: very often needed
+cpu=yes ; ! Optional: Reports CPU times for various stages
+log file = yes;  ! Optional
+WHS = no ;   ! Do not use sparse format 
+! Input files:
+File DDATA = input\basedata.har; ! Disaggregate data in GTAP notation
+File DSETS = input\sets.har; ! Set specification for disaggregate data
+File ASETS = maphar.dat; ! Set specification for aggregate data
+File AGGHAR = aggmain.har; !# data aggregated by AggHAR #;
+
+! Output files:
+File ADATA = output\basedata.har; ! Aggregated data in GTAP notation
+File GSETS = output\sets.har; ! 
+

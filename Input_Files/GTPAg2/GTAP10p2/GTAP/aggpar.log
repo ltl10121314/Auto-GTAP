@@ -1,0 +1,405 @@
+ 
+ This GEMPACK log file was created at 13:45:55 on 23-APR-2018 by the program
+  <aggpar.for 10-FEB-2016 (a TABLO-generated program)>
+ which accesses some of the routines in the GEMPACK software release
+  <GEMPACK Release 11.3.001   May 2014>
+ 
+ 
+ <aggpar.for 10-FEB-2016 (a TABLO-generated program)>
+   This program accesses some of the routines in the GEMPACK software release
+ <GEMPACK Release 11.3.001   May 2014>
+ 
+ 
+  %%WARNING. Your GEMPACK licence expires on 30-APR-2018.
+  You will not be able to run GEMPACK programs
+    after that date unless you renew the licence.
+ 
+     -------------------------------------------------------
+    !            GEMPACK Software System Licence            !
+    !  Source Code Licence for the GEMPACK Software System  !
+    !                 Licence No.  GFM-0137                 !
+    !          Licence for Release 11.4 of GEMPACK          !
+    !          U.S. International Trade Commission          !
+    !                     Washington DC                     !
+    !                          USA                          !
+    !    (Your GEMPACK licence expires on 30-APR-2018.)     !
+     -------------------------------------------------------
+ 
+ 
+     << COPYRIGHT 1987-2010: CoPS/Impact and KPSOFT >>
+ 
+  Current directory is: C:\GTPAg2\GTAP10P2\GTAP
+ 
+ 
+  Full path name of running EXE is: C:\GTPAg2\GTAP10P2\GTAP\aggpar.exe
+  Fortran compiler = GF32  4.8.1 (rev3, built by mingw-builds project):
+  Operating system is Windows 8
+ 
+ 
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+ 
+                    TABLO-GENERATED PROGRAM OPTIONS
+               ( --> indicates those in effect )
+ 
+       BAT Run in batch              STI Take inputs from a Stored-input file
+       BPR Brief prompts             SIF Store inputs on a file
+       LOG Output to log file        ASI Add to incomplete Stored-input file
+                                     CMF Take inputs from a Command file
+       EAA Echo all activity           SVX Select variables on XAC file (later)
+       CPU Report CPU times            RQF Required figures agreement (extrap)
+       NRP Don't reuse pivots        NIR Don't do solution iterative refinement
+                                 --> IZ1 Ignore zero coefficients in step 1
+                                     KZ2 Keep zero coefficients in steps 2,3 etc
+       NEQ Do no equations           NWE Don't warn how well equations solved
+       NDS Do no displays            SSI Several subintervals; extrap after each
+       NWR Do no writes              M28 Use MA28 routines (rather than MA48)
+       NAS Do no assertions          SUI Save updated formula(initial) data
+       NUD Do no final updates              Extra Options Screen
+       NSM Don't do simulation              --------------------
+       NWT Use Newton's method      DTO Display, Terminal/Text write Options
+       CR  Check-on-read options
+ 
+  Select an option   :  <opt>      Deselect an option      : -<opt>
+  Help for an option : ?<opt>      Help on all options     : ??
+  Redisplay options  : /           Finish option selection : Carriage return
+ 
+ (Opened, as text, existing file 'aggpar.cmf'.)
+  (Taking inputs from a command file.)
+ (Opened, as text, existing file 'aggpar.cmf'.)
+ 
+  !  (There is no CREATION information on this file.)
+ 
+ 
+  --> Reading the Command file.
+ 
+ auxiliary files = aggpar;
+ check-on-read elements = warn; ! Optional: very often needed
+ cpu=yes ; ! Optional: Reports CPU times for various stages
+ log file = yes;  ! Optional
+ WHS = no ;   ! Do not use sparse format
+ ! Input files:
+ File DDATA = input\basedata.har; ! disaggregate data in GTAP notation
+ File DPARAM = input\default.prm; ! disaggregate parameters
+ File EPARAM = maphar.dat; ! user-supplied parameters
+ File DSETS = input\SETS.har; ! set specification for disaggregate data
+ File ASETS = maphar.dat; ! set specification for aggregate data
+ ! Output files:
+ File PARAM = output\default.prm; ! aggregated CDE, CES and CET elasticities
+ 
+ 
+  (Finished reading the command file.)
+ 
+  Auxiliary Statement File
+  ------------------------
+ (Opened, as binary, existing file 'C:\GTPAg2\GTAP10P2\GTAP\aggpar.axs'.)
+ 
+  Auxiliary Table File
+  --------------------
+ (Opened, as binary, existing file 'C:\GTPAg2\GTAP10P2\GTAP\aggpar.axt'.)
+ 
+  !  This file was created at 16:55:56 on 10-FEB-2016 by the program
+  !    <TABLO  Version 6.4   April 2012>
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+ 
+ [Auxiliary Table File was created by TABLO at 16:55:56 on 10-FEB-2016.]
+ [TABLO file used here is "aggpar.tab".]
+ [No TABLO STI file used when TABLO was run.]
+ 
+  (Writing output to log file, and also to the terminal.)
+ (Opened new text file 'aggpar.log'.)
+  
+  (Reporting CPU times.)
+  
+  (Not Writing Header arrays Sparsely.)
+ [This TG-program was created by TABLO at 16:55:56 on 10-FEB-2016.]
+  
+  [Starting to check "extra" statements on the Command file.]
+  
+  
+  [Finished checking "extra" statements on the Command file.]
+  
+  
+ ++++++++++++++++++++++++++++++++++++++++++++++++++
+  This program was written by the GEMPACK program TABLO
+  as described in the Information file
+  'aggpar.inf'
+  
+  This run of the TABLO-generated program
+      o can carry out 14 WRITEs
+      o can carry out 4 TRANSFERs
+  
+ ++++++++++++++++++++++++++++++++++++++++++++++++++
+ (Range test of initial values will produce warnings.)
+  
+  (Data file with logical name 'DDATA')
+ (Opened, as header, existing file 'input\basedata.har'.)
+  
+  !  This file was created at 9/28/2017 by the program
+  !    Sprs2Full
+  !  which accesses some of the routines in the GEMPACK software release
+  !    HARFILE.PAS 8/May/2012
+  !  [The program which created this file was compiled with DELPHI.]
+  
+  
+  (Data file with logical name 'DPARAM')
+ (Opened, as header, existing file 'input\default.prm'.)
+  
+  !  This file was created at 10:47:38 on 28-SEP-2017 by the program
+  !    <pretty.for 28-SEP-2017> [pretty.tab,pretty.sti]
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+  
+  
+  (Data file with logical name 'EPARAM')
+ (Opened, as header, existing file 'maphar.dat'.)
+  
+  !  This file was created at 4/23/2018 1:45:51 PM by the program
+  !    GtapAgg2
+  !  which accesses some of the routines in the GEMPACK software release
+  !    HARFILE.PAS 4/Mar/2016
+  !  [The program which created this file was compiled with DELPHI.]
+  
+  
+  (Data file with logical name 'DSETS')
+ (Opened, as header, existing file 'input\SETS.har'.)
+  
+  !  This file was created at 10:47:38 on 28-SEP-2017 by the program
+  !    <pretty.for 28-SEP-2017> [pretty.tab,pretty.sti]
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+  
+  
+  (Data file with logical name 'ASETS')
+ (Opened, as header, existing file 'maphar.dat'.)
+  
+  !  This file was created at 4/23/2018 1:45:51 PM by the program
+  !    GtapAgg2
+  !  which accesses some of the routines in the GEMPACK software release
+  !    HARFILE.PAS 4/Mar/2016
+  !  [The program which created this file was compiled with DELPHI.]
+  
+  
+  (Data file with logical name 'PARAM')
+ (Opened new header file 'output\default.prm'.)
+  
+  --->  Beginning the preliminary pass (aimed at sets and subsets).
+ Set 'DREG'
+ (Opened, as header, existing file 'input\SETS.har'.)
+   (141 character strings, each of length 12 read. Header 'H1  ')
+   [Set has size 141.]
+ Set 'DTRAD_COMM'
+   (57 character strings, each of length 12 read. Header 'H2  ')
+   [Set has size 57.]
+ Set 'DENDW_COMM'
+   (8 character strings, each of length 12 read. Header 'H6  ')
+   [Set has size 8.]
+ Set 'CGDS_COMM'
+   (1 character strings, each of length 12 read. Header 'H9  ')
+   [Set has size 1.]
+ Set 'DPROD_COMM'
+   [Set has size 58.]
+ 'DTRAD_COMM' as a subset of 'DPROD_COMM'
+ 'CGDS_COMM' as a subset of 'DPROD_COMM'
+ Set 'REG'
+ (Opened, as header, existing file 'maphar.dat'.)
+   (3 character strings, each of length 12 read. Header 'H1  ')
+   [Set has size 3.]
+ Set 'TRAD_COMM'
+   (10 character strings, each of length 12 read. Header 'H2  ')
+   [Set has size 10.]
+ Set 'ENDW_COMM'
+   (5 character strings, each of length 12 read. Header 'H6  ')
+   [Set has size 5.]
+ Set 'PROD_COMM'
+   [Set has size 11.]
+ 'TRAD_COMM' as a subset of 'PROD_COMM'
+ 'CGDS_COMM' as a subset of 'PROD_COMM'
+  
+  Reading the values of set mapping 'COM'
+   (57 character strings, each of length 12 read. Header 'DCOM')
+  
+  Reading the values of set mapping 'REGD'
+   (141 character strings, each of length 12 read. Header 'DREG')
+ [CPU for reads, formulas etc is 1.56250000E-02 seconds.]
+ Elapsed time for reads, formulas etc is: less than one second.
+  
+  Total memory currently used for all arrays is approximately 4.17 megabytes.
+  [Add about 5-10 megabytes for the memory used by the code.]
+  
+  --->  Beginning the reads, formulas (etc).
+ Transferring "DVER" from file 'DDATA' to file 'PARAM'
+ (Opened, as header, existing file 'input\basedata.har'.)
+ (Opened, for writing, header file 'output\default.prm'.)
+ (Written real array, size 1, header "DVER".)
+ (Opened, for writing, header file 'output\default.prm'.)
+ Transferring "DREL" from file 'DDATA' to file 'PARAM'
+   (1 character strings, each of length 59 written. Header 'DREL')
+ (Opened, for writing, header file 'output\default.prm'.)
+  
+  Reading the values of set mapping 'COM'
+ (Opened, as header, existing file 'maphar.dat'.)
+   (57 character strings, each of length 12 read. Header 'DCOM')
+  
+  Reading the values of set mapping 'REGD'
+   (141 character strings, each of length 12 read. Header 'DREG')
+ (Opened, as header, existing file 'input\basedata.har'.)
+ Reading 'EVFA'
+ (Read real array, size 8x58x141, header "EVFA".)
+ (%%WARNING. Set info mismatch reading from header 'EVFA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'VIFA'
+ (Read real array, size 57x58x141, header "VIFA".)
+ (%%WARNING. Set info mismatch reading from header 'VIFA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'VDFA'
+ (Read real array, size 57x58x141, header "VDFA".)
+ (%%WARNING. Set info mismatch reading from header 'VDFA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'VIPA'
+ (Read real array, size 57x141, header "VIPA".)
+ (%%WARNING. Set info mismatch reading from header 'VIPA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'VDPA'
+ (Read real array, size 57x141, header "VDPA".)
+ (%%WARNING. Set info mismatch reading from header 'VDPA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'VIGA'
+ (Read real array, size 57x141, header "VIGA".)
+ (%%WARNING. Set info mismatch reading from header 'VIGA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'VDGA'
+ (Read real array, size 57x141, header "VDGA".)
+ (%%WARNING. Set info mismatch reading from header 'VDGA')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ (Opened, as header, existing file 'input\default.prm'.)
+ Reading 'DSUBPAR'
+ (Read real array, size 57x141, header "SUBP".)
+ (%%WARNING. Set info mismatch reading from header 'SUBP')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'DINCPAR'
+ (Read real array, size 57x141, header "INCP".)
+ (%%WARNING. Set info mismatch reading from header 'INCP')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'DSIGD'
+ (Read real array, size 57, header "ESBD".)
+ (%%WARNING. Set info mismatch reading from header 'ESBD')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'DSIGM'
+ (Read real array, size 57, header "ESBM".)
+ (%%WARNING. Set info mismatch reading from header 'ESBM')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'DSIGVA'
+ (Read real array, size 58, header "ESBV".)
+ (%%WARNING. Set info mismatch reading from header 'ESBV')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ Reading 'DRORFLEX'
+ (Read real array, size 141, header "RFLX".)
+ (%%WARNING. Set info mismatch reading from header 'RFLX')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+ (Opened, as header, existing file 'maphar.dat'.)
+ Reading 'SLUG'
+   (Integer matrix with 5 rows and 1 columns read. Header 'SLUG')
+ Reading 'ETRAE'
+ (Read real array, size 5, header "ETRE".)
+ (Opened, as header, existing file 'input\default.prm'.)
+ Reading 'RORDELTA'
+   (Integer matrix with 1 rows and 1 columns read. Header 'RDLT')
+ Reading 'DSIGT'
+ (Read real array, size 58, header "ESBT".)
+ (%%WARNING. Set info mismatch reading from header 'ESBT')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+  Formula for 'VPA'
+  Formula for 'VI'
+  Formula for 'VIR'
+  Formula for 'SUBPAR'
+  Formula for 'INCPAR'
+  Formula for 'VA'
+  Formula for 'VAR'
+  Formula for 'ESUBVAR'
+  Formula for 'ESUBVAR'
+  Formula for 'ESUBVA'
+  Formula for 'ESUBVA'
+  Formula for 'VDI'
+  Formula for 'VDIR'
+  Formula for 'ESUBD'
+  Formula for 'ESUBDR'
+  Formula for 'ESUBM'
+  Formula for 'ESUBMR'
+  Formula for 'RORFLEX'
+  Formula for 'VIU'
+  Formula for 'ESUBT'
+  Formula for 'ESUBT'
+  Formula for 'VIUR'
+  Formula for 'ESUBTR'
+  Formula for 'ESUBTR'
+ Writing 'SUBPAR'
+ (Written real array, size 10x3, header "SUBP".)
+ Writing 'INCPAR'
+ (Written real array, size 10x3, header "INCP".)
+ Writing 'ESUBT'
+ (Written real array, size 11, header "ESBT".)
+ Writing 'SLUG'
+   (Integer matrix with 5 rows and 1 columns written. Header 'SLUG')
+ Writing 'ETRAE'
+ (Written real array, size 5, header "ETRE".)
+ Writing 'ESUBVA'
+ (Written real array, size 11, header "ESBV".)
+ Writing 'ESUBD'
+ (Written real array, size 10, header "ESBD".)
+ Writing 'ESUBM'
+ (Written real array, size 10, header "ESBM".)
+ Writing 'ESUBTR'
+ (Written real array, size 11x3, header "SBTR".)
+ Writing 'ESUBVAR'
+ (Written real array, size 11x3, header "SBVR".)
+ Writing 'ESUBDR'
+ (Written real array, size 10x3, header "SBDR".)
+ Writing 'ESUBMR'
+ (Written real array, size 10x3, header "SBMR".)
+ Writing 'RORDELTA'
+   (Integer matrix with 1 rows and 1 columns written. Header 'RDLT')
+ Writing 'RORFLEX'
+ (Written real array, size 3, header "RFLX".)
+ Transferring "IO" from file 'DPARAM' to file 'PARAM'
+ [Header "IO" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\default.prm'.)
+ Transferring "PYRT" from file 'DPARAM' to file 'PARAM'
+ [Header "PYRT" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\default.prm'.)
+ [CPU for reads, formulas etc is 0.26562500 seconds.]
+ Elapsed time for reads, formulas etc is: less than one second.
+ [CPU for all of this 0-step calculation is 0.28125000 seconds.]
+ Elapsed time for all this 0-step calculation is: less than one second.
+  [Total CPU is 0.59375000 seconds.]
+  
+  (Inputs have been taken from the Command file
+  'C:\GTPAg2\GTAP10P2\GTAP\aggpar.cmf')
+  
+  (The program has completed without error.)
+  (There were        15 warnings.)
+  (If you have a LOG file, search for '%%W' to see them.)
+  (The last was:
+   'Check-on-read warning')
+  Total elapsed time is:  1 seconds.
+  
+  
+  This run ended at 13:45:56 on 23-APR-2018

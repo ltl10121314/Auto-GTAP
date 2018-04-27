@@ -1,0 +1,404 @@
+ 
+ This GEMPACK log file was created at 13:45:54 on 23-APR-2018 by the program
+  <aggdat.for 10-FEB-2016 (a TABLO-generated program)>
+ which accesses some of the routines in the GEMPACK software release
+  <GEMPACK Release 11.3.001   May 2014>
+ 
+ 
+ <aggdat.for 10-FEB-2016 (a TABLO-generated program)>
+   This program accesses some of the routines in the GEMPACK software release
+ <GEMPACK Release 11.3.001   May 2014>
+ 
+ 
+  %%WARNING. Your GEMPACK licence expires on 30-APR-2018.
+  You will not be able to run GEMPACK programs
+    after that date unless you renew the licence.
+ 
+     -------------------------------------------------------
+    !            GEMPACK Software System Licence            !
+    !  Source Code Licence for the GEMPACK Software System  !
+    !                 Licence No.  GFM-0137                 !
+    !          Licence for Release 11.4 of GEMPACK          !
+    !          U.S. International Trade Commission          !
+    !                     Washington DC                     !
+    !                          USA                          !
+    !    (Your GEMPACK licence expires on 30-APR-2018.)     !
+     -------------------------------------------------------
+ 
+ 
+     << COPYRIGHT 1987-2010: CoPS/Impact and KPSOFT >>
+ 
+  Current directory is: C:\GTPAg2\GTAP10P2\GTAP
+ 
+ 
+  Full path name of running EXE is: C:\GTPAg2\GTAP10P2\GTAP\aggdat.exe
+  Fortran compiler = GF32  4.8.1 (rev3, built by mingw-builds project):
+  Operating system is Windows 8
+ 
+ 
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+ 
+                    TABLO-GENERATED PROGRAM OPTIONS
+               ( --> indicates those in effect )
+ 
+       BAT Run in batch              STI Take inputs from a Stored-input file
+       BPR Brief prompts             SIF Store inputs on a file
+       LOG Output to log file        ASI Add to incomplete Stored-input file
+                                     CMF Take inputs from a Command file
+       EAA Echo all activity           SVX Select variables on XAC file (later)
+       CPU Report CPU times            RQF Required figures agreement (extrap)
+       NRP Don't reuse pivots        NIR Don't do solution iterative refinement
+                                 --> IZ1 Ignore zero coefficients in step 1
+                                     KZ2 Keep zero coefficients in steps 2,3 etc
+       NEQ Do no equations           NWE Don't warn how well equations solved
+       NDS Do no displays            SSI Several subintervals; extrap after each
+       NWR Do no writes              M28 Use MA28 routines (rather than MA48)
+       NAS Do no assertions          SUI Save updated formula(initial) data
+       NUD Do no final updates              Extra Options Screen
+       NSM Don't do simulation              --------------------
+       NWT Use Newton's method      DTO Display, Terminal/Text write Options
+       CR  Check-on-read options
+ 
+  Select an option   :  <opt>      Deselect an option      : -<opt>
+  Help for an option : ?<opt>      Help on all options     : ??
+  Redisplay options  : /           Finish option selection : Carriage return
+ 
+ (Opened, as text, existing file 'aggdat.cmf'.)
+  (Taking inputs from a command file.)
+ (Opened, as text, existing file 'aggdat.cmf'.)
+ 
+  !  (There is no CREATION information on this file.)
+ 
+ 
+  --> Reading the Command file.
+ 
+ auxiliary files = aggdat;
+ check-on-read elements = warn; ! Optional: very often needed
+ cpu=yes ; ! Optional: Reports CPU times for various stages
+ log file = yes;  ! Optional
+ WHS = no ;   ! Do not use sparse format
+ ! Input files:
+ File DDATA = input\basedata.har; ! Disaggregate data in GTAP notation
+ File DSETS = input\sets.har; ! Set specification for disaggregate data
+ File ASETS = maphar.dat; ! Set specification for aggregate data
+ File AGGHAR = aggmain.har; !# data aggregated by AggHAR #;
+ 
+ ! Output files:
+ File ADATA = output\basedata.har; ! Aggregated data in GTAP notation
+ File GSETS = output\sets.har; !
+ 
+ 
+  (Finished reading the command file.)
+ 
+  Auxiliary Statement File
+  ------------------------
+ (Opened, as binary, existing file 'C:\GTPAg2\GTAP10P2\GTAP\aggdat.axs'.)
+ 
+  Auxiliary Table File
+  --------------------
+ (Opened, as binary, existing file 'C:\GTPAg2\GTAP10P2\GTAP\aggdat.axt'.)
+ 
+  !  This file was created at 16:55:44 on 10-FEB-2016 by the program
+  !    <TABLO  Version 6.4   April 2012>
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+ 
+ [Auxiliary Table File was created by TABLO at 16:55:44 on 10-FEB-2016.]
+ [TABLO file used here is "aggdat.tab".]
+ [No TABLO STI file used when TABLO was run.]
+ 
+  (Writing output to log file, and also to the terminal.)
+ (Opened new text file 'aggdat.log'.)
+  
+  (Reporting CPU times.)
+  
+  (Not Writing Header arrays Sparsely.)
+ [This TG-program was created by TABLO at 16:55:44 on 10-FEB-2016.]
+  
+  [Starting to check "extra" statements on the Command file.]
+  
+  
+  [Finished checking "extra" statements on the Command file.]
+  
+  
+ ++++++++++++++++++++++++++++++++++++++++++++++++++
+  This program was written by the GEMPACK program TABLO
+  as described in the Information file
+  'aggdat.inf'
+  
+  This run of the TABLO-generated program
+      o can carry out 15 WRITEs
+      o can carry out 16 TRANSFERs
+  
+ ++++++++++++++++++++++++++++++++++++++++++++++++++
+ (Range test of initial values will produce warnings.)
+  
+  (Data file with logical name 'DSETS')
+ (Opened, as header, existing file 'input\sets.har'.)
+  
+  !  This file was created at 10:47:38 on 28-SEP-2017 by the program
+  !    <pretty.for 28-SEP-2017> [pretty.tab,pretty.sti]
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+  
+  
+  (Data file with logical name 'ASETS')
+ (Opened, as header, existing file 'maphar.dat'.)
+  
+  !  This file was created at 4/23/2018 1:45:51 PM by the program
+  !    GtapAgg2
+  !  which accesses some of the routines in the GEMPACK software release
+  !    HARFILE.PAS 4/Mar/2016
+  !  [The program which created this file was compiled with DELPHI.]
+  
+  
+  (Data file with logical name 'DDATA')
+ (Opened, as header, existing file 'input\basedata.har'.)
+  
+  !  This file was created at 9/28/2017 by the program
+  !    Sprs2Full
+  !  which accesses some of the routines in the GEMPACK software release
+  !    HARFILE.PAS 8/May/2012
+  !  [The program which created this file was compiled with DELPHI.]
+  
+  
+  (Data file with logical name 'GSETS')
+ (Opened new header file 'output\sets.har'.)
+  
+  (Data file with logical name 'ADATA')
+ (Opened new header file 'output\basedata.har'.)
+  
+  (Data file with logical name 'AGGHAR')
+ (Opened, as header, existing file 'aggmain.har'.)
+  
+  !  This file was created at 4/23/2018 1:45:53 PM by the program
+  !    AggHAR
+  !  which accesses some of the routines in the GEMPACK software release
+  !    HARFILE.PAS 29/Jan/2016
+  !  [The program which created this file was compiled with DELPHI.]
+  
+  
+  --->  Beginning the preliminary pass (aimed at sets and subsets).
+ Set 'DREG'
+ (Opened, as header, existing file 'input\sets.har'.)
+   (141 character strings, each of length 12 read. Header 'H1  ')
+   [Set has size 141.]
+ Set 'DTRAD_COMM'
+   (57 character strings, each of length 12 read. Header 'H2  ')
+   [Set has size 57.]
+ Set 'DMARG_COMM'
+   (3 character strings, each of length 12 read. Header 'MARG')
+   [Set has size 3.]
+ Set 'DENDW_COMM'
+   (8 character strings, each of length 12 read. Header 'H6  ')
+   [Set has size 8.]
+ Set 'CGDS_COMM'
+   (1 character strings, each of length 12 read. Header 'H9  ')
+   [Set has size 1.]
+ Set 'TARSET'
+   (2 character strings, each of length 12 read. Header 'TARS')
+   [Set has size 2.]
+ Set 'DPROD_COMM'
+   [Set has size 58.]
+ 'DTRAD_COMM' as a subset of 'DPROD_COMM'
+ 'CGDS_COMM' as a subset of 'DPROD_COMM'
+ 'DMARG_COMM' as a subset of 'DTRAD_COMM'
+ Set 'REG'
+ (Opened, as header, existing file 'maphar.dat'.)
+   (3 character strings, each of length 12 read. Header 'H1  ')
+   [Set has size 3.]
+ Set 'TRAD_COMM'
+   (10 character strings, each of length 12 read. Header 'H2  ')
+   [Set has size 10.]
+ Set 'ENDW_COMM'
+   (5 character strings, each of length 12 read. Header 'H6  ')
+   [Set has size 5.]
+ Set 'PROD_COMM'
+   [Set has size 11.]
+ 'TRAD_COMM' as a subset of 'PROD_COMM'
+ 'CGDS_COMM' as a subset of 'PROD_COMM'
+  
+  Reading the values of set mapping 'COM'
+   (57 character strings, each of length 12 read. Header 'DCOM')
+  
+  Reading the values of set mapping 'REGD'
+   (141 character strings, each of length 12 read. Header 'DREG')
+  
+  Reading the values of set mapping 'ENDD'
+   (8 character strings, each of length 12 read. Header 'DEND')
+  Formula for 'UNITVEC'
+  Formula for 'ISAMAR'
+  Formula for set 'MARG_COMM'
+ Set 'MARG_COMM'
+   [Set has size 1.]
+ 'MARG_COMM' as a subset of 'TRAD_COMM'
+  Formula for 'D2AMARG'
+ [CPU for reads, formulas etc is 1.56250000E-02 seconds.]
+ Elapsed time for reads, formulas etc is: less than one second.
+  
+  Total memory currently used for all arrays is approximately 0.02 megabytes.
+  [Add about 5-10 megabytes for the memory used by the code.]
+  
+  --->  Beginning the reads, formulas (etc).
+ Transferring "DVER" from file 'DSETS' to file 'GSETS'
+ (Opened, as header, existing file 'input\sets.har'.)
+ (Opened, for writing, header file 'output\sets.har'.)
+ (Written real array, size 1, header "DVER".)
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "DREL" from file 'DSETS' to file 'GSETS'
+   (1 character strings, each of length 59 written. Header 'DREL')
+ (Opened, for writing, header file 'output\sets.har'.)
+ Writing elements of set 'REG'
+   (3 character strings, each of length 12 written. Header 'H1  ')
+ Writing elements of set 'TRAD_COMM'
+   (10 character strings, each of length 12 written. Header 'H2  ')
+ Writing elements of set 'ENDW_COMM'
+   (5 character strings, each of length 12 written. Header 'H6  ')
+ Writing elements of set 'CGDS_COMM'
+   (1 character strings, each of length 12 written. Header 'H9  ')
+  
+  Reading the values of set mapping 'COM'
+ (Opened, as header, existing file 'maphar.dat'.)
+   (57 character strings, each of length 12 read. Header 'DCOM')
+  
+  Reading the values of set mapping 'REGD'
+   (141 character strings, each of length 12 read. Header 'DREG')
+  
+  Reading the values of set mapping 'ENDD'
+   (8 character strings, each of length 12 read. Header 'DEND')
+  Formula for 'D2AMARG'
+ Writing elements of set 'MARG_COMM'
+   (1 character strings, each of length 12 written. Header 'MARG')
+ Writing elements of set 'DREG'
+   (141 character strings, each of length 12 written. Header 'DH1 ')
+ Writing elements of set 'DTRAD_COMM'
+   (57 character strings, each of length 12 written. Header 'DH2 ')
+ Writing elements of set 'DENDW_COMM'
+   (8 character strings, each of length 12 written. Header 'DH6 ')
+ Writing elements of set 'DMARG_COMM'
+   (3 character strings, each of length 12 written. Header 'DMAR')
+ Writing elements of set 'TARSET'
+   (2 character strings, each of length 12 written. Header 'TARS')
+ Writing 'COM'
+   (57 character strings, each of length 12 written. Header 'MCOM')
+ Writing 'REGD'
+   (141 character strings, each of length 12 written. Header 'MREG')
+ Writing 'ENDD'
+   (8 character strings, each of length 12 written. Header 'MEND')
+ Writing 'D2AMARG'
+   (3 character strings, each of length 12 written. Header 'MMAR')
+ Transferring "IOCY" from file 'DSETS' to file 'GSETS'
+ (Opened, as header, existing file 'input\sets.har'.)
+ [Header "IOCY" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "INFO" from file 'DSETS' to file 'GSETS'
+ [Header "INFO" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "DCPL" from file 'DSETS' to file 'GSETS'
+ [Header "DCPL" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "PAYS" from file 'DSETS' to file 'GSETS'
+ [Header "PAYS" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "AGRI" from file 'DSETS' to file 'GSETS'
+ [Header "AGRI" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "DREG" from file 'DSETS' to file 'GSETS'
+ [Header "DREG" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "VAR" from file 'DSETS' to file 'GSETS'
+ [Header "VAR" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "WEB" from file 'DSETS' to file 'GSETS'
+ [Header "WEB" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "LICN" from file 'ASETS' to file 'GSETS'
+ (Opened, as header, existing file 'maphar.dat'.)
+   (1 character strings, each of length 65 written. Header 'LICN')
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "H1L" from file 'ASETS' to file 'GSETS'
+   (3 character strings, each of length 50 written. Header 'H1L ')
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "H2L" from file 'ASETS' to file 'GSETS'
+   (10 character strings, each of length 50 written. Header 'H2L ')
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "H6L" from file 'ASETS' to file 'GSETS'
+ [Header "H6L" does not exist. Nothing to transfer.]
+ (Opened, for writing, header file 'output\sets.har'.)
+ Transferring "LICN" from file 'ASETS' to file 'ADATA'
+ (Opened, for writing, header file 'output\basedata.har'.)
+   (1 character strings, each of length 65 written. Header 'LICN')
+ (Opened, for writing, header file 'output\basedata.har'.)
+ (Opened, as header, existing file 'input\basedata.har'.)
+ Reading 'DPSM'
+ (Read real array, size 141, header "DPSM".)
+ (%%WARNING. Set info mismatch reading from header 'DPSM')
+   [See Section 22.4 of the GEMPACK Manual, "Checking set and element
+    information when reading data".][TopicID:gpd3.4.4]
+  Formula for 'CDPSM'
+ Writing 'CDPSM'
+ (Written real array, size 3, header "DPSM".)
+ Transferring unwritten from file 'AGGHAR' to file 'ADATA'
+ (Opened, as header, existing file 'aggmain.har'.)
+   (1 character strings, each of length 59 written. Header '
+ DREL                                    ')
+ (Written real array, size 1, header "DVER".)
+ (Written real array, size 10x3x3, header "VIMS".)
+ (Written real array, size 10x3x3, header "VIWS".)
+ (Written real array, size 10x3x3, header "VXWD".)
+ (Written real array, size 10x3x3, header "VXMD".)
+ (Written real array, size 10x3x3, header "ADRV".)
+ (Written real array, size 10x3x3, header "TFRV".)
+ (Written real array, size 10x3x3, header "PURV".)
+ (Written real array, size 10x3x3, header "MFRV".)
+ (Written real array, size 10x3x3, header "VRRV".)
+ (Written real array, size 10x3x3, header "XTRV".)
+ (Written real array, size 10x11x3, header "VIFM".)
+ (Written real array, size 10x11x3, header "VDFM".)
+ (Written real array, size 10x11x3, header "VIFA".)
+ (Written real array, size 10x11x3, header "VDFA".)
+ (Written real array, size 10x11x3x2, header "ISEP".)
+ (Written real array, size 5x11x3, header "VFM".)
+ (Written real array, size 10x3, header "VIPM".)
+ (Written real array, size 10x3, header "VDPM".)
+ (Written real array, size 10x3, header "VIGM".)
+ (Written real array, size 10x3, header "VDGM".)
+ (Written real array, size 1x3, header "VST".)
+ (Written real array, size 5x3, header "EVOA".)
+ (Written real array, size 5x11x3, header "EVFA".)
+ (Written real array, size 10x3, header "VIPA".)
+ (Written real array, size 10x3, header "VDPA".)
+ (Written real array, size 10x3, header "VIGA".)
+ (Written real array, size 10x3, header "VDGA".)
+ (Written real array, size 3, header "SAVE".)
+ (Written real array, size 3, header "VKB".)
+ (Written real array, size 3, header "VDEP".)
+ (Written real array, size 10x3, header "OSEP".)
+ (Written real array, size 5x11x3, header "FBEP".)
+ (Written real array, size 1x10x3x3, header "VTWR".)
+ (Written real array, size 5x11x3, header "FTRV".)
+ (Written real array, size 3, header "POP".)
+ (Written real array, size 10x3, header "TVOM".)
+ (Written real array, size 2x10x3x3, header "VTSS".)
+ (Opened, for writing, header file 'output\basedata.har'.)
+ [CPU for reads, formulas etc is 0.12500000 seconds.]
+ Elapsed time for reads, formulas etc is: less than one second.
+ [CPU for all of this 0-step calculation is 0.14062500 seconds.]
+ Elapsed time for all this 0-step calculation is: less than one second.
+  [Total CPU is 0.39062500 seconds.]
+  
+  (Inputs have been taken from the Command file
+  'C:\GTPAg2\GTAP10P2\GTAP\aggdat.cmf')
+  
+  (The program has completed without error.)
+  (There were         2 warnings.)
+  (If you have a LOG file, search for '%%W' to see them.)
+  (The last was:
+   'Check-on-read warning')
+  Total elapsed time is: less than one second.
+  
+  
+  This run ended at 13:45:54 on 23-APR-2018

@@ -1,0 +1,445 @@
+!============================================================================!
+! AGGPAR.TAB: Parameters Aggregation TAB File                                !
+! GTAP Data Base Version 5 (2001)                                            !
+! This file reads the global data and substitution and demand parameters     !
+!      and creates the parameters file.                                      !
+!============================================================================!
+
+equation (NONE);
+
+!============================================================================!
+! Input files                                                                !
+!============================================================================!
+
+file
+    DDATA #disaggregate data in GTAP notation#;
+file
+    DPARAM #disaggregate parameters#;
+file 
+    EPARAM #user-supplied parameters#;
+file
+    DSETS #set specification for disaggregate data#;
+file
+    ASETS #set specification for aggregate data#;
+
+!============================================================================!
+! Output files                                                               !
+!============================================================================!
+
+file (new)
+    PARAM #aggregated CDE, CES and CET elasticities#;
+
+! next statement checks that DVER is present on input flows file,
+  and places it first on output !
+Transfer (ifheaderexists) "DVER" from file DDATA to file PARAM;
+
+! next statement checks that DREL is present on input flows file,
+  and places it first on output !
+Transfer (ifheaderexists) "DREL" from file DDATA to file PARAM;
+
+
+!============================================================================!
+! Sets for dis-aggregate data                                                !
+!============================================================================!
+
+set
+    DREG #regions#
+    read elements from file DSETS header "H1";
+
+set
+    DTRAD_COMM #traded commodities#
+    read elements from file DSETS header "H2";
+
+set
+    DENDW_COMM #endowment commodities#
+    read elements from file DSETS header "H6";
+
+set
+    CGDS_COMM #capital goods#
+    read elements from file DSETS header "H9";
+
+set
+    DPROD_COMM # produced commodities # = DTRAD_COMM Union CGDS_COMM;
+
+!============================================================================!
+! Sets for aggregate data                                                    !
+!============================================================================!
+
+SET REG       # REGIONS IN AGGREGATE DATA SET #
+    READ ELEMENTS FROM FILE ASETS HEADER "H1";
+
+SET TRAD_COMM # TRADED COMMODITIES #
+    READ ELEMENTS FROM FILE ASETS HEADER "H2";
+
+SET ENDW_COMM  # ENDOWMENT COMMODITIES # 
+    READ ELEMENTS FROM FILE ASETS HEADER "H6";
+
+SET PROD_COMM # produced commodities # = TRAD_COMM Union CGDS_COMM;
+
+! ===========================================================================!
+!                    READING AGGREGATION SCHEME                              !
+! ===========================================================================!
+
+MAPPING COM FROM DTRAD_COMM TO TRAD_COMM; 
+         READ (BY_ELEMENTS) COM FROM FILE ASETS HEADER "DCOM";
+
+MAPPING REGD FROM DREG TO REG; 
+         READ (BY_ELEMENTS) REGD FROM FILE ASETS HEADER "DREG";
+
+!MAPPING ENDD FROM DENDW_COMM TO ENDW_COMM; 
+         READ (BY_ELEMENTS) ENDD FROM FILE ASETS HEADER "DEND";!
+
+
+!============================================================================!
+! Read values from dis-aggregate database.                                   !
+!============================================================================!
+
+!============================================================================!
+!              base revenues and expenditures at agent's prices              !
+!============================================================================!
+
+
+coefficient (all,i,DENDW_COMM)(all,j,DPROD_COMM)(all,r,DREG)
+    EVFA(i,j,r)
+    #producer expenditure on i by industry j in region r, at agent's prices#;
+
+coefficient (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)
+    VIFA(i,j,r) #purchases of imported i r for use in j in region r#;
+
+coefficient (all,i,DTRAD_COMM)(all,j,DPROD_COMM)(all,r,DREG)
+    VDFA(i,j,r) #purchases of domestic i r for use in j in region r#;
+
+coefficient (all,i,DTRAD_COMM)(all,r,DREG)
+    VIPA(i,r) #private household expenditure on imported i#;
+
+coefficient (all,i,DTRAD_COMM)(all,r,DREG)
+    VDPA(i,r) #private household expenditure on domestic i in r#;
+
+coefficient (all,i,DTRAD_COMM)(all,r,DREG)
+    VIGA(i,r) #government household expenditure on imported i#;
+
+coefficient (all,i,DTRAD_COMM)(all,r,DREG)
+    VDGA(i,r) #government household expenditure on domestic i in r#;
+
+!============================================================================!
+! disaggregate parameters                                                    !
+!============================================================================!
+
+coefficient (all,i,DTRAD_COMM)(all,r,DREG)
+    DINCPAR(i,r) #calibrated CDE expansion parameter#;
+
+coefficient (integer)
+    RORDELTA #investment allocation binary coefficient#;
+
+coefficient (all,r,DREG)
+    DRORFLEX(r) #expected rate of return flexibility parameter#;
+
+coefficient (all,i,DTRAD_COMM)
+    DSIGD(i) #Armington CES elasticities for domestic/imported allocation#;
+
+coefficient (all,i,DTRAD_COMM)
+    DSIGM(i) #Armington CES elasticities for regional allocation of imports#;
+
+coefficient (all,i,DPROD_COMM)
+    DSIGT(i) #intermediate usage substitution elasticity#;
+
+coefficient (all,i,DPROD_COMM)
+    DSIGVA(i) #Allen partial elasticities for Value Added#;
+
+coefficient (all,i,DTRAD_COMM)(all,r,DREG)
+    DSUBPAR(i,r) #calibrated CDE scale parameters#;
+
+!============================================================================!
+! user-supplied parameters                                                   !
+!============================================================================!
+
+coefficient (all,i,ENDW_COMM)
+    ETRAE(i) #CET elasticity of transformation#;
+
+coefficient (integer) (all,i,ENDW_COMM)
+    SLUG(i) #sluggishness flag#;
+
+!----------------------------------------------------------------------------!
+!                   Reading basedata.                                        !
+!----------------------------------------------------------------------------!
+
+
+read
+    EVFA from file DDATA header "EVFA";
+
+read
+    VIFA from file DDATA header "VIFA";
+
+read
+    VDFA from file DDATA header "VDFA";
+
+read
+    VIPA from file DDATA header "VIPA";
+
+read
+    VDPA from file DDATA header "VDPA";
+
+read
+    VIGA from file DDATA header "VIGA";
+
+read
+    VDGA from file DDATA header "VDGA";
+
+!----------------------------------------------------------------------------!
+! Reading elasticities                                                       !
+!----------------------------------------------------------------------------!
+
+read
+    DSUBPAR from file DPARAM header "SUBP";
+
+read
+    DINCPAR from file DPARAM header "INCP";
+
+read
+    DSIGD from file DPARAM header "ESBD";
+
+read
+    DSIGM from file DPARAM header "ESBM";
+
+read
+    DSIGVA from file DPARAM header "ESBV";
+
+read
+    DRORFLEX from file DPARAM header "RFLX";
+
+read
+    SLUG from file EPARAM header "SLUG";
+
+read
+    ETRAE from file EPARAM header "ETRE";
+
+read
+    RORDELTA from file DPARAM header "RDLT";
+
+read
+    DSIGT from file DPARAM header "ESBT";
+
+
+!----------------------------------------------------------------------------!
+!                   DERIVATIVES OF THE BASE DATA                             !
+!----------------------------------------------------------------------------!
+
+zerodivide (zero_by_zero) default 0;
+
+coefficient (all,i,dTRAD_COMM)(all,r,DREG)
+    VPA(i,r)
+    #private expenditure on commodity i in region r, at agent's prices#;
+formula (all,i,dTRAD_COMM)(all,s,DREG)
+    VPA(i,s) = VDPA(i,s) + VIPA(i,s);
+
+!============================================================================!
+! AGGREGATION of all coefficients                                            !
+!============================================================================!
+
+coefficient (all,c,DTRAD_COMM)
+    VI(c) #imports by commodity, at agents' prices, for the whole world#;
+formula (all,i,DTRAD_COMM)
+    VI(i) = sum{r,DREG, sum{j,DPROD_COMM, VIFA(i,j,r)} + VIPA(i,r) + VIGA(i,r)};
+
+coefficient (all,c,DTRAD_COMM)(all,r,DREG)
+    VIR(c,r) #imports by commodity, at agents' prices, for the region R#;
+formula (all,i,DTRAD_COMM)(all,r,DREG)
+    VIR(i,r) =  sum{j,DPROD_COMM, VIFA(i,j,r)} + VIPA(i,r) + VIGA(i,r);
+
+coefficient (all,c,TRAD_COMM)(all,t,REG)
+    SUBPAR(c,t) #aggregate#;
+formula (all,c,TRAD_COMM)(all,t,REG)
+    SUBPAR(c,t)
+  =   sum{
+        i,
+        DTRAD_COMM: COM(i) EQ c,
+        sum{r,DREG: REGD(r) EQ t, VPA(i,r)*DSUBPAR(i,r)}
+      }
+    / sum{
+        i,
+        DTRAD_COMM: COM(i) EQ c,
+        sum{r,DREG: REGD(r) EQ t, VPA(i,r)}
+      };
+
+coefficient (all,c,TRAD_COMM)(all,t,REG)
+    INCPAR(c,t);
+formula (all,c,TRAD_COMM)(all,t,REG)
+    INCPAR(c,t)
+  =   sum{
+        i,
+        DTRAD_COMM: COM(i) EQ c,
+        sum{r,DREG: REGD(r) EQ t, VPA(i,r)*DINCPAR(i,r)}
+      }
+    / sum{
+        i,
+        DTRAD_COMM: COM(i) EQ c,
+        sum{r,DREG: REGD(r) EQ t, VPA(i,r)}
+      };
+
+coefficient (all,c,DPROD_COMM)
+    VA(c) #value added by industry, at firms' prices, for the world as whole#;
+formula (all,c,DPROD_COMM)
+    VA(c) = sum{j,DENDW_COMM, sum{r,DREG, EVFA(j,c,r)}};
+
+coefficient (all,c,DPROD_COMM)(all,r,DREG)
+    VAR(c,r) #value added by industry, at firms' prices, for the region r#;
+formula (all,c,DPROD_COMM)(all,r,DREG)
+    VAR(c,r) = sum{j,DENDW_COMM, EVFA(j,c,r)};
+
+coefficient (all,c,PROD_COMM)(all,r,REG)
+    ESUBVAR(c,r);
+formula (all,c,PROD_COMM)(all,r,REG)
+    ESUBVAR(c,r) = 1.0;
+formula (all,c,TRAD_COMM)(all,r,REG)
+    ESUBVAR(c,r)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, sum{s,DREG: REGD(s) EQ r,
+      VAR(i,s)*DSIGVA(i)}} / sum{i,DTRAD_COMM: COM(i) EQ c, 
+      sum{s,DREG: REGD(s) EQ r,VAR(i,s)}};
+
+
+coefficient (all,c,PROD_COMM)
+    ESUBVA(c);
+formula (all,c,PROD_COMM)
+    ESUBVA(c) = 1.0;
+formula (all,c,TRAD_COMM)
+    ESUBVA(c)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, VA(i)*DSIGVA(i)}
+    / sum{i,DTRAD_COMM: COM(i) EQ c, VA(i)};
+
+coefficient (all,c,DTRAD_COMM)
+    VDI(c) #domestic and imports, at agents' prices, for the whole world#;
+formula (all,i,DTRAD_COMM)
+    VDI(i)
+  = VI(i) + sum{r,DREG, sum{j,DPROD_COMM, VDFA(i,j,r)} + VDPA(i,r) + VDGA(i,r)};
+
+coefficient (all,c,DTRAD_COMM)(all,r,DREG)
+    VDIR(c,r) #domestic and imports, at agents' prices, for the whole world#;
+formula (all,i,DTRAD_COMM)(all,r,DREG)
+    VDIR(i,r)
+  = VIR(i,r) + sum{j,DPROD_COMM, VDFA(i,j,r)} + VDPA(i,r) + VDGA(i,r);
+
+coefficient (all,c,TRAD_COMM)
+    ESUBD(c);
+formula (all,c,TRAD_COMM)
+    ESUBD(c)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, VDI(i)*DSIGD(i)}
+    / sum{i,DTRAD_COMM: COM(i) EQ c, VDI(i)};
+
+coefficient (all,c,TRAD_COMM)(all,r,REG)
+    ESUBDR(c,r);
+formula (all,c,TRAD_COMM)(all,s,REG)
+    ESUBDR(c,s)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, sum{r,DREG: REGD(r) EQ s,
+        VDIR(i,r)*DSIGD(i)}}
+    / sum{j,DTRAD_COMM: COM(j) EQ c, sum{g,DREG: REGD(g) EQ s, VDIR(j,g)}};
+
+coefficient (all,c,TRAD_COMM)
+    ESUBM(c);
+formula (all,c,TRAD_COMM)
+    ESUBM(c)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, VI(i)*DSIGM(i)}
+    / sum{i,DTRAD_COMM: COM(i) EQ c, VI(i)};
+
+coefficient (all,c,TRAD_COMM)(all,r,REG)
+    ESUBMR(c,r);
+formula (all,c,TRAD_COMM)(all,r,REG)
+    ESUBMR(c,r)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, sum{s,DREG: REGD(s) EQ r,
+        VIR(i,s)*DSIGM(i)}}
+    / sum{j,DTRAD_COMM: COM(j) EQ c, sum{g,DREG: REGD(g) EQ r, VIR(j,g)}};
+
+coefficient (all,n,REG)
+    RORFLEX(n);
+formula (all,n,REG)
+    RORFLEX(n)
+  =   sum{r,DREG: REGD(r) EQ n, DRORFLEX(r)}
+    / sum{r,DREG: REGD(r) EQ n, 1.0};
+
+coefficient (all,j,DPROD_COMM)
+    VIU(j);
+formula (all,j,DPROD_COMM)
+    VIU(j)
+  =   sum{r,DREG, sum{i,DTRAD_COMM, VDFA(i,j,r)}}
+    + sum{r,DREG, sum{i,DTRAD_COMM, VIFA(i,j,r)}};
+
+coefficient (all,c,PROD_COMM)
+    ESUBT(c) #intermediate usage substitution elasticity#;
+formula (all,c,CGDS_COMM)
+    ESUBT(c) = DSIGT(c);
+formula (all,c,TRAD_COMM)
+    ESUBT(c)
+  =   sum{i, DTRAD_COMM: COM(i) EQ c, VIU(i)*DSIGT(i)}
+    / sum{i, DTRAD_COMM: COM(i) EQ c, VIU(i)};
+
+coefficient (all,j,DPROD_COMM)(all,r,DREG)
+    VIUR(j,r);
+formula (all,j,DPROD_COMM)(all,r,DREG)
+    VIUR(j,r)
+  =   sum{i,DTRAD_COMM, VDFA(i,j,r)}
+    + sum{i,DTRAD_COMM, VIFA(i,j,r)};
+
+coefficient (all,c,PROD_COMM)(all,r,REG)
+    ESUBTR(c,r);
+formula (all,c,PROD_COMM)(all,r,REG)
+    ESUBTR(c,r) = 1.0;
+formula (all,c,TRAD_COMM)(all,r,REG)
+    ESUBTR(c,r)
+  =   sum{i,DTRAD_COMM: COM(i) EQ c, sum{s,DREG: REGD(s) EQ r,
+      VIUR(i,s)*DSIGT(i)}} / sum{j,DTRAD_COMM: COM(j) EQ c, 
+      sum{g,DREG: REGD(g) EQ r,VIUR(j,g)}};
+
+!============================================================================!
+! write all coefficients                                            !
+!============================================================================!
+
+write
+    SUBPAR to file PARAM header "SUBP" longname
+    "CDE substitution parameter";
+write
+    INCPAR to file PARAM header "INCP" longname
+    "CDE expansion parameter";
+write
+    ESUBT to file PARAM header "ESBT" longname
+    "Elasticity of intermediate input substitution";
+write
+    SLUG to file PARAM header "SLUG" longname 
+    "Binary parameter for factor mobility: 1=sluggish 0=mobile";
+write
+    ETRAE to file PARAM header "ETRE" longname
+    "CET between sectors for sluggish primary factors";
+write
+    ESUBVA to file PARAM header "ESBV" longname
+    "CES between primary factors in production";
+write
+    ESUBD to file PARAM header "ESBD" longname 
+    "Armington CES for domestic/imported allocation";
+write
+    ESUBM to file PARAM header "ESBM" longname
+    "Armington CES for regional allocation of imports";
+write
+    ESUBTR to file PARAM header "SBTR" longname
+    "Elasticity of intermediate input substitution at region level";
+write
+    ESUBVAR to file PARAM header "SBVR" longname
+    "CES between primary factors in production at region level";
+write
+    ESUBDR to file PARAM header "SBDR" longname 
+    "Armington CES for domestic/imported allocation at region level";
+write
+    ESUBMR to file PARAM header "SBMR" longname
+    "Armington CES for regional allocation of imports at region level";
+write
+    RORDELTA to file PARAM header "RDLT" longname
+    "Investment allocation binary coefficient";
+write
+    RORFLEX to file PARAM header "RFLX" longname
+    "Expected rate of return flexibility parameter";
+
+
+!Transfer the headers that need no change in aggregation!
+
+Transfer (ifheaderexists) "IO" from file DPARAM to file PARAM ;
+
+Transfer (ifheaderexists) "PYRT" from file DPARAM to file PARAM ;
+
+!======================= END OF FILE AGGPAR.TAB =============================!

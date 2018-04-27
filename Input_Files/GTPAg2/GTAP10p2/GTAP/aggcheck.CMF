@@ -1,0 +1,12 @@
+auxiliary files = aggcheck;
+check-on-read elements = warn; ! Optional: very often needed
+WHS = no ;   ! Do not use sparse format 
+cpu=yes ; ! Optional: Reports CPU times for various stages
+log file = yes;  ! Optional
+! Input files:
+File DSETS = input\SETS.har; ! Set specification for disaggregate data
+File ASETS = maphar.dat; ! Set specification for aggregate data
+! Output files:
+File checkmap = checkmap.har; ! Diagnostic file 
+File SUPP = aggsupp.har; ! Instructions for AggHAR
+

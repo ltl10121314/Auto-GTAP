@@ -1,0 +1,626 @@
+ 
+ This GEMPACK log file was created at 13:45:56 on 23-APR-2018 by the program
+  <gtapview.for 10-FEB-2016 (a TABLO-generated program)>
+ which accesses some of the routines in the GEMPACK software release
+  <GEMPACK Release 11.3.001   May 2014>
+ 
+ 
+ <gtapview.for 10-FEB-2016 (a TABLO-generated program)>
+   This program accesses some of the routines in the GEMPACK software release
+ <GEMPACK Release 11.3.001   May 2014>
+ 
+ 
+  %%WARNING. Your GEMPACK licence expires on 30-APR-2018.
+  You will not be able to run GEMPACK programs
+    after that date unless you renew the licence.
+ 
+     -------------------------------------------------------
+    !            GEMPACK Software System Licence            !
+    !  Source Code Licence for the GEMPACK Software System  !
+    !                 Licence No.  GFM-0137                 !
+    !          Licence for Release 11.4 of GEMPACK          !
+    !          U.S. International Trade Commission          !
+    !                     Washington DC                     !
+    !                          USA                          !
+    !    (Your GEMPACK licence expires on 30-APR-2018.)     !
+     -------------------------------------------------------
+ 
+ 
+     << COPYRIGHT 1987-2010: CoPS/Impact and KPSOFT >>
+ 
+  Current directory is: C:\GTPAg2\GTAP10P2\GTAP
+ 
+ 
+  Full path name of running EXE is: C:\GTPAg2\GTAP10P2\GTAP\gtapview.exe
+  Fortran compiler = GF32  4.8.1 (rev3, built by mingw-builds project):
+  Operating system is Windows 8
+ 
+ 
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+ 
+                    TABLO-GENERATED PROGRAM OPTIONS
+               ( --> indicates those in effect )
+ 
+       BAT Run in batch              STI Take inputs from a Stored-input file
+       BPR Brief prompts             SIF Store inputs on a file
+       LOG Output to log file        ASI Add to incomplete Stored-input file
+                                     CMF Take inputs from a Command file
+       EAA Echo all activity           SVX Select variables on XAC file (later)
+       CPU Report CPU times            RQF Required figures agreement (extrap)
+       NRP Don't reuse pivots        NIR Don't do solution iterative refinement
+                                 --> IZ1 Ignore zero coefficients in step 1
+                                     KZ2 Keep zero coefficients in steps 2,3 etc
+       NEQ Do no equations           NWE Don't warn how well equations solved
+       NDS Do no displays            SSI Several subintervals; extrap after each
+       NWR Do no writes              M28 Use MA28 routines (rather than MA48)
+       NAS Do no assertions          SUI Save updated formula(initial) data
+       NUD Do no final updates              Extra Options Screen
+       NSM Don't do simulation              --------------------
+       NWT Use Newton's method      DTO Display, Terminal/Text write Options
+       CR  Check-on-read options
+ 
+  Select an option   :  <opt>      Deselect an option      : -<opt>
+  Help for an option : ?<opt>      Help on all options     : ??
+  Redisplay options  : /           Finish option selection : Carriage return
+ 
+ (Opened, as text, existing file 'gtapview.cmf'.)
+  (Taking inputs from a command file.)
+ (Opened, as text, existing file 'gtapview.cmf'.)
+ 
+  !  (There is no CREATION information on this file.)
+ 
+ 
+  --> Reading the Command file.
+ 
+ auxiliary files = gtapview;
+ check-on-read elements = warn; ! Optional: very often needed
+ cpu=yes ; ! Optional: Reports CPU times for various stages
+ WHS = no ;   ! Do not use sparse format
+ log file = yes;  ! Optional
+ ! Input files:
+ File GTAPDATA = output\basedata.har; ! File containing all base data
+ File GTAPSETS = output\sets.har;     ! File with set specification
+ File GTAPPARM = output\default.prm;  ! File containing behavioral prameters
+ ! Output files:
+ File GTAPVIEW = output\baseview.har; ! File with headers for viewing
+ File TAXRATES = output\baserate.har; ! File with headers for viewing initial
+ tax rates
+ 
+ 
+  (Finished reading the command file.)
+ 
+  Auxiliary Statement File
+  ------------------------
+ (Opened, as binary, existing file 'C:\GTPAg2\GTAP10P2\GTAP\gtapview.axs'.)
+ 
+  Auxiliary Table File
+  --------------------
+ (Opened, as binary, existing file 'C:\GTPAg2\GTAP10P2\GTAP\gtapview.axt'.)
+ 
+  !  This file was created at 16:56:09 on 10-FEB-2016 by the program
+  !    <TABLO  Version 6.4   April 2012>
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+ 
+ [Auxiliary Table File was created by TABLO at 16:56:09 on 10-FEB-2016.]
+ [TABLO file used here is "gtapview.tab".]
+ [No TABLO STI file used when TABLO was run.]
+ 
+  (Writing output to log file, and also to the terminal.)
+ (Opened new text file 'gtapview.log'.)
+  
+  (Reporting CPU times.)
+  
+  (Not Writing Header arrays Sparsely.)
+ [This TG-program was created by TABLO at 16:56:09 on 10-FEB-2016.]
+  
+  [Starting to check "extra" statements on the Command file.]
+  
+  
+  [Finished checking "extra" statements on the Command file.]
+  
+  
+ ++++++++++++++++++++++++++++++++++++++++++++++++++
+  This program was written by the GEMPACK program TABLO
+  as described in the Information file
+  'gtapview.inf'
+  
+  This run of the TABLO-generated program
+      o can carry out 63 WRITEs
+      o can carry out 3 TRANSFERs
+  
+ ++++++++++++++++++++++++++++++++++++++++++++++++++
+ (Range test of initial values will produce warnings.)
+  
+  (Data file with logical name 'GTAPDATA')
+ (Opened, as header, existing file 'output\basedata.har'.)
+  
+  !  This file was created at 13:45:54 on 23-APR-2018 by the program
+  !    <aggdat.for 10-FEB-2016> [aggdat.tab]
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+  
+  
+  (Data file with logical name 'GTAPSETS')
+ (Opened, as header, existing file 'output\sets.har'.)
+  
+  !  This file was created at 13:45:54 on 23-APR-2018 by the program
+  !    <aggdat.for 10-FEB-2016> [aggdat.tab]
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+  
+  
+  (Data file with logical name 'GTAPPARM')
+ (Opened, as header, existing file 'output\default.prm'.)
+  
+  !  This file was created at 13:45:56 on 23-APR-2018 by the program
+  !    <aggpar.for 10-FEB-2016> [aggpar.tab]
+  !  which accesses some of the routines in the GEMPACK software release
+  !    <GEMPACK Release 11.3.001   May 2014>
+  !  [The program which created this file was compiled with GF32.]
+  
+  
+  (Data file with logical name 'GTAPVIEW')
+ (Opened new header file 'output\baseview.har'.)
+  
+  (Data file with logical name 'TAXRATES')
+ (Opened new header file 'output\baserate.har'.)
+  
+  --->  Beginning the preliminary pass (aimed at sets and subsets).
+ Set 'REG'
+ (Opened, as header, existing file 'output\sets.har'.)
+   (3 character strings, each of length 12 read. Header 'H1  ')
+   [Set has size 3.]
+ Set 'TRAD_COMM'
+   (10 character strings, each of length 12 read. Header 'H2  ')
+   [Set has size 10.]
+ Set 'MARG_COMM'
+   (1 character strings, each of length 12 read. Header 'MARG')
+   [Set has size 1.]
+ 'MARG_COMM' as a subset of 'TRAD_COMM'
+ Set 'NMRG_COMM'
+   [Set has size 9.]
+ 'NMRG_COMM' as a subset of 'TRAD_COMM'
+ Set 'CGDS_COMM'
+   (1 character strings, each of length 12 read. Header 'H9  ')
+   [Set has size 1.]
+ Set 'ENDW_COMM'
+   (5 character strings, each of length 12 read. Header 'H6  ')
+   [Set has size 5.]
+ Set 'TARSET'
+   (2 character strings, each of length 12 read. Header 'TARS')
+   [Set has size 2.]
+ Set 'ENDWC_COMM'
+   [Set has size 1.]
+ Set 'PROD_COMM'
+   [Set has size 11.]
+ 'TRAD_COMM' as a subset of 'PROD_COMM'
+ 'CGDS_COMM' as a subset of 'PROD_COMM'
+ Set 'DEMD_COMM'
+   [Set has size 15.]
+ 'ENDW_COMM' as a subset of 'DEMD_COMM'
+ 'TRAD_COMM' as a subset of 'DEMD_COMM'
+ Set 'NSAV_COMM'
+   [Set has size 16.]
+ 'DEMD_COMM' as a subset of 'NSAV_COMM'
+ 'CGDS_COMM' as a subset of 'NSAV_COMM'
+ 'PROD_COMM' as a subset of 'NSAV_COMM'
+ 'ENDWC_COMM' as a subset of 'NSAV_COMM'
+ Set 'GDPEXPEND'
+   [Set has size 5.]
+ Set 'GDPSOURCE'
+   [Set has size 3.]
+ Set 'CAPACCT'
+   [Set has size 2.]
+ Set 'CURACCT'
+   [Set has size 2.]
+ Set 'MKTVALUE'
+   [Set has size 2.]
+ Set 'OUT'
+   [Set has size 3.]
+ Set 'SALES'
+   [Set has size 3.]
+ Set 'PURCHVALUE'
+   [Set has size 2.]
+ Set 'DIR'
+   [Set has size 2.]
+ Set 'OUTVALUE'
+   [Set has size 2.]
+ Set 'EXPVALUE'
+   [Set has size 2.]
+ Set 'IMPVALUE'
+   [Set has size 2.]
+ Set 'PRODTAX'
+   [Set has size 1.]
+ Set 'MORECOLS'
+   [Set has size 7.]
+ Set 'SUMCOLS'
+   [Set has size 18.]
+ 'PROD_COMM' as a subset of 'SUMCOLS'
+ 'MORECOLS' as a subset of 'SUMCOLS'
+ Set 'XXX'
+   [Set has size 15.]
+ 'TRAD_COMM' as a subset of 'XXX'
+ 'ENDW_COMM' as a subset of 'XXX'
+ Set 'SUMROWS'
+   [Set has size 16.]
+ 'XXX' as a subset of 'SUMROWS'
+ 'PRODTAX' as a subset of 'SUMROWS'
+ 'DEMD_COMM' as a subset of 'XXX'
+ Set 'S@gov'
+   [Set has size 1.]
+ 'S@gov' as a subset of 'SUMCOLS'
+ Set 'S@hou'
+   [Set has size 1.]
+ 'S@hou' as a subset of 'SUMCOLS'
+ Set 'S@exp'
+   [Set has size 1.]
+ 'S@exp' as a subset of 'SUMCOLS'
+ Set 'S@lessDomTax'
+   [Set has size 1.]
+ 'S@lessDomTax' as a subset of 'SUMCOLS'
+ Set 'S@lessImpTax'
+   [Set has size 1.]
+ 'S@lessImpTax' as a subset of 'SUMCOLS'
+ Set 'S@lessTariff'
+   [Set has size 1.]
+ 'S@lessTariff' as a subset of 'SUMCOLS'
+ Set 'S@lessImpCIF'
+   [Set has size 1.]
+ 'S@lessImpCIF' as a subset of 'SUMCOLS'
+ Set 'SUMREP'
+   [Set has size 5.]
+ [CPU for reads, formulas etc is 0.0000000 seconds.]
+ Elapsed time for reads, formulas etc is: less than one second.
+  
+  Total memory currently used for all arrays is approximately 0.07 megabytes.
+  [Add about 5-10 megabytes for the memory used by the code.]
+  
+  --->  Beginning the reads, formulas (etc).
+ (Opened, as header, existing file 'output\basedata.har'.)
+ Reading 'EVOA'
+ (Read real array, size 5x3, header "EVOA".)
+ Reading 'EVFA'
+ (Read real array, size 5x11x3, header "EVFA".)
+ Reading 'save'
+ (Read real array, size 3, header "SAVE".)
+ Reading 'VIFA'
+ (Read real array, size 10x11x3, header "VIFA".)
+ Reading 'VDFA'
+ (Read real array, size 10x11x3, header "VDFA".)
+ Reading 'VIPA'
+ (Read real array, size 10x3, header "VIPA".)
+ Reading 'VDPA'
+ (Read real array, size 10x3, header "VDPA".)
+ Reading 'VIGA'
+ (Read real array, size 10x3, header "VIGA".)
+ Reading 'VDGA'
+ (Read real array, size 10x3, header "VDGA".)
+ Reading 'VKB'
+ (Read real array, size 3, header "VKB".)
+ Reading 'VDEP'
+ (Read real array, size 3, header "VDEP".)
+ Reading 'VXMD'
+ (Read real array, size 10x3x3, header "VXMD".)
+ Reading 'VST'
+ (Read real array, size 1x3, header "VST".)
+ Reading 'VFM'
+ (Read real array, size 5x11x3, header "VFM".)
+ Reading 'VIFM'
+ (Read real array, size 10x11x3, header "VIFM".)
+ Reading 'VDFM'
+ (Read real array, size 10x11x3, header "VDFM".)
+ Reading 'VIPM'
+ (Read real array, size 10x3, header "VIPM".)
+ Reading 'VDPM'
+ (Read real array, size 10x3, header "VDPM".)
+ Reading 'VIGM'
+ (Read real array, size 10x3, header "VIGM".)
+ Reading 'VDGM'
+ (Read real array, size 10x3, header "VDGM".)
+ Reading 'VIMS'
+ (Read real array, size 10x3x3, header "VIMS".)
+ Reading 'VXWD'
+ (Read real array, size 10x3x3, header "VXWD".)
+ Reading 'VIWS'
+ (Read real array, size 10x3x3, header "VIWS".)
+ Reading 'VTWR'
+ (Read real array, size 1x10x3x3, header "VTWR".)
+  Formula for 'VPA'
+  Formula for 'PRIVEXP'
+  Formula for 'VFA'
+  Formula for 'VFA'
+  Formula for 'VOA'
+  Formula for 'VOA'
+  Formula for 'REGINV'
+  Formula for 'VGA'
+  Formula for 'GOVEXP'
+  Formula for 'VEXPORTS'
+  Formula for 'VIMPORTS'
+  Formula for 'GDPEXP'
+  Formula for 'GDPEXP'
+  Formula for 'GDPEXP'
+  Formula for 'GDPEXP'
+  Formula for 'GDPEXP'
+  Formula for 'NETFACTINC'
+  Formula for 'VDM'
+  Formula for 'VOM'
+  Formula for 'VOM'
+  Formula for 'VOM'
+  Formula for 'VOM'
+  Formula for 'NETAXES'
+  Formula for 'GDPSRC'
+  Formula for 'GDPSRC'
+  Formula for 'GDPSRC'
+  Formula for 'NETINV'
+  Formula for 'CAPITALACCT'
+  Formula for 'CAPITALACCT'
+  Formula for 'CURRENTACCT'
+  Formula for 'CURRENTACCT'
+  Formula for 'CURRENTACCT'
+  Formula for 'VALEXPORTS'
+  Formula for 'VALEXPORTS'
+  Formula for 'VALIMPORTS'
+  Formula for 'VALIMPORTS'
+  Formula for 'CIFDECOMP'
+  Formula for 'CIFDECOMP'
+  Formula for 'OUTDISP'
+  Formula for 'OUTDISP'
+  Formula for 'OUTDISP'
+  Formula for 'OUTDISP'
+  Formula for 'DOMSALESDISP'
+  Formula for 'DOMSALESDISP'
+  Formula for 'DOMSALESDISP'
+  Formula for 'IMPSALESDISP'
+  Formula for 'IMPSALESDISP'
+  Formula for 'IMPSALESDISP'
+  Formula for 'VALOUTPUT'
+  Formula for 'VALOUTPUT'
+  Formula for 'SUFFICIENCY'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVFA'
+  Formula for 'NVPA'
+  Formula for 'NVPA'
+  Formula for 'NVPA'
+  Formula for 'NVPA'
+  Formula for 'NVGA'
+  Formula for 'NVGA'
+  Formula for 'NVGA'
+  Formula for 'NVGA'
+ (Opened, for writing, header file 'output\baseview.har'.)
+ Writing 'GDPEXP'
+ (Written real array, size 3x5, header "AG01".)
+ Writing 'GDPSRC'
+ (Written real array, size 3x3, header "AG02".)
+ Writing 'EVFA'
+ (Written real array, size 5x11x3, header "AG03".)
+ Writing 'CAPITALACCT'
+ (Written real array, size 3x2, header "AG04".)
+ Writing 'CURRENTACCT'
+ (Written real array, size 3x2x10, header "AG05".)
+ Writing 'VKB'
+ (Written real array, size 3, header "AG06".)
+ Writing 'VALEXPORTS'
+ (Written real array, size 10x3x3x2, header "BI01".)
+ Writing 'VALIMPORTS'
+ (Written real array, size 10x3x3x2, header "BI02".)
+ Writing 'CIFDECOMP'
+ (Written real array, size 10x3x3x2, header "BI03".)
+ Writing 'OUTDISP'
+ (Written real array, size 10x3x3, header "CM01".)
+ Writing 'DOMSALESDISP'
+ (Written real array, size 10x3x3, header "CM02".)
+ Writing 'IMPSALESDISP'
+ (Written real array, size 10x3x3, header "CM03".)
+ Writing 'VALOUTPUT'
+ (Written real array, size 10x3x2, header "CM04".)
+ Writing 'SUFFICIENCY'
+ (Written real array, size 10x3, header "CM05".)
+ Writing 'NVFA'
+ (Written real array, size 15x11x3x2x2, header "SF01".)
+ Writing 'NVPA'
+ (Written real array, size 10x3x2x2, header "SF02".)
+ Writing 'NVGA'
+ (Written real array, size 10x3x2x2, header "SF03".)
+  Formula for 'VITQS'
+ Reading 'VITQS'
+   [Header "VTQS" does not exist so nothing read.]
+  Formula for 'rTO'
+  Formula for 'rTF'
+  (Number of ZERO DIVIDED BY ZERO operations was 66.)
+    ( Default value used was 1.0000000. )
+  Formula for 'rTPD'
+  Formula for 'rTPI'
+  Formula for 'rTGD'
+  Formula for 'rTGI'
+  Formula for 'rTFD'
+  Formula for 'rTFI'
+  Formula for 'rTXS'
+  Formula for 'rTMS'
+  Formula for 'rTQSMS'
+  Formula for 'rTQSMS'
+ (Opened, for writing, header file 'output\baserate.har'.)
+ Writing 'rTO'
+ (Written real array, size 16x3, header "rTO".)
+ Writing 'rTF'
+ (Written real array, size 5x11x3, header "rTF".)
+ Writing 'rTPD'
+ (Written real array, size 10x3, header "rTPD".)
+ Writing 'rTPI'
+ (Written real array, size 10x3, header "rTPI".)
+ Writing 'rTGD'
+ (Written real array, size 10x3, header "rTGD".)
+ Writing 'rTGI'
+ (Written real array, size 10x3, header "rTGI".)
+ Writing 'rTFD'
+ (Written real array, size 10x11x3, header "rTFD".)
+ Writing 'rTFI'
+ (Written real array, size 10x11x3, header "rTFI".)
+ Writing 'rTXS'
+ (Written real array, size 10x3x3, header "rTXS".)
+ Writing 'rTMS'
+ (Written real array, size 10x3x3, header "rTMS".)
+ Writing 'rTQSMS'
+ (Written real array, size 2x10x3x3, header "rTQS".)
+  Formula for 'CHKMKTCLIMP'
+  Formula for 'SURPLUS'
+  Formula for 'VTWR_M'
+  Formula for 'CHKTRANS_D'
+  Formula for 'VSTT'
+  Formula for 'VSTT'
+  Formula for 'CHKTRANS_S'
+  Formula for 'SUMTRANS_S'
+  Formula for 'SUMTRANS_D'
+  Formula for 'SUMSURPLUS'
+  Formula for 'SUMMKTCLIMP'
+  Formula for 'SUMIMBALS'
+ (Opened, for writing, header file 'output\baseview.har'.)
+ Writing 'SUMIMBALS'
+ (Written real array, size 1, header "0IMB".)
+ Writing 'SUMTRANS_S'
+ (Written real array, size 1, header "1TNS".)
+ Writing 'SUMTRANS_D'
+ (Written real array, size 1, header "1TND".)
+ Writing 'SUMSURPLUS'
+ (Written real array, size 1, header "1SRP".)
+ Writing 'SUMMKTCLIMP'
+ (Written real array, size 1, header "1IMP".)
+ Writing 'CHKTRANS_S'
+ (Written real array, size 1, header "2TNS".)
+ Writing 'CHKTRANS_D'
+ (Written real array, size 10x3x3, header "2TND".)
+ Writing 'SURPLUS'
+ (Written real array, size 3, header "2SRP".)
+ Writing 'CHKMKTCLIMP'
+ (Written real array, size 10x3, header "2IMP".)
+  Formula for 'SIGNER'
+ Writing 'SIGNER'
+ (Written real array, size 5x3, header "SVOA".)
+  Formula for 'SIGNEPR'
+ Writing 'SIGNEPR'
+ (Written real array, size 5x11x3, header "SVFA".)
+  Formula for 'SIGNTPR'
+ Writing 'SIGNTPR'
+ (Written real array, size 10x11x3, header "SIFA".)
+  Formula for 'SIGNTPR'
+ Writing 'SIGNTPR'
+ (Written real array, size 10x11x3, header "SDFA".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SIPA".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SDPA".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SIGA".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SDGA".)
+  Formula for 'SIGNR'
+ Writing 'SIGNR'
+ (Written real array, size 3, header "SKB".)
+  Formula for 'SIGNR'
+ Writing 'SIGNR'
+ (Written real array, size 3, header "SDEP".)
+  Formula for 'SIGNTRR'
+ Writing 'SIGNTRR'
+ (Written real array, size 10x3x3, header "SXMD".)
+  Formula for 'SIGNMR'
+ Writing 'SIGNMR'
+ (Written real array, size 1x3, header "SST".)
+  Formula for 'SIGNMTRR'
+ Writing 'SIGNMTRR'
+ (Written real array, size 1x10x3x3, header "STWR".)
+  Formula for 'SIGNEPR'
+ Writing 'SIGNEPR'
+ (Written real array, size 5x11x3, header "SFM".)
+  Formula for 'SIGNTPR'
+ Writing 'SIGNTPR'
+ (Written real array, size 10x11x3, header "SIFM".)
+  Formula for 'SIGNTPR'
+ Writing 'SIGNTPR'
+ (Written real array, size 10x11x3, header "SDFM".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SIPM".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SDPM".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SIGM".)
+  Formula for 'SIGNTR'
+ Writing 'SIGNTR'
+ (Written real array, size 10x3, header "SDGM".)
+  Formula for 'SIGNTRR'
+ Writing 'SIGNTRR'
+ (Written real array, size 10x3x3, header "SIMS".)
+  Formula for 'SIGNTRR'
+ Writing 'SIGNTRR'
+ (Written real array, size 10x3x3, header "SXWD".)
+  Formula for 'SIGNTRR'
+ Writing 'SIGNTRR'
+ (Written real array, size 10x3x3, header "SIWS".)
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+  Formula for 'SUMMARY'
+ Writing 'SUMMARY'
+ (Written real array, size 16x18x3, header "SMRY".)
+  Formula for 'SUMBAL'
+ Writing 'SUMBAL'
+ (Written real array, size 10x3, header "SBAL".)
+  Formula for 'MACSUM'
+  Formula for 'MACSUM'
+  Formula for 'MACSUM'
+  Formula for 'MACSUM'
+  Formula for 'MACSUM'
+  Formula for 'MACSUM'
+ Writing 'MACSUM'
+ (Written real array, size 3x5, header "MSUM".)
+ Transferring "LICN" from file 'GTAPSETS' to file 'GTAPVIEW'
+ (Opened, as header, existing file 'output\sets.har'.)
+   (1 character strings, each of length 65 written. Header 'LICN')
+ (Opened, for writing, header file 'output\baseview.har'.)
+ Transferring "H1L" from file 'GTAPSETS' to file 'GTAPVIEW'
+   (3 character strings, each of length 50 written. Header 'H1L ')
+ (Opened, for writing, header file 'output\baseview.har'.)
+ Transferring "H2L" from file 'GTAPSETS' to file 'GTAPVIEW'
+   (10 character strings, each of length 50 written. Header 'H2L ')
+ (Opened, for writing, header file 'output\baseview.har'.)
+  (Checking that values of 'VST' are in the required range.)
+ [CPU for reads, formulas etc is 6.25000000E-02 seconds.]
+ Elapsed time for reads, formulas etc is: less than one second.
+ [CPU for all of this 0-step calculation is 6.25000000E-02 seconds.]
+ Elapsed time for all this 0-step calculation is: less than one second.
+  [Total CPU is 0.18750000 seconds.]
+  
+  (Inputs have been taken from the Command file
+  'C:\GTPAg2\GTAP10P2\GTAP\gtapview.cmf')
+  
+  (The program has completed without error.)
+  (There were         1 warnings.)
+  (If you have a LOG file, search for '%%W' to see them.)
+  (The last was:
+   'Your GEMPACK licence will expire on 30-APR-2018')
+  Total elapsed time is:  1 seconds.
+  
+  
+  This run ended at 13:45:57 on 23-APR-2018

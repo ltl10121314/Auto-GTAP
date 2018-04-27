@@ -1,0 +1,311 @@
+! This file was created by program GtapAgg.
+! If you edit it directly, please observe the following rules:
+!   The file has 6 sections:
+!     A section marker is a line that starts with "=".
+!     Each section begins AND ends with its own section markers.
+!     Hence the file must contain 12 section marker lines.
+!     Blank lines are ignored.
+!     Lines starting with "!" are ignored.
+!
+!   Below, "sector" refers to "tradeable commodity"
+!      and "factor" refers to "endowment commodity".
+!
+!   Section 1 lists new (aggregated) sectors.
+!   Each line consists of:
+!             (a) name of new sector (max 12 letters)
+!             (b) an ampersand "&"
+! optionally, (c) description of new sector (max 30 letters)
+!   You may have to add or delete lines in Section 1
+!
+!   Section 2 lists original (disaggregated) sectors.
+!   Each line consists of:
+!             (a) name of old sector (max 12 letters)
+! optionally, (b) space or comma followed by description of new
+!                     sector (max 30 letters)
+!             (c) an ampersand "&"
+!             (d) matching new sector (must be one of the short
+!                     names mentioned in Section 1
+!   You are not expected to add or delete lines in Section 2,
+!        or to alter the stuff BEFORE the "&" on each line
+!
+! Sections 3 and 4 specify the regional aggregation.
+! They follow the same pattern as Sections 1 and 2.
+!
+! Sections 5 and 6 specify the factor (endowment) aggregation.
+! They follow a similar pattern to Sections 1 and 2.
+! However see notes preceding Section 5.
+!
+!
+! Section 1
+! One line for each new sector
+= = = = = =
+GrainsCrops  & Grains and Crops
+MeatLstk     & Livestock and Meat Products
+Extraction   & Mining and Extraction
+ProcFood     & Processed Food
+TextWapp     & Textiles and Clothing
+LightMnfc    & Light Manufacturing
+HeavyMnfc    & Heavy Manufacturing
+Util_Cons    & Utilities and Construction
+TransComm    & Transport and Communication
+OthServices  & Other Services
+= = = = = =
+!
+! Section 2
+! One line for each old sector
+! Old sector at left, corresponding new sector on right
+= = = = = =
+pdr            Paddy rice                      & GrainsCrops
+wht            Wheat                           & GrainsCrops
+gro            Cereal grains nec               & GrainsCrops
+v_f            Vegetables, fruit, nuts         & GrainsCrops
+osd            Oil seeds                       & GrainsCrops
+c_b            Sugar cane, sugar beet          & GrainsCrops
+pfb            Plant-based fibers              & GrainsCrops
+ocr            Crops nec                       & GrainsCrops
+ctl            Cattle,sheep,goats,horses       & MeatLstk
+oap            Animal products nec             & MeatLstk
+rmk            Raw milk                        & MeatLstk
+wol            Wool, silk-worm cocoons         & MeatLstk
+frs            Forestry                        & Extraction
+fsh            Fishing                         & Extraction
+coa            Coal                            & Extraction
+oil            Oil                             & Extraction
+gas            Gas                             & Extraction
+omn            Minerals nec                    & Extraction
+cmt            Meat: cattle,sheep,goats,horse  & MeatLstk
+omt            Meat products nec               & MeatLstk
+vol            Vegetable oils and fats         & ProcFood
+mil            Dairy products                  & ProcFood
+pcr            Processed rice                  & GrainsCrops
+sgr            Sugar                           & ProcFood
+ofd            Food products nec               & ProcFood
+b_t            Beverages and tobacco products  & ProcFood
+tex            Textiles                        & TextWapp
+wap            Wearing apparel                 & TextWapp
+lea            Leather products                & LightMnfc
+lum            Wood products                   & LightMnfc
+ppp            Paper products, publishing      & LightMnfc
+p_c            Petroleum, coal products        & HeavyMnfc
+crp            Chemical,rubber,plastic prods   & HeavyMnfc
+nmm            Mineral products nec            & HeavyMnfc
+i_s            Ferrous metals                  & HeavyMnfc
+nfm            Metals nec                      & HeavyMnfc
+fmp            Metal products                  & LightMnfc
+mvh            Motor vehicles and parts        & LightMnfc
+otn            Transport equipment nec         & LightMnfc
+ele            Electronic equipment            & HeavyMnfc
+ome            Machinery and equipment nec     & HeavyMnfc
+omf            Manufactures nec                & LightMnfc
+ely            Electricity                     & Util_Cons
+gdt            Gas manufacture, distribution   & Util_Cons
+wtr            Water                           & Util_Cons
+cns            Construction                    & Util_Cons
+trd            Trade                           & TransComm
+otp            Transport nec                   & TransComm
+wtp            Sea transport                   & TransComm
+atp            Air transport                   & TransComm
+cmn            Communication                   & TransComm
+ofi            Financial services nec          & OthServices
+isr            Insurance                       & OthServices
+obs            Business services nec           & OthServices
+ros            Recreation and other services   & OthServices
+osg            PubAdmin/Defence/Health/Educat  & OthServices
+dwe            Dwellings                       & OthServices
+= = = = = =
+!
+! Section 3
+! One line for each new region
+= = = = = =
+Oceania      & Australia, New Zealand
+chn          & China
+EastAsia     & East Asia
+SEAsia       & Southeast Asia
+SouthAsia    & South Asia
+usa          & United States of America
+NAmerica     & North America
+LatinAmer    & Latin America
+EU_28        & European Union 28
+MENA         & Middle East and North Africa
+SSA          & Sub-Saharan Africa
+RestofWorld  & Rest of World
+= = = = = =
+!
+! Section 4
+! One line for each old region
+! Old region at left, corresponding new region on right
+= = = = = =
+aus            Australia                       & Oceania
+nzl            New Zealand                     & Oceania
+xoc            Rest of Oceania                 & Oceania
+chn            China                           & chn
+hkg            Hong Kong                       & EastAsia
+jpn            Japan                           & EastAsia
+kor            Korea                           & EastAsia
+mng            Mongolia                        & EastAsia
+twn            Taiwan                          & EastAsia
+xea            Rest of East Asia               & EastAsia
+brn            Brunei Darussalam               & EastAsia
+khm            Cambodia                        & SEAsia
+idn            Indonesia                       & SEAsia
+lao            Lao People's Democratic Republ  & SEAsia
+mys            Malaysia                        & SEAsia
+phl            Philippines                     & SEAsia
+sgp            Singapore                       & SEAsia
+tha            Thailand                        & SEAsia
+vnm            Viet Nam                        & SEAsia
+xse            Rest of Southeast Asia          & SEAsia
+bgd            Bangladesh                      & SouthAsia
+ind            India                           & SouthAsia
+npl            Nepal                           & SouthAsia
+pak            Pakistan                        & SouthAsia
+lka            Sri Lanka                       & SouthAsia
+xsa            Rest of South Asia              & SouthAsia
+can            Canada                          & NAmerica
+usa            United States of America        & usa
+mex            Mexico                          & NAmerica
+xna            Rest of North America           & NAmerica
+arg            Argentina                       & LatinAmer
+bol            Bolivia                         & LatinAmer
+bra            Brazil                          & LatinAmer
+chl            Chile                           & LatinAmer
+col            Colombia                        & LatinAmer
+ecu            Ecuador                         & LatinAmer
+pry            Paraguay                        & LatinAmer
+per            Peru                            & LatinAmer
+ury            Uruguay                         & LatinAmer
+ven            Venezuela                       & LatinAmer
+xsm            Rest of South America           & LatinAmer
+cri            Costa Rica                      & LatinAmer
+gtm            Guatemala                       & LatinAmer
+hnd            Honduras                        & LatinAmer
+nic            Nicaragua                       & LatinAmer
+pan            Panama                          & LatinAmer
+slv            El Salvador                     & LatinAmer
+xca            Rest of Central America         & LatinAmer
+dom            Dominican Republic              & LatinAmer
+jam            Jamaica                         & LatinAmer
+pri            Puerto Rico                     & LatinAmer
+tto            Trinidad and Tobago             & LatinAmer
+xcb            Caribbean                       & LatinAmer
+aut            Austria                         & EU_28
+bel            Belgium                         & EU_28
+cyp            Cyprus                          & EU_28
+cze            Czech Republic                  & EU_28
+dnk            Denmark                         & EU_28
+est            Estonia                         & EU_28
+fin            Finland                         & EU_28
+fra            France                          & EU_28
+deu            Germany                         & EU_28
+grc            Greece                          & EU_28
+hun            Hungary                         & EU_28
+irl            Ireland                         & EU_28
+ita            Italy                           & EU_28
+lva            Latvia                          & EU_28
+ltu            Lithuania                       & EU_28
+lux            Luxembourg                      & EU_28
+mlt            Malta                           & EU_28
+nld            Netherlands                     & EU_28
+pol            Poland                          & EU_28
+prt            Portugal                        & EU_28
+svk            Slovakia                        & EU_28
+svn            Slovenia                        & EU_28
+esp            Spain                           & EU_28
+swe            Sweden                          & EU_28
+gbr            United Kingdom                  & EU_28
+che            Switzerland                     & RestofWorld
+nor            Norway                          & RestofWorld
+xef            Rest of EFTA                    & RestofWorld
+alb            Albania                         & RestofWorld
+bgr            Bulgaria                        & EU_28
+blr            Belarus                         & RestofWorld
+hrv            Croatia                         & EU_28
+rou            Romania                         & EU_28
+rus            Russian Federation              & RestofWorld
+ukr            Ukraine                         & RestofWorld
+xee            Rest of Eastern Europe          & RestofWorld
+xer            Rest of Europe                  & RestofWorld
+kaz            Kazakhstan                      & RestofWorld
+kgz            Kyrgyzstan                      & RestofWorld
+tjk            Tajikistan                      & RestofWorld
+xsu            Rest of Former Soviet Union     & RestofWorld
+arm            Armenia                         & RestofWorld
+aze            Azerbaijan                      & RestofWorld
+geo            Georgia                         & RestofWorld
+bhr            Bahrain                         & MENA
+irn            Iran Islamic Republic of        & MENA
+isr            Israel                          & MENA
+jor            Jordan                          & MENA
+kwt            Kuwait                          & MENA
+omn            Oman                            & MENA
+qat            Qatar                           & MENA
+sau            Saudi Arabia                    & MENA
+tur            Turkey                          & MENA
+are            United Arab Emirates            & MENA
+xws            Rest of Western Asia            & MENA
+egy            Egypt                           & MENA
+mar            Morocco                         & MENA
+tun            Tunisia                         & MENA
+xnf            Rest of North Africa            & MENA
+ben            Benin                           & SSA
+bfa            Burkina Faso                    & SSA
+cmr            Cameroon                        & SSA
+civ            Cote d'Ivoire                   & SSA
+gha            Ghana                           & SSA
+gin            Guinea                          & SSA
+nga            Nigeria                         & SSA
+sen            Senegal                         & SSA
+tgo            Togo                            & SSA
+xwf            Rest of Western Africa          & SSA
+xcf            Central Africa                  & SSA
+xac            South Central Africa            & SSA
+eth            Ethiopia                        & SSA
+ken            Kenya                           & SSA
+mdg            Madagascar                      & SSA
+mwi            Malawi                          & SSA
+mus            Mauritius                       & SSA
+moz            Mozambique                      & SSA
+rwa            Rwanda                          & SSA
+tza            Tanzania                        & SSA
+uga            Uganda                          & SSA
+zmb            Zambia                          & SSA
+zwe            Zimbabwe                        & SSA
+xec            Rest of Eastern Africa          & SSA
+bwa            Botswana                        & SSA
+nam            Namibia                         & SSA
+zaf            South Africa                    & SSA
+xsc            Rest of South African Customs   & SSA
+xtw            Rest of the World               & RestofWorld
+= = = = = =
+!
+! Section 5
+! One line for each new factor
+! Four fields separated by three ampersands (&)
+! (a) name of new factor (max 12 letters)
+! (b) an ampersand "&"
+! (c) either "sluggish" or "mobile"
+! (d) an ampersand "&"
+! (e) for sluggish ETRAE number <0, for mobile "---"
+! (f) an ampersand "&"
+! optionally, (g) description of new factor (max 30 letters)
+= = = = = =
+Land         & sluggish &-1.000000 & 
+UnSkLab      &   mobile &     --- & 
+SkLab        &   mobile &     --- & 
+Capital      &   mobile &     --- & 
+NatRes       & sluggish &-0.001000 & 
+= = = = = =
+!
+! Section 6
+! One line for each old factor
+! Old factor at left, corresponding new factor on right
+= = = = = =
+Land           Land                            & Land
+tech_aspros    Technicians/AssocProfessional   & SkLab
+clerks         Clerks                          & UnSkLab
+service_shop   Service/Shop workers            & UnSkLab
+off_mgr_pros   Officials and Managers          & SkLab
+ag_othlowsk    Agricultural and Unskilled      & UnSkLab
+Capital        Capital                         & Capital
+NatlRes        Natural Resources               & NatRes
+= = = = = =

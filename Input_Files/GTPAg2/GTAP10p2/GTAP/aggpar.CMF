@@ -1,0 +1,14 @@
+auxiliary files = aggpar;
+check-on-read elements = warn; ! Optional: very often needed
+cpu=yes ; ! Optional: Reports CPU times for various stages
+log file = yes;  ! Optional
+WHS = no ;   ! Do not use sparse format 
+! Input files:
+File DDATA = input\basedata.har; ! disaggregate data in GTAP notation
+File DPARAM = input\default.prm; ! disaggregate parameters
+File EPARAM = maphar.dat; ! user-supplied parameters
+File DSETS = input\SETS.har; ! set specification for disaggregate data
+File ASETS = maphar.dat; ! set specification for aggregate data
+! Output files:
+File PARAM = output\default.prm; ! aggregated CDE, CES and CET elasticities
+
