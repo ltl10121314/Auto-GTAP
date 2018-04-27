@@ -19,6 +19,7 @@ from ExportDictionary import ExportDictionary
 from CreateOutput import CreateOutput
 from CreateConfig import CreateConfig
 from ModifyHAR import ModifyHAR
+from MoveDatabaseFiles import MoveDatabaseFiles
 from SplitCommodities import SplitCommodities
 from AggregateModelData import AggregateModelData
 
@@ -31,6 +32,7 @@ for simulation_name in config.simulation_list:
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   config.sim_property(simulation_name, "input_directory"), config.sim_property(simulation_name, "shock")).create("Gas")
     AggregateModelData(simulation_name)
+    MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
     SplitCommodities(simulation_name)
     if config.sim_property(simulation_name, "modify_har"):
         ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
