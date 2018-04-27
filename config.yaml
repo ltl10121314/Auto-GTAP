@@ -23,7 +23,8 @@ simulations:
   GTAP-E-Johan:
     input_directory: GTAP-E
     other_input_directories:
-      - MSPlitCom
+      - MSplitCom-Exe
+      - GTPAg2
     model_file_name: gtap
     model_type: gtap-e
     solution_method: j

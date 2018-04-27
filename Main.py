@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-4-24"
+__altered__ = "2018-4-27"
 
 # Import methods
 # Import External Methods
@@ -19,15 +19,19 @@ from ExportDictionary import ExportDictionary
 from CreateOutput import CreateOutput
 from CreateConfig import CreateConfig
 from ModifyHAR import ModifyHAR
+from SplitCommodities import SplitCommodities
+from AggregateModelData import AggregateModelData
 
 # Call Methods
 config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
-CleanWorkFiles(config.simulation_list)
+CleanWorkFiles()
 for simulation_name in config.simulation_list:
     CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                   config.sim_property(simulation_name, "input_directory"), config.sim_property(simulation_name, "shock")).create("Gas")
+    AggregateModelData(simulation_name)
+    SplitCommodities(simulation_name)
     if config.sim_property(simulation_name, "modify_har"):
         ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
                   config.yaml_file["parameter_modifications"][
