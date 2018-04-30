@@ -8,7 +8,8 @@ simulations_to_run:
 #  - Actual
 #  - GTAP-E-Gragg
 #  - GTAP-E-Custom-G
-  - GTAP-E-Johan
+#  - GTAP-E-Johan
+    - GTAP-V7
 parameter_modifications:
   low-elasticity:
       -
@@ -70,15 +71,18 @@ simulations:
   GTAP-V7:
     input_directory: GTAP-V7
     model_file_name: gtap
+    other_input_directories:
+      - MSplitCom-Exe
+      - GTPAg2
     model_type: gtap-v7
     solution_method: j
     modify_har: false
     shock: experiment
   GTAP-E-Gragg:
-    input_directory: GTAP-E
+    input_directory: GTAP-V7
     model_file_name: gtap
-    model_type: gtap-e
-    solution_method: g
+    model_type: gtap-v7
+    solution_method: j
     modify_har: false
     shock: experiment
   Actual:
