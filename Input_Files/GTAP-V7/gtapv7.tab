@@ -1,0 +1,5206 @@
+!<
+    =============================
+    Global Trade Analysis Project
+    The GTAP Modeling Framework
+    GTAP Model Version 7.0
+    June 2017
+    =============================
+
+    For documentation see:
+    Erwin L. Corong, Thomas W. Hertel, Robert A. McDougall, Marinos E. Tsigas,
+    and Dominique van der Mensbrugghe. The Standard GTAP Model, Version 7.
+    Journal of Global Economic Analysis, [S.l.], v.2, n.1, p. 1-119, june 2017.
+    Available at:
+    <https://jgea.org/resources/jgea/ojs/index.php/jgea/article/view/47>
+    or
+    http://dx.doi.org/10.21642/JGEA.020101AF.
+
+    The GTAPv7 paper documents all the technical changes since the GTAP book and
+    GTAP.TAB (version 6.2). For older documentation, see:
+
+    (a) Hertel, T.W. and M.E. Tsigas, "Structure of the Standard GTAP Model",
+    Chapter 2 in T.W. Hertel (editor) "Global Trade Analysis: Modeling and
+    Applications", Cambridge University Press, 1997.
+
+    (b) R.A. McDougall, "A New Regional Household Demand System for GTAP",
+    GTAP Technical Paper #20, Center for Global Trade Analysis, Purdue
+    University
+
+    (c) Hertel T.W., K. Itakura and R.A. McDougall, GTAP.TAB(version 6.2)
+
+
+    --------------------
+    HISTORY of this file
+    --------------------
+    June 2017: Version 7.0 replaces GTAP.tab version 6.2
+
+    ----------------------------------
+    Overview of the GTAP.TAB Structure
+    ----------------------------------
+    Preliminaries:
+        A-0. FILES
+        A-1. SET definitions
+        A-2. READ Base Data
+        A-3. Key derivatives of Base Data
+        A-4. Common COEFFICIENTS
+        A-5. Common VARIABLES
+
+    Equation Modules:
+        1.  Firms
+        2.  Commodity supply
+        3.  Income distribution
+        4.  Allocation of income across expenditure categories
+        5.  Domestic final demand
+        6.  Trade, goods market equilibrium and prices
+        7.  Factor market equilibrium
+        8.  Allocation of global saving
+        9.  Tax revenue streams
+       10.  Numeraire and Walras law
+            ................................................
+            Summary Indices (for use in welfare measurement)
+            ................................................
+            B-0. Variables and coefficients for summary indices
+            B-1. Factor price indices
+            B-2. Regional terms of trade (ToT)
+            B-3. GDP indices (value, price and quantity)
+            B-4. Aggregate trade indices (value, price and quantity)
+            B-5. Trade balance indices
+            B-6. Terms of trade (ToT) decomposition
+       11.  Welfare measurement and decomposition
+
+    Welfare summary and post-sim calculations:
+       C. Welfare decomposition summary
+       D. Volume changes (GTAPVol)
+       E. Data balance checks
+>!
+
+!<
+    ----------
+    A-0. FILES
+    ----------
+>!
+
+File
+    GTAPSETS # file with set specification #;
+File
+    GTAPDATA # file containing all Base Data #;
+File
+    GTAPPARM # file containing behavioral parameters #;
+File (new)
+    GTAPSUM # file containing data summary and accounting checks #;
+
+!<
+    --------------------
+    A-1. SET definitions
+    --------------------
+
+    Sets define relevant groupings of entities over which we will be performing
+    operations in the model. SUBSETS are defined in order to facilitate
+    summation over only a portion of a given group, e.g., margin commodities.
+
+    The GTAP Model requires separate SET specification for activities and
+    commodities because of multi-production possibilities--i.e., a single
+    activity could produce multiple commodities (e.g., an agriculture activity
+    producing multiple agricultural commodities), or for a commodity to be
+    produced by multiple activities (e.g., electricity being produced by
+    different generation activities).
+
+    Although the standard GTAP Data Base has a diagonal 'make' matrix, it is
+    possible to aggregate it such that the resulting aggregated
+    database would have a non-diagonal 'make' matrix structure.
+
+    Aide-Memoire for Sets and indices
+    ---------------------------------
+
+    Activities
+    |-----------|
+    |  ACTS(a)  |
+    |-----------|
+
+    Commodities
+    |-----------------------|
+    |        COMM(c)        |
+    |-----------------------|
+    |  MARG(m)  |  NMRG(n)  |
+    |-----------------------|
+
+    Endowments
+    |---------------------------------------------------|
+    |                      ENDW(e)                      |
+    |---------------------------------------------------|
+    |  ENDWF(e)  |  ENDWC(e)  |  ENDWM(e)  |  ENDWS(e)  |
+    |---------------------------------------------------|
+                 |              ENDWMS(e)               |
+                 |--------------------------------------|
+
+
+    Commodities and endowments
+    |-----------------------|
+    |        DEMD(d)        |
+    |-----------------------|
+    |  COMM(c)  |  ENDW(e)  |
+    |-----------------------|
+
+>!
+
+Coefficient
+    VERNUM # version of GTAP Data Base #;
+Read
+    VERNUM from file GTAPDATA header "DVER";
+Update (change)
+    VERNUM = 0.0; ! force it to be copied to update file !
+
+Set
+    REG # regions #
+    read elements from file GTAPSETS header "REG";
+Set
+    COMM # commodities #
+    read elements from file GTAPSETS header "COMM";
+Set
+    MARG # margin commodities #
+    read elements from file GTAPSETS header "MARG";
+Subset
+    MARG is subset of COMM;
+Set
+    NMRG # non-margin commodities # = COMM - MARG;
+Set
+    ACTS # Activities #
+    read elements from file GTAPSETS header "ACTS";
+Set
+    ENDW # endowments #
+    read elements from file GTAPSETS header "ENDW";
+Set !< The single element ENDWC set is defined for the sake of convenience >!
+    ENDWC # capital endowment # (capital);
+Subset
+    ENDWC is subset of ENDW;
+Set
+    ENDWM # mobile endowments #
+    read elements from file GTAPSETS header "ENDM";
+Subset
+    ENDWM is subset of ENDW;
+Set
+    ENDWS # sluggish endowment #
+    read elements from file GTAPSETS header "ENDS";
+Subset
+    ENDWS is subset of ENDW;
+Set
+    ENDWMS # mobile and sluggish endowments # = ENDWM + ENDWS;
+Subset
+    ENDWMS is subset of ENDW;
+Subset
+    ENDWC is subset of ENDWMS;
+Set
+    ENDWF # Sector-specific endowment # = ENDW - ENDWMS;
+Set
+    DEMD # demanded commodities and endowments # = ENDW + COMM;
+
+!<
+    -------------------
+    A-2. READ Base Data
+    -------------------
+    We read in here almost all the base data, and define variables and
+    coefficients associated with them. A few data arrays, namely: VKB,
+    VTMFSD and DPARSUM are read in their respective modules.
+
+    Data flows and prices are valued at: supplier(S)
+                                         basic(B)
+                                         producer(P)
+                                         FOB exports
+                                         CIF imports
+
+    The READ statements are divided into six sections:
+    Firms
+    Commodity Supply
+    Government Consumption
+    Private Consumption
+    Investment Consumption
+    Saving
+    Global Bank
+    International Trade and Transport
+
+    Since these are invariant for each solution of the model, they are termed
+    coefficients. Coefficients are assigned upper case to distinguish them
+    from variables (this is purely cosmetic, as GEMPACK is not case-sensitive).
+    Variables in GEMPACK are assigned lower case labels to denote the fact that
+    they are percentage changes. In some cases, original levels values for
+    selected variables are defined to permit the user to compare post-simulation
+    levels values across several simulations.
+
+    The updating command indicates how the new level of the coefficient will
+    be computed based on the previous solution of the linearized equations.
+    Note that the notation used in the update commands is a shorthand for
+    total differentials of these coefficient values.  Thus, w * v indicates
+    that we want to take the total differential of W * V, plug in the
+    calculated values of w and v, and add this to the base level in order to
+    obtain a revised value for this product.
+>!
+
+!<
+    Firms
+    -----
+>!
+
+!<  Domestic intermediate purchases by firms at basic prices >!
+Variable (orig_level=1.0)(all,c,COMM)(all,r,REG)
+    pds(c,r) # price of domestically supplied commodity c in region r #;
+Variable (orig_level=VDFB)(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    qfd(c,a,r) # demand for domestic commodity c by activity a in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VDFB(c,a,r) # expenditure on domestic c by act. a in r at basic prices #;
+Read
+    VDFB from file GTAPDATA header "VDFB";
+Update (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VDFB(c,a,r) = pds(c,r) * qfd(c,a,r);
+
+!<  Imported intermediate purchases by firms at basic prices >!
+Variable (orig_level=1.0)(all,c,COMM)(all,r,REG)
+    pms(c,r) # price of aggregate commodity import bundle c in region r #;
+Variable (orig_level=VMFB)(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    qfm(c,a,r) # imported commodity c for use by activity a in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VMFB(c,a,r) # expenditure on imported c by act. a in r at basic prices #;
+Read
+    VMFB from file GTAPDATA header "VMFB";
+Update (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VMFB(c,a,r) = pms(c,r) * qfm(c,a,r);
+
+!<  Domestic intermediate purchases by firms at producer prices >!
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pfd(c,a,r) # price of domestic com. c purchased by act. a in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VDFP(c,a,r) # expenditure on dom. c by act. a in r at producer prices #;
+Read
+    VDFP from file GTAPDATA header "VDFP";
+Update (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VDFP(c,a,r) = pfd(c,a,r) * qfd(c,a,r);
+
+!<  Imported intermediate purchases by firms at producer prices >!
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pfm(c,a,r) # price of imported com. c purchased by act. a in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VMFP(c,a,r) # expenditure on imp. c by act. a in r at producer prices #;
+Read
+    VMFP from file GTAPDATA header "VMFP";
+Update (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VMFP(c,a,r) = pfm(c,a,r) * qfm(c,a,r);
+
+!<  Endowment at supplier's (after income tax) prices >!
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    pes(e,a,r) # supply (after income tax) price of e for use by a in r #;
+Variable (orig_level=EVOS)(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    qes(e,a,r) # supply of endowment e for use by activity a in region r #;
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    EVOS(e,a,r) # value of e for use by a in r at supplier (after tax) prices #;
+Read
+    EVOS from file GTAPDATA header "EVOS";
+Update (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    EVOS(e,a,r) = pes(e,a,r) * qes(e,a,r);
+
+!<  Endowments at basic (income tax inclusive) prices >!
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    peb(e,a,r) # basic price of endowment e in act. a in region r #;
+Variable (orig_level=EVFB)(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    qfe(e,a,r) # demand for endowment e by act. a in region r #;
+Coefficient (ge 0)(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    EVFB(e,a,r) # expenditure on endowment e by act. a in r at basic prices #;
+Read
+    EVFB from file GTAPDATA header "EVFB";
+Update (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    EVFB(e,a,r) = peb(e,a,r) * qfe(e,a,r);
+
+!<  Endowments at producer prices >!
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    pfe(e,a,r) # price of endowment e purchased by activity a region r #;
+Coefficient (ge 0)(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    EVFP(e,a,r) # expenditure on endowment e by a in r at producer prices #;
+Read
+    EVFP from file GTAPDATA header "EVFP";
+Update (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    EVFP(e,a,r) = pfe(e,a,r) * qfe(e,a,r);
+
+!<
+    Commodity supply
+    ----------------
+>!
+
+!<  'make' matrix at supplier's (i.e., output tax exclusive) prices >!
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    ps(c,a,r) # supply price of commodity c produced by activity a in r #;
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    qca(c,a,r) # supply of commodity c by activity a in r #;
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKES(c,a,r) # 'make' matrix valued at supplier's prices #;
+Read
+    MAKES from file GTAPDATA header "MAKS";
+Update (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKES(c,a,r) = ps(c,a,r)*qca(c,a,r);
+
+!<  'make' matrix at basic (i.e., output tax inclusive) prices >!
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pca(c,a,r) # basic price of commodity c produced by activity a in r #;
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKEB(c,a,r) # 'make' matrix valued at basic prices #;
+Read
+    MAKEB from file GTAPDATA header "MAKB";
+Update (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKEB(c,a,r) = pca(c,a,r)*qca(c,a,r);
+
+!<
+    Government consumption
+    ----------------------
+>!
+
+!<  Domestic commodity purchases by government at basic prices >!
+Variable (orig_level=VDGB)(all,c,COMM)(all,r,REG)
+    qgd(c,r) # government demand for domestic commodity c in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VDGB(c,r) # government expenditure on domestic c in r at basic prices #;
+Read
+    VDGB from file GTAPDATA header "VDGB";
+Update (all,c,COMM)(all,r,REG)
+    VDGB(c,r) = pds(c,r) * qgd(c,r);
+
+!<  Imported commodity purchases by government at basic prices >!
+Variable (orig_level=VMGB)(all,c,COMM)(all,r,REG)
+    qgm(c,r) # government demand for imported commodity c in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VMGB(c,r) # government expenditure on imported c in r at basic prices #;
+Read
+    VMGB from file GTAPDATA header "VMGB";
+Update (all,c,COMM)(all,r,REG)
+    VMGB(c,r) = pms(c,r) * qgm(c,r);
+
+!<  Domestic commodity purchases by government at producer prices >!
+Variable (all,c,COMM)(all,r,REG)
+    pgd(c,r) # price of domestic com. c purchased by government in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VDGP(c,r) # government expenditure on dom. c in r at producer prices #;
+Read
+    VDGP from file GTAPDATA header "VDGP";
+Update (all,c,COMM)(all,r,REG)
+    VDGP(c,r) = pgd(c,r) * qgd(c,r);
+
+!<  Imported commodity purchases by government at producer prices >!
+Variable (all,c,COMM)(all,r,REG)
+    pgm(c,r) # price of imported com. c purchased by government in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VMGP(c,r) # government expenditure on imp. c in r at producer prices #;
+Read
+    VMGP from file GTAPDATA header "VMGP";
+Update (all,c,COMM)(all,r,REG)
+    VMGP(c,r) = pgm(c,r) * qgm(c,r);
+
+!<
+    Private consumption
+    -------------------
+>!
+
+!<  Domestic commodity purchases by priv. household at basic prices >!
+Variable (orig_level=VDPB)(all,c,COMM)(all,r,REG)
+    qpd(c,r) # private household demand for domestic commodity c in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VDPB(c,r) # private household expenditure on dom. c in r at basic prices #;
+Read
+    VDPB from file GTAPDATA header "VDPB";
+Update (all,c,COMM)(all,r,REG)
+    VDPB(c,r) = pds(c,r) * qpd(c,r);
+
+!<  Imported commodity purchases by priv. household at basic prices >!
+Variable (orig_level=VMPB)(all,c,COMM)(all,r,REG)
+    qpm(c,r) # private household demand for imported commodity c in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VMPB(c,r) # private household expenditure on imp. c in r at basic prices #;
+Read
+    VMPB from file GTAPDATA header "VMPB";
+Update (all,c,COMM)(all,r,REG)
+    VMPB(c,r)= pms(c,r) * qpm(c,r);
+
+!<  Domesticcommodity purchases by priv. household at producer prices >!
+Variable (all,c,COMM)(all,r,REG)
+    ppd(c,r) # price of domestic com. c purchased by private household in r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VDPP(c,r) # private hhld expenditure on dom. c in r at producer prices #;
+Read
+    VDPP from file GTAPDATA header "VDPP";
+Update (all,c,COMM)(all,r,REG)
+    VDPP(c,r) = ppd(c,r) * qpd(c,r);
+
+!<  Imported commodity purchases by priv. household at producer prices >!
+Variable (all,c,COMM)(all,r,REG)
+    ppm(c,r) # price of imported com. c purchased by private household in r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VMPP(c,r) # private hhld expenditure on imp. c in r at producer prices #;
+Read
+    VMPP from file GTAPDATA header "VMPP";
+Update (all,c,COMM)(all,r,REG)
+    VMPP(c,r) = ppm(c,r) * qpm(c,r);
+
+!<
+    Investment consumption
+    ----------------------
+>!
+
+!<  Domestic commodity purchases by investment agent at basic prices >!
+Variable (orig_level=VDIB)(all,c,COMM)(all,r,REG)
+    qid(c,r) # investment demand for domestic commodity c in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VDIB(c,r) # investment expenditure on domestic c in r at basic prices #;
+Read
+    VDIB from file GTAPDATA header "VDIB";
+Update (all,c,COMM)(all,r,REG)
+    VDIB(c,r) = pds(c,r) * qid(c,r);
+
+!<  Imported commodity purchases by investment agent at basic prices >!
+Variable (orig_level=VMIB)(all,c,COMM)(all,r,REG)
+    qim(c,r) # investment demand for imported commodity c in region r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VMIB(c,r) # investment expenditure on imported c in r at basic prices #;
+Read
+    VMIB from file GTAPDATA header "VMIB";
+Update (all,c,COMM)(all,r,REG)
+    VMIB(c,r) = pms(c,r) * qim(c,r);
+
+!<  Domestic commodity purchases by investment agent at producer prices >!
+Variable (all,c,COMM)(all,r,REG)
+    pid(c,r) # price of domestic com. c purchased by investment agent in r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VDIP(c,r) # investment expenditure on dom. c in r at producer prices #;
+Read
+    VDIP from file GTAPDATA header "VDIP";
+Update (all,c,COMM)(all,r,REG)
+    VDIP(c,r) = pid(c,r) * qid(c,r);
+
+!<  Imported commodity purchases by investment agent at producer prices >!
+Variable (all,c,COMM)(all,r,REG)
+    pim(c,r) # price of imported com. c purchased by investment agent in r #;
+Coefficient (ge 0)(all,c,COMM)(all,r,REG)
+    VMIP(c,r) # investment expenditure on imp. c in r at producer prices #;
+Read
+    VMIP from file GTAPDATA header "VMIP";
+Update (all,c,COMM)(all,r,REG)
+    VMIP(c,r) = pim(c,r) * qim(c,r);
+
+!<
+    Saving
+    ------
+>!
+
+Variable (all,r,REG)
+    psave(r) # price of saving in region r #;
+Variable (all,r,REG)
+    qsave(r) # regional demand for NET saving #;
+Coefficient (all,r,REG)
+    SAVE(r) # NET saving in region r valued at producer prices #;
+Read
+    SAVE from file GTAPDATA header "SAVE";
+Update (all,r,REG)
+    SAVE(r) = psave(r) * qsave(r);
+
+!<
+    Global bank
+    -----------
+>!
+
+Variable (all,r,REG)
+    pinv(r) # price index of investment goods #;
+Variable (all,r,REG)
+    kb(r) # beginning-of-period capital stock in r #;
+Coefficient (ge 0)(all,r,REG)
+    VDEP(r) # value of capital depeciation in r (exogenous) #;
+Read
+    VDEP from file GTAPDATA header "VDEP";
+Update (all,r,REG)
+    VDEP(r) = pinv(r) * kb(r);
+!<
+    Value of capital depreciation is used to compute the (exogenous)
+    depreciation rate and therefore does not appear in update.
+>!
+
+!<
+    International trade
+    -------------------
+>!
+
+!<  Exports at basic prices >!
+Variable (orig_level=VXSB)(all,c,COMM)(all,s,REG)(all,d,REG)
+    qxs(c,s,d) # export sales of commodity c from source s to destination d #;
+Coefficient (ge 0)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VXSB(c,s,d)
+    # value of exports of  c from s to d at basic prices (tradeables only) #;
+Read
+    VXSB from file GTAPDATA header "VXSB";
+Update (all,c,COMM)(all,s,REG)(all,d,REG)
+    VXSB(c,s,d) = pds(c,s) * qxs(c,s,d);
+
+!<  Exports at FOB (i.e., exports tax inclusive) prices >!
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    pfob(c,s,d) # FOB world price of com. c from source s to destination d #;
+Coefficient (ge 0)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VFOB(c,s,d)
+    # value of exports of c from s to d at FOB prices (tradeables only) #;
+Read
+    VFOB from file GTAPDATA header "VFOB";
+Update (all,c,COMM)(all,s,REG)(all,d,REG)
+    VFOB(c,s,d) = pfob(c,s,d) * qxs(c,s,d);
+
+!<  Imports at CIF prices >!
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    pcif(c,s,d) # CIF world price of imported com. c from source s to dest. d #;
+Coefficient (ge 0)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VCIF(c,s,d)
+    # value of imports of c from s to d at CIF prices (tradeables only) #;
+Read
+    VCIF from file GTAPDATA header "VCIF";
+Update (all,c,COMM)(all,s,REG)(all,d,REG)
+    VCIF(c,s,d) = pcif(c,s,d) * qxs(c,s,d);
+
+!<  Imports at basic (import tariff inclusive) prices >!
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    pmds(c,s,d) # price of imported c supplied by source region s to dest. d #;
+Coefficient (ge 0)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VMSB(c,s,d)
+    # value of imports of c from s to d at domestic (basic) prices #;
+Read
+    VMSB from file GTAPDATA header "VMSB";
+Update (all,c,COMM)(all,s,REG)(all,d,REG)
+    VMSB(c,s,d) = pmds(c,s,d) * qxs(c,s,d);
+
+!<
+    International transport margins
+    -------------------------------
+>!
+
+Variable (orig_level=VST)(all,m,MARG)(all,r,REG)
+    qst(m,r) # supply of margin m from region r for international transport #;
+Coefficient (ge 0)(all,m,MARG)(all,r,REG)
+    VST(m,r)
+    # value of exports of margin m from r for int'l transport at basic prices #;
+Read
+    VST from file GTAPDATA header "VST";
+Update (all,m,MARG)(all,r,REG)
+    VST(m,r) = pds(m,r) * qst(m,r);
+
+!<
+    -------------------------------------
+    A-3. Key derivatives of the Base Data
+    -------------------------------------
+
+    Key derivatives of the Base Data
+    Regional expenditure and income
+    Indirect tax receipts
+    Miscellaneous coefficients and parameters
+
+>!
+
+!<  Intermediate and endowment expenditure by firms at producer prices >!
+Coefficient (all,d,DEMD)(all,a,ACTS)(all,r,REG)
+    VFP(d,a,r) # expenditure on d by act. a in r valued at producer prices #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    VFP(e,a,r) = EVFP(e,a,r);
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VFP(c,a,r) = VDFP(c,a,r) + VMFP(c,a,r);
+
+!<  Value of output at supplier's prices >!
+Coefficient (all,a,ACTS)(all,r,REG)
+    VOS(a,r) # output of act. a in r valued at supplier's prices #;
+Formula (all,a,ACTS)(all,r,REG)
+    VOS(a,r) = sum{d,DEMD, VFP(d,a,r)};
+
+!<  Endowments >!
+Coefficient (all,e,ENDW)(all,r,REG)
+    VES(e,r) # endowment supply in region r, at supplier's (after tax) prices #;
+Formula (all,e,ENDW)(all,r,REG)
+    VES(e,r) = sum{a,ACTS, EVOS(e,a,r)};
+
+!< Commodity supply >!
+Coefficient (all,a,ACTS)(all,r,REG)
+    MAKEBACT(a,r) # total output of activity a valued at basic prices #;
+Formula (all,a,ACTS)(all,r,REG)
+    MAKEBACT(a,r) = sum{c,COMM, MAKEB(c,a,r)};
+
+Coefficient (all,c,COMM)(all,r,REG)
+    MAKEBCOM(c,r) # supply of commodity c valued at basic prices #;
+Formula (all,c,COMM)(all,r,REG)
+    MAKEBCOM(c,r) = sum{a,ACTS, MAKEB(c,a,r)};
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VDB(c,r) # domestic sales of c in r at basic prices (tradeables only) #;
+Formula (all,c,COMM)(all,r,REG)
+    VDB(c,r) = VDPB(c,r) + VDGB(c,r) + VDIB(c,r) + sum{a,ACTS, VDFB(c,a,r)};
+
+!<  Commodity supply = Commodity demand >!
+Coefficient (all,c,COMM)(all,r,REG)
+    VCB(c,r) # supply of commodity c in region r valued at basic prices #;
+Formula (all,c,COMM)(all,r,REG)
+    VCB(c,r) = VDB(c,r) + sum{d,REG, VXSB(c,r,d)} + IF[c in MARG, VST(c,r)];
+
+!<
+    Regional expenditure and income
+    -------------------------------
+
+    Regional income is allocated between private consumption expenditure,
+    government consumption expenditure, and saving.
+
+    Expenditure of Regional household
+    .................................
+
+                   Regional household(h.h.)
+                    Expenditure = Income
+                             _/|\_
+                           _/  |  \_
+                         _/    |    \_
+                       _/      |      \_
+                     _/        |        \_
+           Private h.h.        |        Government h.h.
+           ( PRIVEXP )         |          ( GOVEXP )
+              _/\_             |              _/\_  <---(CES: ESUBG)
+            _/    \_           |            _/    \_
+           /        \          |           /        \
+        Domestic  Imported   Saving    Domestic    Imported
+         Goods     Goods     ( SAVE )    Goods       Goods
+        ( VDPP )  ( VMPP )              ( VDGP )    ( VMGP )
+
+    Note: The coefficients at the ends of branches are
+          Base Data, e.g., VDPP, SAVE.
+>!
+
+!< Government consumption expenditure, GOVEXP >!
+Coefficient (all,c,COMM)(all,r,REG)
+    VGP(c,r) # government cons. expenditure on c in r at producer prices #;
+Formula (all,c,COMM)(all,r,REG)
+    VGP(c,r) = VDGP(c,r) + VMGP(c,r);
+Coefficient (all,r,REG)
+    GOVEXP(r) # aggregate government expenditure in region r #;
+Formula (all,r,REG)
+    GOVEXP(r) = sum{c,COMM, VGP(c,r)};
+
+!< Private household consumption expenditure, PRIVEXP >!
+Coefficient (all,c,COMM)(all,r,REG)
+    VPP(c,r) # private household expenditure on c in r at producer prices #;
+Formula (all,c,COMM)(all,r,REG)
+    VPP(c,r) = VDPP(c,r) + VMPP(c,r);
+Coefficient (all,r,REG)
+    PRIVEXP(r) # aggregate private consumption expenditure in region r #;
+Formula (all,r,REG)
+    PRIVEXP(r) = sum{c,COMM, VPP(c,r)};
+
+!< Investment consumption expenditure >!
+Coefficient (all,c,COMM)(all,r,REG)
+    VIP(c,r) # expenditure on investment c valued at producer prices #;
+Formula (all,c,COMM)(all,r,REG)
+    VIP(c,r) = VDIP(c,r) + VMIP(c,r);
+
+!< Aggregate income = aggregate expenditure + saving >!
+Coefficient (all,r,REG)
+    INCOME(r) # level of expenditure, which equals NET income in region r #;
+Formula (all,r,REG)
+    INCOME(r) = PRIVEXP(r) + GOVEXP(r) + SAVE(r);
+
+!<
+    Indirect tax receipts
+    ---------------------
+>!
+
+!< Production tax revenue >!
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    PTAX(c,a,r) # revenue from tax on commodity c produced by activity a in r #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    PTAX(c,a,r) = MAKEB(c,a,r) - MAKES(c,a,r);
+Coefficient (all,r,REG)
+    TAXROUT(r) # total revenue from production tax payments in region r #;
+Formula (all,r,REG)
+    TAXROUT(r) = sum{c,COMM, sum{a,ACTS, PTAX(c,a,r)}};
+
+!< Government consumption tax revenue >!
+Coefficient (all,c,COMM)(all,r,REG)
+    DGTAX(c,r) # tax revenue from gov't cons. of domestic c in region r #;
+Formula (all,c,COMM)(all,r,REG)
+    DGTAX(c,r) = VDGP(c,r) - VDGB(c,r);
+Coefficient (all,c,COMM)(all,r,REG)
+    MGTAX(c,r) # tax revenue from gov't consumption of imported c in region r #;
+Formula (all,c,COMM)(all,r,REG)
+    MGTAX(c,r) = VMGP(c,r) - VMGB(c,r);
+Coefficient (all,r,REG)
+    TAXRGC(r) # total revenue from government consumption tax payments in r #;
+Formula (all,r,REG)
+    TAXRGC(r) = sum{c,COMM, DGTAX(c,r) + MGTAX(c,r)};
+
+!< Private household consumption tax revenue >!
+Coefficient (all,c,COMM)(all,r,REG)
+    DPTAX(c,r) # tax revenue from priv. hhld cons. of domestic c in region r #;
+Formula (all,c,COMM)(all,r,REG)
+    DPTAX(c,r) = VDPP(c,r) - VDPB(c,r);
+Coefficient (all,c,COMM)(all,r,REG)
+    MPTAX(c,r) # tax revenue from priv. hhld cons. of imported c in region r #;
+Formula (all,c,COMM)(all,r,REG)
+    MPTAX(c,r) = VMPP(c,r) - VMPB(c,r);
+Coefficient (all,r,REG)
+    TAXRPC(r) # total revenue from priv. hhld consumption tax payments in r #;
+Formula (all,r,REG)
+    TAXRPC(r) = sum{c,COMM, DPTAX(c,r) + MPTAX(c,r)};
+
+!< Investment consumption tax revenue >!
+Coefficient (all,c,COMM)(all,r,REG)
+    DITAX(c,r) # tax revenue from investment cons. of domestic c in region r #;
+Formula (all,c,COMM)(all,r,REG)
+    DITAX(c,r) = VDIP(c,r) - VDIB(c,r);
+Coefficient (all,c,COMM)(all,r,REG)
+    MITAX(c,r) # tax revenue from investment cons. of imported c in region r #;
+Formula (all,c,COMM)(all,r,REG)
+    MITAX(c,r) = VMIP(c,r) - VMIB(c,r);
+Coefficient (all,r,REG)
+    TAXRIC(r) # total revenue from investment consumption tax payments in r #;
+Formula (all,r,REG)
+    TAXRIC(r) = sum{c,COMM, DITAX(c,r) + MITAX(c,r)};
+
+!< Intermediate consumption tax revenue >!
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    DFTAX(c,a,r) # tax revenue from use of dom. intermediate c by act. a in r #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    DFTAX(c,a,r) = VDFP(c,a,r) - VDFB(c,a,r);
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MFTAX(c,a,r) # tax revenue from use of imp. intermediate c by act. a in r #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MFTAX(c,a,r) = VMFP(C,a,r) - VMFB(c,a,r);
+Coefficient (all,r,REG)
+    TAXRIU(r) # total revenue from tax on intermediate goods usage in r #;
+Formula (all,r,REG)
+    TAXRIU(r) = sum{c,COMM, sum{a,ACTS, DFTAX(c,a,r) + MFTAX(c,a,r)}};
+
+!< Endowment tax revenue >!
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    ETAX(e,a,r) # tax revenue from use of endowment e by act. a in region r #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    ETAX(e,a,r) = EVFP(e,a,r) - EVFB(e,a,r);
+Coefficient (all,r,REG)
+    TAXRFU(r) # total revenue from use of factor/endowment e by act. a in r #;
+Formula (all,r,REG)
+    TAXRFU(r) = sum{e,ENDW, sum{a,ACTS, ETAX(e,a,r)}};
+
+!< Endowment income tax revenue <!
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    INCTAX(e,a,r) # tax revenue from endowment income tax in region r #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    INCTAX(e,a,r) = EVFB(e,a,r) - EVOS(e,a,r);
+
+!< Exports tax revenue <!
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    XTAXD(c,s,d) # tax rev. from exports of c from source s to destination d #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    XTAXD(c,s,d) = VFOB(c,s,d) - VXSB(c,s,d);
+Coefficient (all,r,REG)
+    TAXREXP(r) # total revenue from export tax payments in r #;
+Formula (all,s,REG)
+    TAXREXP(s) = sum{c,COMM, sum{d,REG, XTAXD(c,s,d)}};
+
+!< Import tariff revenue >!
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    MTAX(c,s,d) # tax rev from imports of c from source s to destination d #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    MTAX(c,s,d) = VMSB(c,s,d) - VCIF(c,s,d);
+Coefficient (all,r,REG)
+    TAXRIMP(r) # total revenue from import tax payments in r #;
+Formula (all,d,REG)
+    TAXRIMP(d) = sum{c,COMM, sum{s,REG, MTAX(c,s,d)}};
+
+!<
+    -----------------------------------
+    A-4. Commom COEFFICIENTS/PARAMETERS
+    -----------------------------------
+    Common coefficients are defined as coefficients which are used in more
+    than one module. For example, ESUBD(c,r) is used in the goverment household,
+    private household, and firms modules.
+>!
+
+!< Regional investment expenditure >!
+Coefficient (all,r,REG)
+    REGINV(r) # regional GROSS investment in r #;
+Formula (all,r,REG)
+    REGINV(r) = sum{c,COMM, VIP(c,r)};
+Coefficient (all,r,REG)
+    NETINV(r) # regional NET investment in region r #;
+Formula (all,r,REG)
+    NETINV(r) = REGINV(r) - VDEP(r);
+
+!< Net global investment expenditure >!
+Coefficient
+    GLOBINV # global expenditures on net investment #;
+Formula
+    GLOBINV = sum{r,REG, NETINV(r)};
+
+!< Elasticity of cost with respect to utility from private consumption >!
+Coefficient (all,c,COMM)(all,r,REG)
+    CONSHR(c,r) # share of private hhld consumption devoted to good c in r #;
+Formula (all,c,COMM)(all,r,REG)
+    CONSHR(c,r) = VPP(c,r) / PRIVEXP(r);
+
+Coefficient (parameter)(all,c,COMM)(all,r,REG)
+    INCPAR(c,r) # expansion parameter in the CDE minimum expenditure function #;
+Read
+    INCPAR from file GTAPPARM header "INCP";
+Coefficient (all,r,REG)
+    UELASPRIV(r)
+    # elasticity of cost wrt utility from private consumption #;
+Formula (all,r,REG)
+    UELASPRIV(r) = sum{c,COMM, CONSHR(c,r) * INCPAR(c,r)};
+
+!<  Domestic/imported Armington elasticity >!
+Coefficient (parameter)(all,c,COMM)(all,r,REG)
+    ESUBD(c,r)
+    # region-specific elast. of subst. for dom. and imp. goods for all agents #;
+Read
+    ESUBD from file GTAPPARM header "ESBD";
+Assertion (all,c,COMM)(all,r,REG) ESUBD(c,r) ge 0;
+
+!<
+    ---------------------
+    A-5. Common VARIABLES
+    ---------------------
+
+    Common variables are defined as variables which are used in more than one
+    module. For example, the variable y(r) is used in the Goverment
+    Consumption, Private Consumption, Firms, Regional Household and
+    Investment, Global Bank and Saving modules.
+    Appendices, e.g., Summary Indices, are not included in this definition.
+>!
+
+Variable (all,r,REG)
+    y(r) # regional household income in region r #;
+Variable (all,r,REG)
+    pop(r) # regional population #;
+
+Variable (all,r,REG)
+    pgov(r) # price index for gov't expenditure in region r #;
+Variable (all,r,REG)
+    yg(r) # regional government consumption expenditure in region r #;
+Variable (all,r,REG)
+    ug(r) # per capita utility from gov't expend. in region r #;
+
+Variable (all,r,REG)
+    ppriv(r) # price index for priv. household cons. expenditure in region r #;
+Variable (all,r,REG)
+    yp(r) # regional private consumption expenditure in region r #;
+Variable (all,r,REG)
+    uepriv(r) # elasticity of cost wrt utility from private consumption #;
+Variable (all,r,REG)
+    up(r) # per capita utility from private expend. in region r #;
+
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    to(c,a,r) # power of tax on com. c supplied by act. a in region r #;
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    tinc(e,a,r) # power of income tax on endowment e supplied to act. a in r #;
+Variable (all,e,ENDW)(all,r,REG)
+    endwslack(e,r) # slack variable in endowment market clearing condition #;
+!<
+    endwslack is exogenous, unless the user wishes to employ a partial
+    equilibrium closure in which the price of one or more of the primary factors
+    is fixed.
+>!
+
+Variable (orig_level=VMB)(all,c,COMM)(all,r,REG)
+    qms(c,r) # aggregate imports of c in region r, basic price weights #;
+Variable
+    globalcgds # global supply of capital goods for NET investment #;
+Variable
+    pcgdswld # world average price of capital goods (net investment weights) #;
+
+!<
+    ================
+    Equation modules
+    ================
+    1.  Firms
+    2.  Commodity supply
+    3.  Income distribution
+    4.  Allocation of income across expenditure categories
+    5.  Domestic final demand
+    6.  Trade, goods market equilibrium and prices
+    7.  Factor market equilibrium
+    8.  Allocation of global saving
+    9.  Tax revenue streams
+    10. Numeraire and Walras law
+    11. Welfare measurement and decomposition
+>!
+
+!<
+    --------
+    1. Firms
+    --------
+
+    We now turn to the behavioral equations for firms. The following picture
+    describes the firms production structure.
+
+                                 qo(a,r)  [ao(a,r)]
+                                 /\
+                                /  \  <----- CES[ESUBT]
+                               /    \
+                              /      \
+                             /        \
+            [ava(a,r)]  qva(a,r)     qint(a,r)  [aint(a,r)]
+                        /|\            |
+    CES[ESUBVA]----->  / | \           |  <------ CES[ESUBC]
+                      /  |  \          |
+                     /   |   \         |
+                    /    |    \        |
+                Land  Labor  Capital  qfa(c,a,r)  [afa(c,a,r)]
+                   qfe(e,a,r)          /\
+                  [afe(e,a,r)]        /  \  <----- CES[ESUBD]
+                                     /    \
+                                    /      \
+                                   /        \
+                               Domestic    Foreign
+                               qfd(c,a,r)  qfm(c,a,r)
+
+    1-1. Top production nest
+    1-2. Second level nests
+    1-3. Sourcing of commodities by firms
+    1-4. Technical change equations
+>!
+
+!<
+    1-1. Top production nest
+    ------------------------
+>!
+
+Variable (all,a,ACTS)(all,r,REG)
+    po(a,r) # unit cost/revenue of activity a in region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    qo(a,r) # output of activity a in region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    ao(a,r) # output augmenting technical change by activity a in region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    pint(a,r) # Price of composite intermediate input c by activity a in r #;
+Variable (all,a,ACTS)(all,r,REG)
+    qint(a,r) # Composite intermediate input c by activity a in r #;
+Variable (all,a,ACTS)(all,r,REG)
+    aint(a,r) # Composite interm. input augmenting tech change by act. a in r #;
+Coefficient (parameter)(all,a,ACTS)(all,r,REG)
+    ESUBT(a,r)
+    # elast. of sub. bet. composite intermediate and factor inputs in prod'n #;
+Read
+    ESUBT from file GTAPPARM header "ESBT";
+Assertion (all,a,ACTS)(all,r,REG) ESUBT(a,r) ge 0;
+
+Equation E_qint
+# sector demands for composite intermediate commodity inputs by act. a in r #
+(all,a,ACTS)(all,r,REG)
+    qint(a,r)
+        = - aint(a,r) + qo(a,r) - ao(a,r)
+        - ESUBT(a,r) * [pint(a,r) - aint(a,r) - po(a,r) - ao(a,r)];
+
+Variable (all,a,ACTS)(all,r,REG)
+    pva(a,r) # firms' price of value added in act. a of region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    qva(a,r) # value added in act. a of region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    ava(a,r) # value added augmenting tech change by act. a in region r #;
+
+Equation E_qva
+# sector demands for primary factor composite #
+(all,a,ACTS)(all,r,REG)
+    qva(a,r)
+        = -ava(a,r) + qo(a,r) - ao(a,r)
+        - ESUBT(a,r) * [pva(a,r) - ava(a,r) - po(a,r) - ao(a,r)];
+
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pfa(c,a,r) # firms' price for commodity c for use by act. a in r #;
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    qfa(c,a,r) # demand for commodity c for use by act. a in region r #;
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    afa(c,a,r) # composite intermed. inpt c augmenting tech ch. by act. a in r #;
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    afe(e,a,r) # primary factor e augmenting tech change by act. a in r #;
+Variable (all,a,ACTS)(all,r,REG)
+    profitslack(a,r) # slack variable in the zero profit equation #;
+!<
+    profitslack is exogenous, unless the user wishes to specify output in a
+    given region exogenously.
+>!
+
+Coefficient (all,d,DEMD)(all,a,ACTS)(all,r,REG)
+    STC(d,a,r) # share of input d in total costs of act. a in r #;
+Zerodivide default 0.5;
+Zerodivide (nonzero_by_zero) default 0.5;
+Formula (all,d,DEMD)(all,a,ACTS)(all,r,REG)
+    STC(d,a,r) = VFP(d,a,r) / VOS(a,r);
+Zerodivide off;
+
+Equation E_qo
+# industry zero pure profits condition #
+(all,a,ACTS)(all,r,REG)
+    po(a,r) + ao(a,r)
+        = sum{e,ENDW, STC(e,a,r) * [pfe(e,a,r) - afe(e,a,r) - ava(a,r)]}
+        + sum{c,COMM, STC(c,a,r) * [pfa(c,a,r) - afa(c,a,r) - aint(a,r)]}
+        + profitslack(a,r);
+!<
+    E_qo defines industry zero pure profits condition. This condition
+    permits us to determine the endogenous output level for each sector,
+    except when profitslack is itself endogenous.
+>!
+
+!<
+    1-2. Second level nest
+    ----------------------
+>!
+
+Coefficient (parameter)(all,a,ACTS)(all,r,REG)
+    ESUBC(a,r)
+    # elasticity of substitution among intermediate inputs in production #;
+Read
+    ESUBC from file GTAPPARM header "ESBC";
+Assertion (all,a,ACTS)(all,r,REG) ESUBC(a,r) ge 0;
+
+Equation E_qfa
+# industry demands for intermediate inputs c by act. a in region r #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    qfa(c,a,r)
+        = - afa(c,a,r) + qint(a,r)
+        - ESUBC(a,r) * [pfa(c,a,r) - afa(c,a,r) - pint(a,r)];
+
+Coefficient (all,a,ACTS)(all,r,REG)
+    TINTCOM(a,r) # total intermediate commodity inputs of act. a in r #;
+Formula (all,a,ACTS)(all,r,REG)
+    TINTCOM(a,r) = sum{c,COMM,VFP(c,a,r)};
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    INTSHR(c,a,r) # share of intermed. c in total com. inputs of act. a in r #;
+Zerodivide default 0.5;
+Zerodivide (nonzero_by_zero) default 0.5;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    INTSHR(c,a,r) = VFP(c,a,r)/TINTCOM(a,r);
+Zerodivide off;
+
+Equation E_pint
+# price of composite intermediate commodity inputs by act. a in r #
+(all,a,ACTS)(all,r,REG)
+    pint(a,r) = sum{c,COMM, INTSHR(c,a,r) * [pfa(c,a,r) - afa(c,a,r)]};
+!<
+    E_pint defines the average price of intermediate input composite.
+>!
+
+Coefficient (parameter)(all,a,ACTS)(all,r,REG)
+    ESUBVA(a,r)
+    # elast. of sub. among capital/labor/land in value added of activity a #;
+Read
+    ESUBVA from file GTAPPARM header "ESBV";
+Assertion (all,a,ACTS)(all,r,REG) ESUBVA(a,r) ge 0;
+
+Coefficient (all,a,ACTS)(all,r,REG)
+    VVA(a,r) # value added in act. a in region r #;
+Formula (all,a,ACTS)(all,r,REG)
+    VVA(a,r) = sum{e,ENDW, VFP(e,a,r)};
+Coefficient (all,e,ENDW)
+    DEFAULTVASHR(e) # zerodivide default for VASHR # ;
+Formula (all,e,ENDW)
+    DEFAULTVASHR(e)
+        = sum{a,ACTS, sum{r,REG, VFP(e,a,r)}}
+        / sum{a,ACTS, sum{r,REG, VVA(a,r)}};
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    VASHR(e,a,r) # share of e in total value added in act. a in r #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG: VVA(a,r) <> 0)
+    VASHR(e,a,r) = VFP(e,a,r) / VVA(a,r);
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG: VVA(a,r) = 0)
+    VASHR(e,a,r) = DEFAULTVASHR(e);
+
+Equation E_qfe
+# demands for endowment commodities #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    qfe(e,a,r)
+        = - afe(e,a,r) + qva(a,r)
+        - ESUBVA(a,r) * [pfe(e,a,r) - afe(e,a,r) - pva(a,r)];
+
+Equation E_pva
+# effective price of primary factor composite in each sector/region #
+(all,a,ACTS)(all,r,REG)
+    pva(a,r) = sum{e,ENDW, VASHR(e,a,r) * [pfe(e,a,r) - afe(e,a,r)]};
+
+!<
+    1-3. Sourcing of commodities by firms
+    -------------------------------------
+>!
+
+Equation E_qfd
+# act. a demands for domestic good c #
+(all,c,COMM)(all,a,ACTS)(all,s,REG)
+    qfd(c,a,s) = qfa(c,a,s) - ESUBD(c,s) * [pfd(c,a,s) - pfa(c,a,s)];
+
+Equation E_qfm
+# act. a demands for composite import c #
+(all,c,COMM)(all,a,ACTS)(all,s,REG)
+    qfm(c,a,s) = qfa(c,a,s) - ESUBD(c,s) * [pfm(c,a,s) - pfa(c,a,s)];
+
+Coefficient (all,c,COMM)(all,a,ACTS)(all,s,REG)
+    FMSHR(c,a,s) # share of firms' imports in dom. composite, purch. prices #;
+Zerodivide default 0.5;
+Formula (all,c,COMM)(all,a,ACTS)(all,s,REG)
+    FMSHR(c,a,s) = VMFP(c,a,s) / VFP(c,a,s);
+Zerodivide off;
+
+Equation E_pfa
+# industry price for composite commodities #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pfa(c,a,r) = [1 - FMSHR(c,a,r)] * pfd(c,a,r) + FMSHR(c,a,r) * pfm(c,a,r);
+
+!<
+    1-4. Technical change equations
+    -------------------------------
+>!
+
+!< Hicks-neutral technical change shifters >!
+Variable (all,a,ACTS)
+    aosec(a) # output tech change for act. a, worldwide #;
+Variable (all,r,REG)
+    aoreg(r) # specific output tech change in region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    aoall(a,r) # output augmenting technical change in act. a of r #;
+Equation E_ao
+# sector/region specific average rate of output augmenting tech change #
+(all,a,ACTS)(all,r,REG)
+    ao(a,r) = aosec(a) + aoreg(r) + aoall(a,r);
+
+!< Intermediate input technical change and shifters >!
+Variable (all,c,COMM)
+    afcom(c) # intermediate tech change of input c, worldwide #;
+Variable (all,a,ACTS)
+    afsec(a) # intermediate tech change of act. a, worldwide #;
+Variable (all,r,REG)
+    afreg(r) # intermediate tech change in region r #;
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    afall(c,a,r) # intermediate input c augmenting tech change by act. a in r #;
+Equation E_afa
+# sector/region specific average rate of intermediates augmenting tech change #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    afa(c,a,r) = afcom(c) + afsec(a) + afreg(r) + afall(c,a,r);
+
+!< Composite value-added technical change and shifters >!
+Variable (all,a,ACTS)
+    avasec(a) # value added tech change for act. a, worldwide #;
+Variable (all,r,REG)
+    avareg(r) # value added tech change in region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    avaall(a,r) # value added augmenting technical change in act. a of r #;
+Equation E_ava
+# sector/region specific average rate of value added augmenting tech change #
+(all,a,ACTS)(all,r,REG)
+    ava(a,r) = avasec(a) + avareg(r) + avaall(a,r);
+
+!< Factor input technical change and shifters  >!
+Variable (all,e,ENDW)
+    afecom(e) # factor input tech change of endwowment e, worldwide #;
+Variable (all,a,ACTS)
+    afesec(a) # factor input tech change of act. a, worldwide #;
+Variable (all,r,REG)
+    afereg(r) # factor input tech change in region r #;
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    afeall(e,a,r) # primary factor e augmenting tech change for act. a in r #;
+Equation E_afe
+# sector/region specific average rate of prim. factor e augmenting tech change #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    afe(e,a,r) = afecom(e) + afesec(a) + afereg(r) + afeall(e,a,r);
+
+!< Composite intermediate input technical change and shifters >!
+Variable (all,a,ACTS)
+    aintsec(a) # composite interm. input augmenting tech change, worldwide #;
+Variable (all,r,REG)
+    aintreg(r) # composite interm. input augmenting tech change in region r #;
+Variable (all,a,ACTS)(all,r,REG)
+    aintall(a,r) # comp. interm. input augmenting tech change of act. a in r #;
+Equation E_aint
+# sector/region specific Composite intermediate input augmenting tech change #
+(all,a,ACTS)(all,r,REG)
+    aint(a,r) = aintsec(a) + aintreg(r) + aintall(a,r);
+
+!<
+    ---------------------
+    2-0. Commodity supply
+    ---------------------
+
+    The following picture describes commodity supply and sourcing. On the supply
+    side, activities with multiple outputs are given a CET specification wherein
+    they maximize their total revenue stream subject to being on the constant
+    elasticity of transformation frontier. On the demand side, buyers of a
+    commodity produced by multiple activities wish to minimize the total cost
+    of supply subject to a CES preference function.
+
+                                 qo(a,r)  [ao(a,r)]
+                                  |
+               CET[ETRAQ] ----->  | 'make'
+                                  |
+                               qca(c,a,r)
+                                  |
+               CES[ESUBQ] ----->  |  'sourcing'
+                                  |
+                                qc(c,r)
+>!
+
+Coefficient (parameter)(all,a,ACTS)(all,r,REG)
+    ETRAQ(a,r)
+    # elasticity of transformation among commodities produced by act. a #;
+Read
+    ETRAQ from file GTAPPARM header "ETRQ";
+Assertion (all,a,ACTS)(all,r,REG) ETRAQ(a,r) lt 0;
+
+Coefficient (all,a,ACTS)(all,r,REG)
+    MAKESCOM(a,r) # pre-tax output of activity a in r #;
+Formula (all,a,ACTS)(all,r,REG)
+    MAKESCOM(a,r) = sum{c,COMM, MAKES(c,a,r)};
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKESACTSHR(c,a,r) # share of c and a in output of a at supplier prices #;
+Zerodivide default 0.5;
+Zerodivide (nonzero_by_zero) default 0.5;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKESACTSHR(c,a,r) = MAKES(c,a,r) / MAKESCOM(a,r);
+Zerodivide off;
+
+Equation E_qca
+# supply of commodities by act. a #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    qca(c,a,r) = IF[MAKES(c,a,r) gt 0,
+                    qo(a,r) - ETRAQ(a,r) * [ps(c,a,r) - po(a,r)]];
+
+Equation E_po
+# average unit (tax-exclusive) cost of output of act. a #
+(all,a,ACTS)(all,r,REG)
+     po(a,r) = sum{c,COMM, MAKESACTSHR(c,a,r) * ps(c,a,r)};
+
+Equation E_ps
+# links basic and supply price of commodity c produced by activity a in r #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pca(c,a,r) = ps(c,a,r) + to(c,a,r);
+!<
+    E_ps links supplier/producer (pre-) and basic (post-tax) prices for firms.
+    This captures the effect of output taxes or subsidies.
+    Note: The power of activity tax, to, is commodity- and activity-specific.
+          to(c,a,r) > 1 in the case of a tax
+          to(c,a,r) < 1 in the case of a subsidy.
+>!
+
+Variable (all,a,ACTS)(all,r,REG)
+    pb(a,r) # price index: basic (tax-inclusive) price of output of act. a #;
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKEBACTSHR(c,a,r) # share of c and a in output of act. a at basic prices #;
+Zerodivide default 0.5;
+Zerodivide (nonzero_by_zero) default 0.5;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKEBACTSHR(c,a,r) = MAKEB(c,a,r) / MAKEBACT(a,r);
+Zerodivide off;
+
+Equation E_pb
+# price index: basic (tax-inclusive) price of output of act. a #
+(all,a,ACTS)(all,r,REG)
+     pb(a,r) = sum{c,COMM, MAKEBACTSHR(c,a,r) * pca(c,a,r)};
+
+Coefficient (parameter)(all,c,COMM)(all,r,REG)
+    ESUBQ(c,r)
+    # 1/CES elast. for sourcing of commodity c produced by various activities #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    ESUBQ(c,r) = 0.0; ! ie, Default 0.0 means perfect substitutes !
+Read (ifheaderexists) ESUBQ from file GTAPPARM header "ESBQ";
+Assertion (all,c,COMM)(all,r,REG) ESUBQ(c,r) ge 0;
+!<
+    ESUBQ is 1/CES elasticity. ESUBQ=0.0 means that commodity c produced by 2
+    or more activities are perfect substitutes--i.e., each activity receives the
+    same price (i.e., the law of one price holds) for a given commodity.
+    In the equation E_pca below,  pca(c,a,r) = pds(c,r) if ESUBQ = 0.0
+    But this will not work well if two or more activities each only produce the
+    same good (e.g., CoalElec and NuclearElec each only produce electricity),
+    resulting in structurally singular matrix problems, especially under the
+    standard GTAP closure, where most factors used by these activitiesare
+    perfectly mobile. In such cases, capital could be set as a sluggish
+    factor (note: if ETRAE=-0.000001, capital becomes a sector-specific factor);
+    or alternatively, capital could be perfectfly mobile across sectors but with
+    ESUBQ set to allow for a degree of commodity sourcing differentiation
+    (i.e., commodity c produced by diff activities are imperfect substitutes).
+    For example, ESUBQ could be set to 0.5 giving an elasticity of substitution
+    of 2.0 = 1/ESUBQ = 1/0.5. Alternative values for ESUBQ could be defined by
+    the user in the parameter input file.
+>!
+
+Variable (all,c,COMM)(all,r,REG)
+    qc(c,r) # total commodity supply in region r #;
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKEBCOMSHR(c,a,r) # share of c by a in commodity supply at basic prices #;
+Zerodivide default 0.5;
+Zerodivide (nonzero_by_zero) default 0.5;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    MAKEBCOMSHR(c,a,r) = MAKEB(c,a,r) / MAKEBCOM(c,r);
+Zerodivide off;
+
+Equation E_pca
+# CES allocation of commodity output by activity (ESUBQ(c,r) is 1/CES elast.) #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pca(c,a,r) = IF[MAKEB(c,a,r) gt 0,
+                    pds(c,r) - ESUBQ(c,r) * [qca(c,a,r) - qc(c,r)]];
+
+Equation E_qc
+# market clearing condition for total commodity supply #
+(all,c,COMM)(all,r,REG)
+     qc(c,r) = sum{a,ACTS, MAKEBCOMSHR(c,a,r) * qca(c,a,r)};
+
+!<
+    ------------------------
+    3-0. Income distribution
+    ------------------------
+>!
+
+Variable (all,r,REG)
+    fincome(r) # factor income at basic prices net of depreciation #;
+Coefficient (all,r,REG)
+    FY(r) # primary factor income in r net of depreciation #;
+Formula (all,r,REG)
+    FY(r) = sum{e,ENDW, sum{a,ACTS, EVFB(e,a,r)}} - VDEP(r);
+
+Equation E_fincome
+# factor income at basic prices net of depreciation #
+(all,r,REG)
+    FY(r) * fincome(r)
+        = sum{e,ENDW, sum{a,ACTS, EVFB(e,a,r)*[peb(e,a,r) + qes(e,a,r)]}}
+        - VDEP(r)  * [pinv(r) + kb(r)];
+
+!< Computation of Regional Income >!
+Variable (all,r,REG)
+    incomeslack(r) # slack variable in the expression for regional income #;
+    !< This is exogenous, unless the user wishes to fix regional income. >!
+Variable (change)(all,r,REG)
+    del_indtaxr(r) # change in ratio of indirect taxes to INCOME in r #;
+Coefficient (all,r,REG)
+    INDTAX(r) # indirect tax receipts in r #;
+Formula (all,r,REG)
+    INDTAX(r) = TAXRPC(r) + TAXRGC(r) + TAXRIC(r) + TAXRIU(r) + TAXRFU(r)
+              + TAXROUT(r) + TAXREXP(r) + TAXRIMP(r);
+
+Equation E_y
+# regional income = sum of primary factor income and indirect tax receipts #
+(all,r,REG)
+    INCOME(r) * y(r)
+        = FY(r) * fincome(r)
+        + 100.0 * INCOME(r) * del_indtaxr(r)
+        + INDTAX(r) * y(r)
+        + INCOME(r) * incomeslack(r);
+
+!<
+    -------------------------------------------------------
+    4-0. Allocation of income across expenditure categories
+    -------------------------------------------------------
+>!
+
+Variable (all,r,REG)
+    uelas(r) # elasticity of cost of utility wrt utility #;
+Variable (all,r,REG)
+    dpsave(r) # saving distribution parameter #;
+Variable (all,r,REG)
+    dpgov(r) # government consumption distribution parameter #;
+Variable (all,r,REG)
+    dppriv(r) # private consumption distribution parameter #;
+
+Equation E_qsave
+# saving #
+(all,r,REG)
+    psave(r) + qsave(r) - y(r) = uelas(r) + dpsave(r);
+
+Equation E_yg
+# government consumption expenditure #
+(all,r,REG)
+    yg(r) - y(r) = uelas(r) + dpgov(r);
+
+Equation E_yp
+# private consumption expenditure #
+(all,r,REG)
+    yp(r) - y(r) = -[uepriv(r) - uelas(r)] + dppriv(r);
+
+Variable (all,r,REG)
+    dpav(r) # average distribution parameter shift, for EV calc. #;
+Coefficient (all,r,REG)
+    XSHRPRIV(r) # private expenditure share in regional income #;
+Formula (all,r,REG)
+    XSHRPRIV(r) = PRIVEXP(r) / INCOME(r);
+Coefficient (all,r,REG)
+    XSHRGOV(r) # government expenditure share in regional income #;
+Formula (all,r,REG)
+    XSHRGOV(r) = GOVEXP(r) / INCOME(r);
+Coefficient (all,r,REG)
+    XSHRSAVE(r) # saving share in regional income #;
+Formula (all,r,REG)
+    XSHRSAVE(r) = SAVE(r) / INCOME(r);
+
+Equation E_uelas
+# elasticity of cost of utility wrt utility #
+(all,r,REG)
+    uelas(r) = XSHRPRIV(r) * uepriv(r) - dpav(r);
+
+Equation E_dpav
+# average distribution parameter shift #
+(all,r,REG)
+    dpav(r)
+        = XSHRPRIV(r) * dppriv(r)
+        + XSHRGOV(r)  * dpgov(r)
+        + XSHRSAVE(r) * dpsave(r);
+
+Variable (all,r,REG)
+    p(r) # price index for disposition of income by regional household #;
+
+Equation E_p
+# price index for disposition of income by regional household #
+(all,r,REG)
+    p(r) = XSHRPRIV(r) * ppriv(r) + XSHRGOV(r) * pgov(r)
+         + XSHRSAVE(r) * psave(r);
+
+Variable (all,r,REG)
+    au(r) # input-neutral shift in utility function #;
+Variable (all,r,REG)
+    dpsum(r) # sum of the distribution parameters #;
+Variable (all,r,REG)
+    u(r) # per capita utility from aggregate hhld expend. in region r #;
+Coefficient (all,r,REG)
+    DPARSUM(r) # sum of distribution parameters #;
+Read
+    DPARSUM from file GTAPDATA header "DPSM";
+Update (all,r,REG)
+    DPARSUM(r) = dpsum(r);
+
+Coefficient (all,r,REG)
+    UTILELAS(r) # elasticity of cost of utility wrt utility #;
+Formula (all,r,REG)
+    UTILELAS(r)
+        = [UELASPRIV(r) * XSHRPRIV(r) + XSHRGOV(r) + XSHRSAVE(r)] / DPARSUM(r);
+Coefficient (all,r,REG)
+    DPARPRIV(r) # private consumption distribution parameter #;
+Formula (all,r,REG)
+    DPARPRIV(r) = UELASPRIV(r) * XSHRPRIV(r) / UTILELAS(r);
+Coefficient (all,r,REG)
+    DPARGOV(r) # government consumption distribution parameter #;
+Formula (all,r,REG)
+    DPARGOV(r) = XSHRGOV(r) / UTILELAS(r);
+
+Coefficient (all,r,REG)
+    DPARSAVE(r) # saving distribution parameter #;
+Formula (all,r,REG)
+    DPARSAVE(r) = XSHRSAVE(r) / UTILELAS(r);
+
+Coefficient (all,r,REG)
+    UTILPRIV(r) # utility from private consumption #;
+Formula (initial)(all,r,REG)
+    UTILPRIV(r) = 1.0;
+Update (all,r,REG)
+    UTILPRIV(r) = up(r);
+
+Coefficient (all,r,REG)
+    UTILGOV(r) # utility from government consumption #;
+Formula (initial)(all,r,REG)
+    UTILGOV(r) = 1.0;
+Update (all,r,REG)
+    UTILGOV(r) = ug(r);
+
+Coefficient (all,r,REG)
+    UTILSAVE(r) # utility from saving #;
+Formula (initial)(all,r,REG)
+    UTILSAVE(r) = 1.0;
+Update (change) (all,r,REG)
+    UTILSAVE(r) = [[qsave(r) - pop(r)] / 100] * UTILSAVE(r);
+
+Equation E_u
+# regional household utility #
+(all,r,REG)
+    u(r) = au(r) + DPARPRIV(r) * loge(UTILPRIV(r)) * dppriv(r)
+         + DPARGOV(r) * loge(UTILGOV(r)) * dpgov(r)
+         + DPARSAVE(r) * loge(UTILSAVE(r)) * dpsave(r)
+         + [1.0 / UTILELAS(r)] * [y(r) - pop(r) - p(r)];
+
+Equation E_dpsum
+# sum of the distribution parameters #
+(all,r,REG)
+    DPARSUM(r) * dpsum(r)
+        = DPARPRIV(r) * dppriv(r)
+        + DPARGOV(r) * dpgov(r)
+        + DPARSAVE(r) * dpsave(r);
+
+!<
+    --------------------------
+    5-0. Domestic final demand
+    --------------------------
+>!
+
+!<
+    5-1. Private expenditures
+    -------------------------
+>!
+
+!<  We first compute for the Allen Partials, Price and Income Elasticities
+    then derive Private household's Composite Demand >!
+Coefficient (parameter)(all,c,COMM)(all,r,REG)
+    SUBPAR(c,r)
+    # substitution parameter in CDE minimum expenditure function #;
+Read
+    SUBPAR from file GTAPPARM header "SUBP";
+Coefficient (all,c,COMM)(all,r,REG)
+    ALPHA(c,r) # 1 - sub. parameter in the CDE minimum expenditure function #;
+Formula (all,c,COMM)(all,r,REG)
+    ALPHA(c,r) = 1 - SUBPAR(c,r);
+Coefficient (all,c,COMM)(all,k,COMM)(all,r,REG)
+    APE(c,k,r) # Allen partial elast. of sub. between composite c and k in r #;
+Formula (all,c,COMM)(all,k,COMM)(all,r,REG)
+    APE(c,k,r)
+        = ALPHA(c,r) + ALPHA(k,r) - sum{n,COMM, CONSHR(n,r) * ALPHA(n,r)};
+Formula (all,c,COMM)(all,r,REG)
+    APE(c,c,r)
+        = 2.0 * ALPHA(c,r)
+        - sum{n,COMM, CONSHR(n,r) * ALPHA(n,r)}
+        - ALPHA(c,r) / CONSHR(c,r);
+
+Coefficient (all,c,COMM)(all,r,REG)
+    EY(c,r) # income elast. of private hhld demand for c in r #;
+Formula (all,c,COMM)(all,r,REG)
+    EY(c,r)
+        =   [1.0 / sum{n,COMM, CONSHR(n,r) * INCPAR(n,r)}]
+            * [INCPAR(c,r) * [1.0 - ALPHA(c,r)]
+                + sum{n,COMM, CONSHR(n,r) * INCPAR(n,r) * ALPHA(n,r)}]
+        + [ALPHA(c,r) - sum{n,COMM, CONSHR(n,r) * ALPHA(n,r)}];
+
+Coefficient (all,c,COMM)(all,k,COMM)(all,r,REG)
+    EP(c,k,r)
+    # uncomp. elast. of private hhld demand for c wrt price of k in r #;
+Formula (all,c,COMM)(all,k,COMM)(all,r,REG)
+    EP(c,k,r) = 0;
+Formula (all,c,COMM)(all,k,COMM)(all,r,REG)
+    EP(c,k,r) = [APE(c,k,r) - EY(c,r)] * CONSHR(k,r);
+
+Variable (all,c,COMM)(all,r,REG)
+    ppa(c,r) # private consumption price for commodity c in region r #;
+Variable (all,c,COMM)(all,r,REG)
+    qpa(c,r) # private hhld demand for commodity c in region r #;
+
+Equation E_qpa
+# private consumption demands for composite commodities #
+(all,c,COMM)(all,r,REG)
+    qpa(c,r) - pop(r)
+        = sum{k,COMM, EP(c,k,r) * ppa(k,r)} + EY(c,r) * [yp(r) - pop(r)];
+!<
+    E_qpa defines private consumption demands for composite commodities.
+    Demand system is on a per capita basis. Here, yp(r) - pop(r) is % change in
+    per capita income.
+>!
+
+!< Utility from Private Consumption >!
+Coefficient (all,c,COMM)(all,r,REG)
+    XWCONSHR(c,r) # expansion-parameter-weighted consumption share #;
+Formula (all,c,COMM)(all,r,REG)
+    XWCONSHR(c,r) = CONSHR(c,r) * INCPAR(c,r) / UELASPRIV(r);
+
+Equation E_uepriv
+# elasticity of expenditure wrt utility from private consumption #
+(all,r,REG)
+    uepriv(r) = sum{c,COMM, XWCONSHR(c,r) * [ppa(c,r) + qpa(c,r) - yp(r)]};
+
+Equation E_ppriv
+# price index for private consumption expenditure #
+(all,r,REG)
+    ppriv(r) = sum{c,COMM, CONSHR(c,r) * ppa(c,r)};
+
+Equation E_up
+# computation of utility from private consumption in r #
+(all,r,REG)
+    UELASPRIV(r) * up(r) = yp(r) - ppriv(r) - pop(r) ;
+!<
+    E_up determines private consumption utility for a representative
+    household in region r, based on the per capita private expenditure
+    function.
+>!
+
+Equation E_qpd
+# private consumption demand for domestic goods #
+(all,c,COMM)(all,r,REG)
+    qpd(c,r) = qpa(c,r) - ESUBD(c,r) * [ppd(c,r) - ppa(c,r)];
+
+!<  Composite Tradeables >!
+Coefficient (all,c,COMM)(all,r,REG)
+    PMSHR(c,r) # share of imports in private hhld cons. at producer prices #;
+Formula (all,c,COMM)(all,r,REG)
+    PMSHR(c,r) = VMPP(c,r) / VPP(c,r);
+
+Equation E_qpm
+# private consumption demand for aggregate imports #
+(all,c,COMM)(all,r,REG)
+    qpm(c,r) = qpa(c,r) - ESUBD(c,r) * [ppm(c,r) - ppa(c,r)];
+
+Equation E_ppa
+# private consumption price for composite commodities #
+(all,c,COMM)(all,r,REG)
+    ppa(c,r) = [1 - PMSHR(c,r)] * ppd(c,r) + PMSHR(c,r) * ppm(c,r);
+
+!<
+    5-2. Public expenditures
+    -------------------------
+>!
+
+Variable (all,c,COMM)(all,r,REG)
+    pga(c,r) # government consumption price for commodity c in region r #;
+Variable (all,c,COMM)(all,r,REG)
+    qga(c,r) # government hhld demand for commodity c in region r #;
+Coefficient (parameter)(all,r,REG)
+    ESUBG(r)
+    # region-specific elast. of subst. for composite government consumption #;
+Read
+    ESUBG from file GTAPPARM header "ESBG";
+Assertion (all,r,REG) ESUBG(r) ge 0;
+
+Equation E_qga
+# government consumption demands for composite commodities #
+(all,c,COMM)(all,r,REG)
+    qga(c,r) = yg(r) - pgov(r) - ESUBG(r) * [pga(c,r) - pgov(r)];
+
+Equation E_pgov
+# price index for aggregate gov't purchases #
+(all,r,REG)
+    pgov(r) = sum{c,COMM, [VGP(c,r) / GOVEXP(r)] * pga(c,r)};
+
+Equation E_ug
+# utility from government consumption in r #
+(all,r,REG)
+    ug(r) = yg(r) - pgov(r) - pop(r);
+
+!<  Composite tradeables >!
+Coefficient (all,c,COMM)(all,r,REG)
+    GMSHR(c,r) # share of imports for gov't hhld at producer prices #;
+Formula (all,c,COMM)(all,r,REG)
+    GMSHR(c,r) = VMGP(c,r) / VGP(c,r);
+
+Equation E_qgd
+# government consumption demand for domestic goods #
+(all,c,COMM)(all,r,REG)
+    qgd(c,r) = qga(c,r) - ESUBD(c,r) * [pgd(c,r) - pga(c,r)];
+
+Equation E_qgm
+# government consumption demand for aggregate imports #
+(all,c,COMM)(all,r,REG)
+    qgm(c,r) = qga(c,r) - ESUBD(c,r) * [pgm(c,r) - pga(c,r)];
+
+Equation E_pga
+# government consumption price for composite commodities #
+(all,c,COMM)(all,r,REG)
+    pga(c,r) = [1 - GMSHR(c,r)] * pgd(c,r) + GMSHR(c,r) * pgm(c,r);
+
+!<
+    5-3. Investment expenditures
+    ----------------------------
+>!
+
+Variable (all,c,COMM)(all,r,REG)
+    pia(c,r) # price of investment commodity in region r #;
+Variable (all,c,COMM)(all,r,REG)
+    qia(c,r) # demand for investment commodity c in region r #;
+Variable (all,r,REG)
+    qinv(r) # demand for investment/capital goods in region r #;
+
+Equation E_qia
+# Top level (Leontief) demand for investment goods #
+(all,c,COMM)(all,r,REG)
+    qia(c,r) = qinv(r);
+
+Equation E_pinv
+# defines the price of investment #
+(all,r,REG)
+    pinv(r) = sum{c,COMM, [VIP(c,r) / REGINV(r)] * pia(c,r)};
+
+Equation E_qid
+# demand for domestic investment commodity c #
+(all,c,COMM)(all,r,REG)
+    qid(c,r) = qia(c,r) - ESUBD(c,r) * [pid(c,r) - pia(c,r)];
+
+Equation E_qim
+# demand for imported investment commodity c #
+(all,c,COMM)(all,r,REG)
+    qim(c,r) = qia(c,r) - ESUBD(c,r) * [pim(c,r) - pia(c,r)];
+
+!<  Composite tradeables >!
+Coefficient (all,c,COMM)(all,r,REG)
+    IMSHR(c,r) # share of imports for investment at producer prices #;
+Formula (all,c,COMM)(all,r,REG)
+    IMSHR(c,r) = VMIP(c,r) / VIP(c,r);
+Equation E_pia
+# invesment price for composite commodities #
+(all,c,COMM)(all,r,REG)
+    pia(c,r) = [1 - IMSHR(c,r)] * pid(c,r) + IMSHR(c,r) * pim(c,r);
+
+!<
+    -----------------------------------------------
+    6-0. Trade, goods market equilibrium and prices
+    -----------------------------------------------
+>!
+
+!<
+    6-1. Sourcing of imports
+    ------------------------
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VMB(c,r) # value of aggregate imports of commodity c in r #;
+Formula (all,c,COMM)(all,r,REG)
+    VMB(c,r) = sum{a,ACTS, VMFB(c,a,r)} + VMIB(c,r)
+             + VMPB(c,r) + VMGB(c,r);
+
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    FMCSHR(c,a,r) # share of import c used by act. a in r #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    FMCSHR(c,a,r) = VMFB(c,a,r) / VMB(c,r);
+
+Coefficient (all,c,COMM)(all,r,REG)
+    PMCSHR(c,r) # share of import c used by priv. hhlds in total imports in r #;
+Formula (all,c,COMM)(all,r,REG)
+    PMCSHR(c,r) = VMPB(c,r) / VMB(c,r);
+
+Coefficient (all,c,COMM)(all,r,REG)
+    GMCSHR(c,r) # the share of import c by gov't hhlds in total imports in r #;
+Formula (all,c,COMM)(all,r,REG)
+    GMCSHR(c,r) = VMGB(c,r) / VMB(c,r);
+
+Coefficient (all,c,COMM)(all,r,REG)
+    IMCSHR(c,r) # share of import c by investment agent in total imports in r #;
+Formula (all,c,COMM)(all,r,REG)
+    IMCSHR(c,r) = VMIB(c,r) / VMB(c,r);
+
+Equation E_qms
+# assures mkt clearing for imported goods entering each region #
+(all,c,COMM)(all,r,REG)
+    qms(c,r)
+        = sum{a,ACTS, FMCSHR(c,a,r) * qfm(c,a,r)}
+        + PMCSHR(c,r) * qpm(c,r)
+        + GMCSHR(c,r) * qgm(c,r)
+        + IMCSHR(c,r) * qim(c,r);
+
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    ams(c,s,d) # commodity c augmenting tech change from s to d #;
+Coefficient (parameter)(all,c,COMM)(all,r,REG)
+    ESUBM(c,r)
+    # region-specific elast. of sub. among imports c in Armington structure #;
+Read
+    ESUBM from file GTAPPARM header "ESBM";
+Assertion (all,c,COMM)(all,r,REG) ESUBM(c,r) ge 0;
+
+Equation E_qxs
+# regional demand for disaggregated imported commodities by source #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    qxs(c,s,d)
+        = -ams(c,s,d) + qms(c,d)
+        - ESUBM(c,d) * [pmds(c,s,d) - ams(c,s,d) - pms(c,d)];
+
+Coefficient (all,c,COMM)(all,d,REG)
+    IMPBASIC(c,d) # total imports of good c by DEST region d, at basic prices #;
+Formula (all,c,COMM)(all,d,REG)
+    IMPBASIC(c,d) = sum{s,REG, VMSB(c,s,d)};
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    MSHRS(c,s,d) # share of imports from s in imp. bill of r at basic prices #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    MSHRS(c,s,d) = VMSB(c,s,d) / IMPBASIC(c,d);
+
+Equation E_pms
+# price for aggregate imports #
+(all,c,COMM)(all,d,REG)
+    pms(c,d) = sum{s,REG, MSHRS(c,s,d) * [pmds(c,s,d) - ams(c,s,d)]};
+
+!<
+    6-2. International trade and transport margins
+    ----------------------------------------------
+>!
+
+!<
+    6-2-1. Demand for Global Transport Services
+    -------------------------------------------
+>!
+
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    ptrans(c,s,d) # cost index for international transport of c from s to d #;
+Variable (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    qtmfsd(m,c,s,d) # international usage margin m on c from s to d #;
+!<
+    International margin usage, by Margin, Freight, Source, and Destination,
+    i.e., the percent change in usage of m in transport of c from s to d.
+>!
+
+Variable (all,m,MARG)
+    pt(m) # price index of composite margins services, by margin mode m #;
+Variable (all,m,MARG)
+    qtm(m) # global margin usage #;
+Variable (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    atmfsd(m,c,s,d) # tech change in m's shipping of c from region s to d #;
+!<
+    Technical progress in shipping by Margin, Freight, Source, and
+    Destination.  This is endogenous and driven by the following mode-,
+    commodity-, source-, and destination-specific determinants.
+>!
+
+Equation E_qtmfsd
+# bilateral demand for transport services #
+(all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    qtmfsd(m,c,s,d) = qxs(c,s,d) - atmfsd(m,c,s,d);
+!<
+    E_qtmfsd equation computes the bilateral demand for international
+    transportation services.  It reflects the fact that the demand for
+    services along any particular route is proportional to the quantity of
+    merchandise shipped [i.e., QXS(c,s,d)].  It is here that we introduce the
+    potential for input-augmenting tech change, atmfsd(m,c,s,d), which is
+    commodity- and route-specific.  Thus, in the levels:
+            ATMFSD(m,c,s,d) * QTMFSD(m,c,s,d) = QXS(c,s,d)
+    where QTMFSD is the amount of composite margins services m used along this
+    route.  Technological improvements are reflected by atmfsd(c,s,d) > 0, and
+    these reduce the margins services required for this i,r,s triplet.  Tech.
+    change also dampens the cost of shipping, thereby lowering the CIF price
+    implied by a given FOB value (see 6-2-2).
+>!
+
+Coefficient (ge 0) (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VTMFSD(m,c,s,d)
+    # int'l margin usage, by margin, freight, source, and destination #;
+Read
+    VTMFSD from file GTAPDATA header "VTWR";
+Update (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VTMFSD(m,c,s,d) = pt(m) * qtmfsd(m,c,s,d);
+
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    VTFSD(c,s,d) # aggregate value of svces in the shipment of c from s to d #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    VTFSD(c,s,d) = sum{m,MARG, VTMFSD(m,c,s,d)};
+!<
+    In a balanced data base, (all,c,COMM)(all,s,REG)(all,d,REG),
+    VCIF(c,s,d) = VFOB(c,s,d) + VTFSD(c,s,d).
+>!
+
+Coefficient
+    VTUSE # international margin services usage #;
+Formula
+    VTUSE = sum{m,MARG, sum{c,COMM, sum{s,REG, sum{d,REG, VTMFSD(m,c,s,d)}}}};
+Coefficient (all,m,MARG)
+    VTMUSE(m) # international margin services usage, by type #;
+Formula (all,m,MARG)
+    VTMUSE(m) = sum{c,COMM, sum{s,REG, sum{d,REG, VTMFSD(m,c,s,d)}}};
+
+Coefficient (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VTFSD_MSH(m,c,s,d) # share of margin m in cost of getting c from s to d #;
+Formula (all,m,MARG)(all,c,COMM)(all,r,REG)
+        (all,d,REG: VTFSD(c,r,d) > 0.0)
+    VTFSD_MSH(m,c,r,d) = VTMFSD(m,c,r,d) / VTFSD(c,r,d);
+Formula (all,m,MARG)(all,c,COMM)(all,s,REG)
+        (all,d,REG: VTFSD(c,s,d) = 0.0)
+    VTFSD_MSH(m,c,s,d) = VTMUSE(m) / VTUSE;
+
+Equation E_ptrans
+#  generates flow-specific modal average cost of transport index (cf. HT7) #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    ptrans(c,s,d)
+        = sum{m,MARG, VTFSD_MSH(m,c,s,d) * [pt(m) - atmfsd(m,c,s,d)]};
+!<
+    average cost index for margin services used in getting c from s to d
+>!
+
+Coefficient (all,m,MARG)
+    VTMPROV(m) # international margin services provision #;
+Formula (all,m,MARG)
+    VTMPROV(m) = sum{r,REG, VST(m,r)};
+!<
+    In a balanced data base, VTMPROV = VTMUSE.
+>!
+Coefficient (all,r,REG)
+    VTRPROV(r) # international margin supply, by region #;
+Formula (all,r,REG)
+    VTRPROV(r) = sum{m,MARG, VST(m,r)};
+Coefficient
+    VT # international margin supply #;
+Formula
+    VT = sum{m,MARG, sum{r,REG, VST(m,r)}};
+
+Coefficient (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VTMUSESHR(m,c,s,d) # share of c,s,d usage in global demand for m #;
+Formula (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VTMUSESHR(m,c,s,d) = VTFSD(c,s,d) / VT;
+Formula
+    (all,m,MARG: VTMUSE(m) <> 0.0)(all,c,COMM)(all,s,REG)(all,d,REG)
+    VTMUSESHR(m,c,s,d) = VTMFSD(m,c,s,d) / VTMUSE(m);
+
+Equation E_qtm
+# global demand for margin m #
+(all,m,MARG)
+    qtm(m)
+        = sum{c,COMM, sum{s,REG, sum{d,REG,
+          VTMUSESHR(m,c,s,d) * qtmfsd(m,c,s,d)}}};
+
+Coefficient (parameter)(all,m,MARG)
+    ESUBS(m)
+    # elasticity of sub. among transportation service inputs #;
+Read
+    ESUBS from file GTAPPARM header "ESBS";
+Assertion (all,m,MARG) ESUBS(m) ge 0;
+
+Equation E_qst
+# generate demand for regional supply of global transportation service #
+(all,m,MARG)(all,r,REG)
+    qst(m,r) = qtm(m) - ESUBS(m)*[pds(m,r) - pt(m)];
+
+!<
+    6-2-2. Supply of Transport Services
+    -----------------------------------
+>!
+
+Coefficient (all,m,MARG)(all,r,REG)
+    VTSUPPSHR(m,r) # share of region r in global supply of margin m #;
+Formula (all,m,MARG)(all,r,REG)
+    VTSUPPSHR(m,r) = VTRPROV(r) / VT;
+Formula (all,m,MARG: VTMPROV(m) <> 0.0)(all,r,REG)
+    VTSUPPSHR(m,r) = VST(m,r) / VTMPROV(m);
+
+Equation E_pt
+# generate price index for composite transportation services #
+(all,m,MARG)
+    pt(m) = sum{r,REG, VTSUPPSHR(m,r) * pds(m,r)};
+!<
+    E_pt equation generates a price index for transportation services based on
+    zero profits.  NOTE:
+    (1) Sales to international transportation are not subject to export tax.
+        This is why we base the costs to the transport sector at basic prices
+        of the goods sold to international transportation.
+    (2) We assume that the supply shares for margin services are uniform
+        across freight, source of freight, and destination.
+>!
+
+Variable (all,m,COMM)
+    atm(m) # tech change in mode m, worldwide #;
+Variable (all,c,COMM)
+    atf(c) # tech change shipping of c, worldwide #;
+Variable (all,r,REG)
+    ats(r) # tech change shipping from region r #;
+Variable (all,d,REG)
+    atd(d) # tech change shipping to d #;
+Variable (all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    atall(m,c,s,d) # tech change in m's shipping of c from region s to d #;
+
+Equation E_atmfsd
+#  generates flow-specific average rate of technical change #
+(all,m,MARG)(all,c,COMM)(all,s,REG)(all,d,REG)
+    atmfsd(m,c,s,d) = atm(m) + atf(c) + ats(s) + atd(d) + atall(m,c,s,d);
+
+!<
+    6-3. Trade prices
+    -----------------
+>!
+
+!<
+    6-3-1. Export Prices
+    --------------------
+>!
+
+Variable (all,c,COMM)(all,r,REG)
+    tx(c,r) # dest.-gen. change in subsidy on exports of c from r #;
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    txs(c,s,d) # dest.-spec. change in subsidy on exports of c from s to d #;
+!<
+    The variable txs captures changes in the power of bilateral export taxes.
+    However, the presence of a destination-generic export subsidy shift (tx)
+    also permits the user to swap a single export tax shock with another
+    target variable.  It is most naturally swapped with the variable qo to
+    insulate domestic producers from the world market.
+
+    The sign of tx(c,r) and txs(c,s,d) has been CHANGED in GTAP model version 7
+    tx(c,r)  > 1 in the case of a tax
+    txs(c,r) > 1 in the case of a tax
+    tx(c,r)  < 1 in the case of a subsidy.
+    txs(c,r) < 1 in the case of a subsidy.
+>!
+
+Equation E_pfob
+# links basic and FOB exports prices #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    pfob(c,s,d) = pds(c,s) + tx(c,s) + txs(c,s,d);
+
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    VCIFCOST(c,s,d) # value of imports calculated as total cost of imports #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    VCIFCOST(c,s,d) = VFOB(c,s,d) + VTFSD(c,s,d);
+
+Zerodivide (zero_by_zero) default 0.5;
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    FOBSHR(c,s,d) # FOB share in (com. and margin) imports at CIF prices #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    FOBSHR(c,s,d) = VFOB(c,s,d) / VCIFCOST(c,s,d);
+Zerodivide (zero_by_zero) off;
+
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    TRNSHR(c,s,d) # Intl. transp. share in (com. and marg) imp. at CIF prices #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    TRNSHR(c,s,d) = 1 - FOBSHR(c,s,d);
+
+Equation E_pcif
+# links FOB and CIF prices for good c shipped from region s to d #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    pcif(c,s,d) = FOBSHR(c,s,d) * pfob(c,s,d) + TRNSHR(c,s,d) * ptrans(c,s,d);
+!<
+    This equation links export and import prices for each commodity/route
+    triplet.  Note that technical change is embodied in ptrans(i,r,s) which is
+    a cost index.
+>!
+
+Variable (all,c,COMM)(all,r,REG)
+    tm(c,r) # source-gen. change in tax on imports of c into r #;
+Variable (all,c,COMM)(all,s,REG)(all,d,REG)
+    tms(c,s,d) # source-spec. change in tax on imports of c from s to d #;
+!<
+    The variable tms captures changes in the power of bilateral import taxes.
+    However, the presence of a source-generic import tariff shift (tm) also
+    permits the user to swap a single import tariff shock with another target
+    variable.  In particular, to insulate domestic producers from import price
+    changes, it may be swapped with the relative price variable pr -- see
+    below.
+>!
+
+Equation E_pmds
+# links basic domestic import prices and CIF import prices #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    pmds(c,s,d) = pcif(c,s,d) + tm(c,d) + tms(c,s,d);
+
+Variable (orig_level=1.0)(all,c,COMM)(all,r,REG)
+    pr(c,r) # ratio of domestic to imported prices in r #;
+Equation E_pr
+# defines target price ratio to be attained via the variable levy #
+(all,c,COMM)(all,r,REG)
+    pr(c,r) = pds(c,r) - pms(c,r);
+!<
+    E_pr equation defines the target price ratio to be attained VIP the
+    variable levy.  This price ratio is the ratio of domestic to average
+    imported goods' price.  Note that the way this price ratio is defined, it
+    includes intraregional imports as well.  In most applications, regions
+    will represent groups of individual countries.  However, in the case of
+    the EU, this is problematic, since recent versions of the database have
+    incorporated intra-EU trade flows.  Therefore, when aggregated to the EU
+    level, the composite import price includes both intra-EU and outside
+    imports.  So some modification is needed to handle the EU case.
+>!
+
+!<
+    6-4. Goods market equilibrium
+    -----------------------------
+>!
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    FDCSHR(c,a,r) # share of dom. prod. c used by act. a in r #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    FDCSHR(c,a,r) = VDFB(c,a,r) / VDB(c,r);
+Coefficient (all,c,COMM)(all,r,REG)
+    PDCSHR(c,r) # share of domestic prod. of c used by private hhlds in r #;
+Formula (all,c,COMM)(all,r,REG)
+    PDCSHR(c,r) = VDPB(c,r) / VDB(c,r);
+Coefficient (all,c,COMM)(all,r,REG)
+    GDCSHR(c,r) # share of imports of c used by gov't hhlds in r #;
+Formula (all,c,COMM)(all,r,REG)
+    GDCSHR(c,r) = VDGB(c,r) / VDB(c,r);
+Coefficient (all,c,COMM)(all,r,REG)
+    IDCSHR(c,r) # share of domestic prod. of c used by investment in r #;
+Formula (all,c,COMM)(all,r,REG)
+    IDCSHR(c,r) = VDIB(c,r) / VDB(c,r);
+
+Variable (orig_level=VDB)(all,c,COMM)(all,r,REG)
+    qds(c,r) # domestic sales of commodity c in r #;
+Equation E_qds
+# assures market clearing for domestic sales #
+(all,c,COMM)(all,r,REG)
+    qds(c,r) = sum{a,ACTS, FDCSHR(c,a,r) * qfd(c,a,r)}
+             + PDCSHR(c,r) * qpd(c,r)
+             + GDCSHR(c,r) * qgd(c,r)
+             + IDCSHR(c,r) * qid(c,r);
+
+Variable (all,c,COMM)(all,r,REG)
+    tradslack(c,r) # slack variable in tradeables market clearing condition #;
+!<
+    tradslack is exogenous unless the user wishes to specify the price of
+    tradeables exogenously, in which case the analysis becomes partial
+    equilibrium and walraslack must be exogenized.
+>!
+Coefficient (all,c,COMM)(all,r,REG)
+    DSSHR(c,r) # share of domestic sales of c in r #;
+Formula (all,c,COMM)(all,r,REG)
+    DSSHR(c,r) = VDB(c,r) / VCB(c,r);
+Coefficient (all,m,MARG)(all,r,REG)
+    STSHR(m,r) # share of sales of m to global transport services in r #;
+Formula (all,m,MARG)(all,r,REG)
+    STSHR(m,r) = VST(m,r) / VCB(m,r);
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    XSSHR(c,s,d) # share of export sales of c to s in r #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    XSSHR(c,s,d) = VXSB(c,s,d) / VCB(c,s);
+
+Equation E_pds
+# assures market clearing for commodities #
+(all,c,COMM)(all,r,REG)
+    qc(c,r) = DSSHR(c,r) * qds(c,r) + sum(d,REG, XSSHR(c,r,d) * qxs(c,r,d))
+            + IF[c in MARG, STSHR(c,r) * qst(c,r)]
+            + tradslack(c,r);
+
+!<
+    6-5. Agents' prices for goods
+    -----------------------------
+>!
+
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    tfd(c,a,r) # tax on domestic c purchased by act. a in r #;
+Variable (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    tfm(c,a,r) # tax on imported c purchased by act. a in r #;
+
+Equation E_pfd
+# links domestic basic and firm prices #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pfd(c,a,r) = pds(c,r) + tfd(c,a,r);
+!<
+    E_pfd  links domestic basic and firm prices. It holds only for domestic
+    goods and it captures the effect of commodity taxation of firms.
+>!
+
+Equation E_pfm
+# links domestic basic and firm prices #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    pfm(c,a,r) = pms(c,r) + tfm(c,a,r);
+!<
+    E_pfm links domestic basic and firm prices.  It holds only for imported
+    goods and it captures the effect of commodity taxation of firms.
+>!
+
+Variable (orig_level=LevTPD)(all,c,COMM)(all,r,REG)
+    tpd(c,r) # power of tax on domestic c purchased by private hhld in r #;
+Variable (all,c,COMM)(all,r,REG)
+    tpm(c,r) # power of tax on imported c purchased by private hhld in r #;
+Coefficient (all,c,COMM)(all,r,REG) LevTPD(c,r) # levels TPD #;
+Zerodivide default 0.5;
+Formula (all,c,COMM)(all,r,REG) LevTPD(c,r)  =  VDPP(c,r) / VDPB(c,r);
+Zerodivide off;
+
+Equation E_ppd
+# links basic and private household consumption prices for domestic com. c #
+(all,c,COMM)(all,r,REG)
+    ppd(c,r) = pds(c,r) + tpd(c,r);
+
+Equation E_ppm
+# links basic and private household consumption prices for imported com. c #
+(all,c,COMM)(all,r,REG)
+    ppm(c,r) = pms(c,r) + tpm(c,r);
+
+Variable (all,c,COMM)(all,r,REG)
+    tgd(c,r) # power of tax on domestic c purchased by government hhld in r #;
+Variable (all,c,COMM)(all,r,REG)
+    tgm(c,r) # power of tax on imported c purchased by gov't hhld in r #;
+
+Equation E_pgd
+# links basic and government consumption prices for domestic com. c #
+(all,c,COMM)(all,r,REG)
+    pgd(c,r) = pds(c,r) + tgd(c,r);
+
+Equation E_pgm
+# links basic and government consumption prices for imported com. c #
+(all,c,COMM)(all,r,REG)
+    pgm(c,r) = pms(c,r) + tgm(c,r);
+
+Variable (all,c,COMM)(all,r,REG)
+    tid(c,r) # power of tax on domestic invesment commodity c in region r #;
+Variable (all,c,COMM)(all,r,REG)
+    tim(c,r) # power of tax on imported invesment commodity c in region r #;
+
+Equation E_pid
+# links basic and investment consumption prices for domestic com. c #
+(all,c,COMM)(all,r,REG)
+    pid(c,r) = pds(c,r) + tid(c,r);
+
+Equation E_pim
+# links basic and investment consumption prices for imported com. c #
+(all,c,COMM)(all,r,REG)
+    pim(c,r) = pms(c,r) + tim(c,r);
+
+
+!<
+    6-6. Private hhld tax shifter
+    -----------------------------
+>!
+
+Variable  (all,c,COMM)(all,r,REG)
+    atpd(c,r) # comm.-, source-spec. shifter in private cons. tax of dom. c #;
+Variable (all,c,COMM)(all,r,REG)
+    atpm(c,r) # comm.-, source-spec. shift in tax on private cons. of imp. c #;
+Variable (all,r,REG)
+    tp(r) # source-generic tax shifter on private cons. #;
+!<
+    The variable tp(r) can be swapped with del_ttaxr(r) in order to generate a
+    tax replacement scenario, whereby taxes remain a constant share of
+    national income.
+>!
+
+Equation E_atpd
+# permits uniform consumption tax change #
+(all,c,COMM)(all,r,REG)
+    tpd(c,r) = atpd(c,r) + tp(r);
+
+Equation E_atpm
+# permits uniform consumption tax change #
+(all,c,COMM)(all,r,REG)
+    tpm(c,r) = atpm(c,r) + tp(r);
+
+!<
+    ----------------------------
+    7. Factor market equilibrium
+    ----------------------------
+>!
+
+Variable (all,e,ENDWMS)(all,r,REG)
+    pe(e,r) # price of mobile and sluggish endowment e in region r #;
+Variable (all,e,ENDWMS)(all,r,REG)
+    qe(e,r) # supply of mobile and sluggish endowment e in region r #;
+
+!<
+    7-1. Mobile endowments
+    ----------------------
+>!
+
+Coefficient (all,e,ENDWM)(all,r,REG)
+    VENDWM(e,r) # mobile endowments in r at basic (incl. income tax) prices #;
+Formula (all,e,ENDWM)(all,r,REG)
+    VENDWM(e,r) = sum{a,ACTS, EVFB(e,a,r)};
+Coefficient (all,e,ENDWM)(all,a,ACTS)(all,r,REG)
+    ENDWMSHR(e,a,r) # share of mobile endow. e used by act. a at basic prices #;
+Formula (all,e,ENDWM)(all,a,ACTS)(all,r,REG)
+    ENDWMSHR(e,a,r) = EVFB(e,a,r) / VENDWM(e,r);
+
+Equation E_pe1
+# mkt clearing for perfectly mobile endowments in each r #
+(all,e,ENDWM)(all,r,REG)
+    qe(e,r) = sum{a,ACTS, ENDWMSHR(e,a,r) * qfe(e,a,r)} + endwslack(e,r);
+
+Equation E_qes1
+# basic price of mobile endowments in a in r #
+(all,e,ENDWM)(all,a,ACTS)(all,r,REG)
+    pes(e,a,r) = pe(e,r);
+
+!<
+    7-2. Sluggish endowments
+    ------------------------
+>!
+
+Coefficient (parameter)(all,e,ENDW)(all,r,REG)
+    ETRAE(e,r)
+    # region-specific elast. of transformation for sluggish factor endowments #;
+Read
+    ETRAE from file GTAPPARM header "ETRE";
+Assertion (all,e,ENDWS)(all,r,REG) ETRAE(e,r) lt 0;
+
+Equation E_qes2
+# allocation of sluggish endowments across sectors #
+(all,e,ENDWS)(all,a,ACTS)(all,r,REG)
+    qes(e,a,r) = qe(e,r) - ETRAE(e,r) * [pes(e,a,r) - pe(e,r)]
+               - endwslack(e,r);
+
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    REVSHR(e,a,r) # Share of endowment e in total endowment revenue/supply #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    REVSHR(e,a,r) = EVOS(e,a,r) / VES(e,r);
+
+Equation E_pe2
+# composite price for sluggish endowments #
+(all,e,ENDWS)(all,r,REG)
+    pe(e,r) = sum{a,ACTS, REVSHR(e,a,r) * pes(e,a,r)};
+
+!<
+    7-3. Sector-specific endowments
+    -------------------------------
+>!
+
+Variable (all,e,ENDWF)(all,a,ACTS)(all,r,REG)
+    qesf(e,a,r) # fixed endowment e in act. a in region r #;
+
+Equation E_qes3
+# equation to assist use of TABmate's automatic closure tool #
+(all,e,ENDWF)(all,a,ACTS)(all,r,REG)
+    qes(e,a,r) = qesf(e,a,r);
+!<
+    For convenience, variable qesf and equation E_qesf are added to assist use
+   of TABmate's automatic closure tool
+>!
+
+!<
+    7-4. Price of endowments
+    ------------------------
+>!
+Variable (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    tfe(e,a,r) # tax on primary factor e used by act. a in region r #;
+
+Equation E_pfe
+# links basic and firm demand prices for mobile endowments #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    pfe(e,a,r) = peb(e,a,r) + tfe(e,a,r);
+
+Equation E_pes
+# links supply (pre-) and basic (post-tax) endowment prices #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    peb(e,a,r) = pes(e,a,r) + tinc(e,a,r);
+
+Equation E_peb !< This equation assures market clearing for all endowments >!
+# market clearing for endowments in each r #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    qfe(e,a,r) = qes(e,a,r);
+
+!<
+    8. Allocation of global saving
+    -------------------------------
+>!
+
+!<
+    8-1. Investment preliminaries
+    -----------------------------
+>!
+Variable (all,r,REG)
+    ke(r) # end-of-period capital stock in r #;
+Coefficient (ge 0)(all,r,REG)
+    VKB(r) # value of beginning-of-period capital stock in region r #;
+Update (all,r,REG)
+    VKB(r) = pinv(r) * kb(r);
+Read
+    VKB from file GTAPDATA header "VKB";
+!<
+    VKB(r) is used only in this sub-module, so its data are read here.  The
+    associated variables, pinv(r) and kb(r), are used across modules, so they
+    have been defined as common variables.
+>!
+
+Coefficient (all,r,REG)
+    INVKERATIO(r)
+    # ratio of gross investment to end-of-period capital stock in r #;
+Formula (all,r,REG)
+    INVKERATIO(r) = REGINV(r) / [VKB(r) + NETINV(r)];
+
+Equation E_ke
+# ending capital stock equals beginning stock plus net investment.  #
+(all,r,REG)
+    ke(r) = INVKERATIO(r) * qinv(r) + [1.0 - INVKERATIO(r)] * kb(r);
+
+Coefficient (all,r,REG)
+    GROSSCAP(r) # gross return to capital #;
+Formula (all,r,REG)
+    GROSSCAP(r) = sum{e,ENDWC, VES(e,r)};
+
+Coefficient (all,r,REG)
+    GRNETRATIO(r) # ratio of GROSS/NET rates of return on capital in r #;
+Formula (all,r,REG)
+    GRNETRATIO(r) = GROSSCAP(r) / [GROSSCAP(r) - VDEP(r)];
+!<
+    NOTE: [GROSSCAP(r) - VDEP(r)] is net returns to capital.
+>!
+
+Variable (all,r,REG)
+    rore(r) # expected net rate of return on capital stock in r #;
+Variable (all,r,REG)
+    rorc(r) # current net rate of return on capital stock in r #;
+Variable (all,r,REG)
+    rental(r) # rental rate on capital = ps("capital",r) #;
+
+Equation E_rental
+# defines a variable for capital rental rate #
+(all,r,REG)
+    rental(r) = sum{e,ENDWC, [VES(e,r) / GROSSCAP(r)] * pe(e,r)};
+
+Equation E_rorc
+# current rate of return on capital in region r #
+(all,r,REG)
+    rorc(r) = GRNETRATIO(r) * [rental(r) - pinv(r)];
+
+Equation E_kb
+# associates change in cap. services w/ change in cap. stock #
+(all,r,REG)
+    kb(r) = sum{e,ENDWC, [VES(e,r) / GROSSCAP(r)] * qe(e,r)};
+!<
+    E_kb equation associates any change in capital services during the period
+    with a change in capital stock.  Full capacity utilization is assumed.
+>!
+
+!<
+    8-2. Rate-of-return sensitive investment allocation
+    ---------------------------------------------------
+>!
+
+Coefficient (parameter)(all,r,REG)
+    RORFLEX(r)
+    # flexibility of expected net ROR on capital stock in r wrt investment #;
+Read
+    RORFLEX from file GTAPPARM header "RFLX";
+!<
+    RORFLEX is the flexibility of the expected net rate of return on the
+    capital stock, in region r, with respect to investment.  If a region's
+    capital stock increases by 1%, then it is expected that the net rate of
+    return on capital will decline by RORFLEX %.  A larger absolute value for
+    this parameter will reduce the tendency of international investment flows
+    to respond to changes in expected rates of return.
+>!
+
+Equation E_rore
+# expected rate of return depends on the current return and investment #
+(all,r,REG)
+    rore(r) = rorc(r) - RORFLEX(r) * [ke(r) - kb(r)];
+
+Coefficient (integer,parameter)
+    RORDELTA
+    # binary coefficient to switch mechanism of allocating investment funds #;
+Read
+    RORDELTA from file GTAPPARM header "RDLT";
+!<
+    RORDELTA is a binary coefficient which determines the mechanism of
+    allocating investment funds across regions.  When RORDELTA = 1, investment
+    funds are allocated across regions to equate the change in the expected
+    rates of return (i.e., rore(r)).  When RORDELTA = 0, investment funds are
+    allocated across regions to maintain the existing composition of capital
+    stocks.
+>!
+
+Variable
+    rorg # global net rate of return on capital stock #;
+Variable (all,r,REG)
+    cgdslack(r) # slack variable for qinv(r) #;
+!<
+    cgdslack is exogenous, unless the user wishes to exogenously fix the level
+    of gross investment in a region, in which case it can be swapped with
+    cgdslack.
+>!
+
+Equation E_qinv
+# either gross investment or expected rate of return in region r #
+(all,r,REG)
+    RORDELTA * rore(r)
+    + [1 - RORDELTA]
+    * [[REGINV(r) / NETINV(r)] * qinv(r) - [VDEP(r) / NETINV(r)] * kb(r)]
+        = RORDELTA * rorg + [1 - RORDELTA] * globalcgds + cgdslack(r);
+!<
+    This equation determines either gross investment or the expected rate of
+    return in each region, depending on the setting for the binary RORDELTA
+    parameter.
+>!
+
+Variable (all,e,ENDWC)(all,r,REG)
+    expand(e,r) # change in investment relative to endowment stock #;
+Equation E_expand
+# change in investment relative to endowment stock #
+(all,e,ENDWC)(all,r,REG)
+    expand(e,r) = qinv(r) - qe(e,r);
+!<
+    Capital Accumulation
+    (based on the theory laid out in GTAP Technical Paper #7)
+>!
+
+!<
+    8-3. Investment allocation based on initial capital shares
+    ----------------------------------------------------------
+>!
+
+Equation E_globalcgds
+# either expected global rate of return or global net investment #
+    RORDELTA * globalcgds + [1 - RORDELTA] * rorg
+        = RORDELTA
+        * sum{r,REG,
+            [REGINV(r) / GLOBINV] * qinv(r) - [VDEP(r) / GLOBINV] * kb(r)}
+        + [1 - RORDELTA] * sum{r,REG, [NETINV(r) / GLOBINV] * rore(r)};
+!<
+    E_globalcgds equation computes either the change in global net investment
+    (when RORDELTA = 1), or the change in the expected global rate of return on
+    capital (when RORDELTA = 0).
+>!
+
+!<
+    8-4. Price of saving
+    ---------------------
+>!
+
+Variable (all,r,REG)
+    psaveslack(r) # slack variable for the saving price equation #;
+!<
+    psaveslack is exogenous under the normal closure.  However, in order to
+    replicate simulations from the GTAP book, where there was a single saving
+    price, psaveslack may be swapped with psave in order to fix the latter.
+    In this case, pcgdswld must be the numeraire so that each region faces the
+    same price of saving.
+>!
+
+Equation E_psave
+# price of saving #
+(all,r,REG)
+    psave(r)
+        = pinv(r)
+        + sum{s,REG, [[NETINV(s) - SAVE(s)] / GLOBINV] * pinv(s)}
+        + psaveslack(r);
+!<
+    In contrast to the GTAP book, the price of saving is now region-specific
+    and it changes at the same rate as the price of regional investment, plus
+    an adjustment factor which accounts for the fact that saving and
+    investment are not equal at the regional level.
+>!
+
+Equation E_pcgdswld
+# price index for the aggregate global cgds composite #
+    pcgdswld = sum{r,REG, [NETINV(r) / GLOBINV] * pinv(r)};
+
+!<
+    9. Tax revenue streams
+    ----------------------
+>!
+
+!<
+    9-1. Tax revenues generated in production
+    -----------------------------------------
+>!
+
+!<
+    The following variables could be dropped when converting to levels
+    equation for income.  They are only needed for the linearized equation.
+    The idea here is to look at the ratio of taxes to income in order to
+    preserve homogeneity in prices.  (We could also look at changes in tax
+    revenue, but then a uniform price increase would change this variable.)
+    Obviously a simple percentage change variable doesn't work, since many
+    taxes are initially zero.  The basic logic of this approach is as follows:
+
+    Let R be the ratio of taxes to income: R = T/Y, then:
+        dR = d(T/Y) = R(t - y)/100
+    multiply through by Y to get:
+        YdR = dT - Ty/100
+    This ratio change is computed for each tax type and for total taxes.  Then
+    the change in tax revenue itself may be computed as:
+        dT = YdR + Ty/100
+    in order to determine regional income.
+>!
+
+Variable (change) (all,r,REG)
+    del_taxrout(r) # change in ratio of output tax to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxrfu(r) # change in ratio of tax on primary factor usage to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxriu(r) # change in ratio of tax on intermediate usage to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxrpc(r) # change in ratio of private consumption tax to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxrgc(r) # change in ratio of government consumption tax to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxric(r) # change in ratio of investment consumption tax to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxrexp(r) # change in ratio of export tax to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxrimp(r) # change in ratio of import tax to INCOME #;
+Variable (change) (all,r,REG)
+    del_taxrinc(r) # change in ratio of income tax to INCOME #;
+
+Equation E_del_taxrout
+# change in ratio of output tax payments to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxrout(r) + TAXROUT(r) * y(r)
+        = sum{c,COMM, sum{a,ACTS,
+           MAKEB(c,a,r) * to(c,a,r) + PTAX(c,a,r) * [ps(c,a,r) + qca(c,a,r)]}};
+
+Equation E_del_taxrfu
+# change in ratio of tax payments on factor usage to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxrfu(r) + TAXRFU(r) * y(r)
+        = sum{e,ENDW, sum{a,ACTS,
+           VFP(e,a,r) * tfe(e,a,r) + ETAX(e,a,r) * [peb(e,a,r) + qfe(e,a,r)]}};
+
+Equation E_del_taxriu
+# change in ratio of tax payments on intermediate goods to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxriu(r) + TAXRIU(r) * y(r)
+        = sum{c,COMM, sum{a,ACTS,
+            VDFP(c,a,r) * tfd(c,a,r) + DFTAX(c,a,r) * [pds(c,r) + qfd(c,a,r)]}}
+        + sum{c,COMM, sum{a,ACTS,
+            VMFP(c,a,r) * tfm(c,a,r) + MFTAX(c,a,r) * [pms(c,r) + qfm(c,a,r)]}};
+
+!<
+    9-2. Tax revenues generated in domestic final demand
+    ----------------------------------------------------
+>!
+
+Equation E_del_taxrpc
+# change in ratio of private consumption tax payments to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxrpc(r) + TAXRPC(r) * y(r)
+        = sum{c,COMM,
+            VDPP(c,r) * tpd(c,r) + DPTAX(c,r) * [pds(c,r) + qpd(c,r)]}
+        + sum{c,COMM,
+            VMPP(c,r) * tpm(c,r) + MPTAX(c,r) * [pms(c,r) + qpm(c,r)]};
+
+Equation E_del_taxrgc
+# change in ratio of government consumption tax payments to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxrgc(r) + TAXRGC(r) * y(r)
+        = sum{c,COMM,
+            VDGP(c,r) * tgd(c,r) + DGTAX(c,r) * [pds(c,r) + qgd(c,r)]}
+        + sum{c,COMM,
+            VMGP(c,r) * tgm(c,r) + MGTAX(c,r) * [pms(c,r) + qgm(c,r)]};
+
+Equation E_del_taxric
+# change in ratio of investment tax payments to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxric(r) + TAXRIC(r) * y(r)
+        = sum{c,COMM,
+            VDIP(c,r) * tid(c,r) + DITAX(c,r) * [pds(c,r) + qid(c,r)]}
+        + sum{c,COMM,
+            VMIP(c,r) * tim(c,r) + MITAX(c,r) * [pms(c,r) + qim(c,r)]};
+
+!<
+    9-3. Tax revenues generated in international trade
+    --------------------------------------------------
+>!
+
+Equation E_del_taxrexp
+# change in ratio of export tax payments to regional income #
+(all,s,REG)
+    100.0 * INCOME(s) * del_taxrexp(s) + TAXREXP(s) * y(s)
+        = sum{c,COMM, sum{d,REG, VFOB(c,s,d) * [tx(c,s) + txs(c,s,d)]
+        + XTAXD(c,s,d) * [pds(c,s) + qxs(c,s,d)]}};
+
+Equation E_del_taxrimp
+# change in ratio of import tax payments to regional income #
+(all,d,REG)
+    100.0 * INCOME(d) * del_taxrimp(d) + TAXRIMP(d) * y(d)
+        = sum{c,COMM, sum{s,REG,
+            VMSB(c,s,d) * [tm(c,d) + tms(c,s,d)]
+            + MTAX(c,s,d) * [pcif(c,s,d) + qxs(c,s,d)]}};
+
+!<
+    9-4. Income taxes and other tax identities
+    ------------------------------------------
+>!
+
+Coefficient (all,r,REG)
+    TAXRINC(r) # income tax payments in r #;
+Formula (all,r,REG)
+    TAXRINC(r) = sum{e,ENDW, sum{a,ACTS, INCTAX(e,a,r)}};
+
+Equation E_del_taxrinc
+# change in ratio of income tax payments to regional income #
+(all,r,REG)
+    100.0 * INCOME(r) * del_taxrinc(r) + TAXRINC(r) * y(r)
+        = sum{e,ENDW, sum{a,ACTS, EVFB(e,a,r) * [tinc(e,a,r)]
+        + INCTAX(e,a,r) * [pes(e,a,r) + qfe(e,a,r)]}};
+
+Equation E_del_indtaxr
+# change in ratio of indirect taxes to INCOME in r #
+(all,r,REG)
+    del_indtaxr(r)
+        = del_taxrout(r) + del_taxrfu(r)
+        + del_taxriu(r) + del_taxrpc(r) + del_taxrgc(r) + del_taxric(r)
+        + del_taxrimp(r)+ del_taxrexp(r);
+
+Variable (change)(all,r,REG)
+    del_ttaxr(r) # change in ratio of taxes to INCOME in r #;
+Equation E_del_ttaxr
+# change in ratio of taxes to INCOME in r #
+(all,r,REG)
+    del_ttaxr(r)
+        = del_indtaxr(r) + del_taxrinc(r);
+!<
+   The del_ttaxr variable can be swapped with the commodity- and source-generic
+   consumption tax shift, tp(r), in order to generate a tax replacement
+   scenario, whereby taxes remain a constant share of national income.
+>!
+
+!<
+    10. Numeraire and closure
+    -------------------------
+>!
+
+Variable (orig_level=1.0)(all,r,REG)
+    pfactor(r) # price index (at basic prices) of primary factors, by region #;
+Coefficient (all,r,REG)
+    VENDWREG(r) # value of primary factors, at basic prices, by region #;
+Formula (all,r,REG)
+    VENDWREG(r) = sum{e,ENDW, sum{a,ACTS, EVFB(e,a,r)}};
+
+Equation E_pfactor
+# computes % change in price index of primary factors, by region #
+(all,r,REG)
+    VENDWREG(r) * pfactor(r)
+        = sum{e,ENDW, sum{a,ACTS, EVFB(e,a,r) * peb(e,a,r)}};
+
+Variable (orig_level=1.0)
+    pfactwld # world price index of primary factors #;
+Coefficient
+    VENDWWLD # value of primary factors, at basic prices, worldwide #;
+Formula
+    VENDWWLD = sum{r,REG, VENDWREG(r)};
+
+Equation E_rorg
+# computes % change in global price index of primary factors #
+    VENDWWLD * pfactwld = sum{r,REG, VENDWREG(r) * pfactor(r)};
+!<  This equation derives the price index of primary factors. Note that this is
+    the only instance where an equation name breaks the GTAP model's naming
+    convention (i.e., equation name does directly not relate to variable being
+    derived). This is because PFACTWLD is exogenous as the model.s price
+    anchor (numeraire) and thus this equation .explains., RORG which has no
+    separate equation (which has been dropped due to Walras' law). Note as well
+    that the equation is separated into two. The first E_pfactor defines a
+    regional index for factor prices, and the second defines the global index.
+    By naming this equation E_rorg and because pfactwld is exogenous, we can
+    for convenience, use TABmate's automatic closure tool to list down all
+    exogenous and endogenous variable split (i.e., closure) that is consistent
+    with the standard GTAP closure. Using TABmate's automatic closure tool is
+    beneficial especially during model development or extension.
+>!
+
+Variable
+    walras_sup # supply in omitted market--global supply of cgds composite #;
+Variable
+    walras_dem # demand in the omitted market--global demand for saving #;
+Variable
+    walraslack # slack variable in the omitted market #;
+
+Equation E_walras_sup
+# extra equation: computes change in supply in the omitted market #
+    walras_sup = pcgdswld + globalcgds;
+!<
+    This is an extra equation which simply computes change in supply in the
+    omitted market.  (modified from HT 12 to reflect the value as opposed to
+    quantity change, in light of the new treatment of psave(r))
+>!
+
+Equation E_walras_dem
+# extra equation: computes change in demand in the omitted market #
+    GLOBINV * walras_dem = sum{r,REG, SAVE(r) * [psave(r) + qsave(r)]};
+!<
+    E_walras_dem is an extra equation which simply computes change in demand in
+    the omitted market.  (modified from HT 13 to reflect the value as opposed to
+    quantity change)
+>!
+
+Equation E_walraslack
+# Check Walras' Law.  Value of "walraslack" should be zero #
+    walras_sup = walras_dem + walraslack;
+!<
+    E_walraslack allows us to verify that Walras' Law holds. The value of
+    walraslack should be zero in any GE simulation. The variable walraslack is
+    endogenous under normal, GE closure.  If the GE links are broken, then
+    walraslack must be swapped with the numeraire, thereby forcing global
+    saving to explicitly equal global investment.
+>!
+
+!<
+    ---------------
+    Summary Indices
+    ---------------
+
+    We first calculate a number of useful summary statistics, including
+    terms of trade variables/coefficients which are used in the
+    Welfare Measurement and Decomposition section (Section 11)
+
+    The following equations do not generally affect the equilibrium structure
+    of the model, although they do include the equation for the usual numeraire
+    variable, "pfactwld".
+
+    B-0. Variables and coefficients for summary indices
+    B-1. Factor price indices
+    B-2. Regional terms of trade (ToT)
+    B-3. GDP indices (value, price and quantity)
+    B-4. Aggregate trade indices (value, price and quantity)
+    B-5. Trade balance indices
+    B-6. Terms of trade (ToT) decomposition
+>!
+
+!<
+    B-0. Appendix-specific variables and coefficients
+    -------------------------------------------------
+    only used in this summary indices appendix
+>!
+
+Variable (all,c,COMM)(all,s,REG)
+    vxwfob(c,s) # value of merchandise regional exports, by commodity, FOB #;
+Variable (all,c,COMM)(all,s,REG)
+    vmwcif(c,s) # value of merchandise regional imports, by commodity, CIF #;
+Variable (all,r,REG)
+    vxwreg(r) # value of merchandise exports, by region #;
+Variable (all,r,REG)
+    vmwreg(r) # value of merchandise imports, by region, at world prices #;
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VXDFOB(c,r) # FOB value of com. c exports to all dest. (tradeables only) #;
+Formula (all,c,COMM)(all,r,REG)
+    VXDFOB(c,r) = sum{d,REG, VFOB(c,r,d)};
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VXW(c,r) # value of exports by commodity c and region r at FOB prices #;
+Formula (all,c,COMM)(all,r,REG)
+    VXW(c,r) = VXDFOB(c,r) + IF[c in MARG, VST(c,r)];
+
+Coefficient (all,r,REG)
+    VXWREGION(r) # value of exports by region r at FOB prices #;
+Formula (all,r,REG)
+    VXWREGION(r) = sum{c,COMM, VXW(c,r)};
+
+Coefficient (all,c,COMM)(all,d,REG)
+    VMCIF(c,d) # value of commodity imports c by DEST. d at CIF prices #;
+Formula (all,c,COMM)(all,d,REG)
+    VMCIF(c,d) = sum{s,REG, VCIF(c,s,d)};
+
+Coefficient (all,r,REG)
+    VMWREGION(r) # value of commodity imports by region r at CIF prices #;
+Formula (all,r,REG)
+    VMWREGION(r) = sum{c,COMM, VMCIF(c,r)};
+
+!<
+    B-1. Factor price indices
+    -------------------------
+>!
+
+Variable (orig_level=1.0)(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    pfactreal(e,a,r) # ratio of return to primary factor e to CPI in r #;
+Equation E_pfactreal
+# defines the real rate of return to primary factor e in region r #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    pfactreal(e,a,r) = peb(e,a,r) - ppriv(r);
+!<
+    This equation defines the real rate of return to primary factor e in
+    region r (new).
+>!
+
+!<
+    B-2. Regional terms of trade (ToT)
+    ----------------------------------
+
+    The next three equations correspond to Table 10 of Hertel and Tsigas on
+    Regional Terms of Trade.
+>!
+
+Variable (orig_level=1.0)(all,r,REG)
+    psw(r) # index of prices received for tradeables produced in region r #;
+Equation E_psw
+# estimate change in index of prices received for tradeables c produced in r #
+(all,r,REG)
+    VXWREGION(r) * psw(r)
+        = sum{c,COMM, sum{d,REG, VFOB(c,r,d) * pfob(c,r,d)}}
+        + sum{m,MARG, VST(m,r) * pds(m,r)};
+!<
+    This equation estimates the change in the index of prices received for
+    tradeable products produced in r.  (modified from HT 64 to eliminate the
+    investment component)
+>!
+
+Variable (orig_level=1.0)(all,r,REG)
+    pdw(r) # index of prices paid for tradeables used in importing region r #;
+Equation E_pdw
+# estimate change in index of prices paid for tradeable products used in r #
+(all,r,REG)
+    VMWREGION(r) * pdw(r)
+        = sum{c,COMM, sum{s,REG, VCIF(c,s,r) * pcif(c,s,r)}};
+!<
+    This equation estimates the change in the index of prices paid for
+    tradeable products used in r.  (modified from HT 65 to eliminate saving)
+>!
+
+Variable (orig_level=1.0)(all,r,REG)
+    tot(r) # terms of trade for region r: tot(r) = psw(r) - pdw(r) #;
+Equation E_tot
+# terms of trade equation computed as difference in psw and pdw #
+(all,r,REG)
+    tot(r) = psw(r) - pdw(r);
+
+!<
+    B-3. GDP indices (value, price and quantity)
+    --------------------------------------------
+>!
+
+! GDP expenditure side summary !
+Set
+    GDPEX (Household,Investment,Government,Exports,IntnlMargins,Imports);
+Coefficient (all,r,REG)(all,g,GDPEX)
+    GDPEXP(r,g) # GDP expenditure side summary #;
+Formula
+(all,r,REG) GDPEXP(r,"Household")    = sum{c,COMM, VPP(c,r)};
+(all,r,REG) GDPEXP(r,"Investment")   = sum{c,COMM, VIP(c,r)};
+(all,r,REG) GDPEXP(r,"Government")   = sum{c,COMM, VGP(c,r)};
+(all,s,REG) GDPEXP(s,"Exports")      = sum{c,COMM, sum{d,REG, VFOB(c,s,d)}};
+(all,r,REG) GDPEXP(r,"IntnlMargins") = sum{m,MARG, VST(m,r)};
+(all,d,REG) GDPEXP(d,"Imports")      = - sum{c,COMM, sum{s,REG, VCIF(c,s,d)}};
+Write
+    GDPEXP to file GTAPSUM header "GDPE";
+
+Variable (all,r,REG)
+    vgdp(r) # change in value of GDP #;
+Coefficient (all,r,REG)
+    GDP(r) # gross domestic product in region r #;
+Formula (all,r,REG)
+    GDP(r) = sum{g,GDPEX, GDPEXP(r,g)};
+!<
+    Gross Domestic Product in region r. Trade is valued at FOB and CIF prices.
+>!
+
+Equation E_vgdp
+# change in value of GDP #
+(all,r,REG)
+    GDP(r) * vgdp(r)
+        = sum{c,COMM, VGP(c,r) * [qga(c,r) + pga(c,r)]}
+        + sum{c,COMM, VPP(c,r) * [qpa(c,r) + ppa(c,r)]}
+        + sum{c,COMM, VIP(c,r) * [qinv(r) + pinv(r)]}
+        + sum{c,COMM, sum{d,REG, VFOB(c,r,d) * [qxs(c,r,d) + pfob(c,r,d)]}}
+        + sum{m,MARG, VST(m,r) * [qst(m,r) + pds(m,r)]}
+        - sum{c,COMM, sum{s,REG, VCIF(c,s,r) * [qxs(c,s,r) + pcif(c,s,r)]}};
+
+Variable (orig_level=1.0)(all,r,REG)
+    pgdp(r) # GDP price index #;
+Variable (orig_level=GDP)(all,r,REG)
+    qgdp(r) # GDP quantity index #;
+
+Equation E_pgdp
+# GDP price index #
+(all,r,REG)
+    GDP(r) * pgdp(r)
+        = sum{c,COMM, VGP(c,r) * pga(c,r)}
+        + sum{c,COMM, VPP(c,r) * ppa(c,r)}
+        + sum{c,COMM, VIP(c,r) * pia(c,r)}
+        + sum{c,COMM, sum{d,REG, VFOB(c,r,d) * pfob(c,r,d)}}
+        + sum{m,MARG, VST(m,r) * pds(m,r)}
+        - sum{c,COMM, sum{s,REG, VCIF(c,s,r) * pcif(c,s,r)}};
+
+Equation E_qgdp
+# GDP quantity index #
+(all,r,REG)
+    GDP(r) * qgdp(r)
+        = sum{c,COMM, VGP(c,r) * qga(c,r)}
+        + sum{c,COMM, VPP(c,r) * qpa(c,r)}
+        + sum{c,COMM, VIP(c,r) * qia(c,r)}
+        + sum{c,COMM, sum{d,REG, VFOB(c,r,d) * qxs(c,r,d)}}
+        + sum{m,MARG, VST(m,r) * qst(m,r)}
+        - sum{c,COMM, sum{s,REG, VCIF(c,s,r) * qxs(c,s,r)}};
+
+!<
+    modified from HT 72 for use with AnalyseGE
+>!
+Variable (all,a,ACTS)(all,r,REG)
+    compvalad(a,r) # composition of value added for good c and region r #;
+
+Equation E_compvalad
+# track change in composition of value added #
+(all,a,ACTS)(all,r,REG)
+    compvalad(a,r) = qo(a,r) - qgdp(r);
+
+!<
+    B-4. Aggregate trade indices (value, price and quantity)
+    --------------------------------------------------------
+>!
+
+!<
+    Common variables and coefficients
+    Value indices for aggregate trade
+    Price indices for aggregate trade
+    Quantity indices for aggregate trade
+>!
+
+!<
+    Common variables and coefficients
+    .................................
+
+    only used in this aggregate trade indices section
+>!
+
+Variable (orig_level=1.0)(all,c,COMM)(all,r,REG)
+    pxw(c,r) # aggregate exports price index of c from region r #;
+Coefficient (all,c,COMM)
+    VXWCOMMOD(c) # value of world exports by commodity c at FOB prices #;
+Formula (all,c,COMM)
+    VXWCOMMOD(c) = sum{r,REG, VXW(c,r)};
+Coefficient
+    VXWLD # value of commodity exports, FOB, globally #;
+Formula
+    VXWLD = sum{r,REG, VXWREGION(r)};
+
+Coefficient (all,c,COMM)
+    VMWCOMMOD(c) # global value of commodity imports, CIF, by commodity #;
+Formula (all,c,COMM)
+    VMWCOMMOD(c) = sum{r,REG, VMCIF(c,r)};
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VXDXSB(c,r) # basic value of com. c exports to all dest. (tradeables only) #;
+Formula (all,c,COMM)(all,r,REG)
+    VXDXSB(c,r) = sum{d,REG, VXSB(c,r,d)};
+
+Coefficient (all,c,COMM)(all,r,REG)
+    PW_PM(c,r) # ratio of world to domestic prices #;
+Formula (all,c,COMM)(all,r,REG)
+    PW_PM(c,r) = VXDFOB(c,r) / VXDXSB(c,r);
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VOW(c,r) # value of commodity output in r at FOB incl transp. services #;
+Formula (all,c,COMM)(all,r,REG)
+    VOW(c,r) = VDB(c,r) * PW_PM(c,r) + VXDFOB(c,r) + IF[c in MARG, + VST(c,r)];
+
+Coefficient (all,c,COMM)
+    VWOW(c) # value of world supply at world prices for c #;
+Formula (all,c,COMM)
+    VWOW(c) = sum{r,REG, VOW(c,r)};
+
+Coefficient (all,c,COMM)
+    VWOU(c) # value of world output of c at user prices #;
+Formula (all,c,COMM)
+    VWOU(c) = sum{r,REG, [VPP(c,r) + VGP(c,r)] + sum{a,ACTS, VFP(c,a,r)}};
+
+!<
+    Value indices for aggregate trade
+    .................................
+>!
+
+Equation E_vxwfob
+# the change in FOB value of exports of m from r #
+(all,c,COMM)(all,r,REG)
+    VXW(c,r) * vxwfob(c,r)
+        = sum{d,REG, VFOB(c,r,d) * [qxs(c,r,d) + pfob(c,r,d)]}
+        + IF[c in MARG, VST(c,r) * [qst(c,r) + pds(c,r)]];
+
+Equation E_vxwreg
+# computes % change in value of merchandise exports, by region #
+(all,r,REG)
+    VXWREGION(r) * vxwreg(r) = sum{c,COMM, VXW(c,r) * vxwfob(c,r)};
+
+Variable (all,c,COMM)
+    vxwcom(c) # value of global merchandise exports by commodity #;
+Equation E_vxwcom
+# computes % change in FOB value of global exports, by commodity #
+(all,c,COMM)
+    VXWCOMMOD(c) * vxwcom(c) = sum{r,REG, VXW(c,r) * vxwfob(c,r)};
+
+Variable
+    vxwwld # value of world trade #;
+Equation E_vxwwld
+# computes % change in value of global exports #
+    VXWLD * vxwwld = sum{r,REG, VXWREGION(r) * vxwreg(r)};
+
+Equation E_vmwcif
+# the change in CIF value of imports of commodity c into r #
+(all,c,COMM)(all,d,REG)
+    VMCIF(c,d) * vmwcif(c,d)
+        = sum{s,REG, VCIF(c,s,d) * [pcif(c,s,d) + qxs(c,s,d)]};
+
+Equation E_vmwreg
+# computes % change in value of imports, CIF basis, by region #
+(all,r,REG)
+    VMWREGION(r) * vmwreg(r) = sum{c,COMM, VMCIF(c,r) * vmwcif(c,r)};
+
+Variable (all,c,COMM)
+    vmwcom(c) # value of global merchandise imports c, at world prices #;
+Equation E_vmwcom
+# computes % change in value of global imports, by commodity #
+(all,c,COMM)
+    VMWCOMMOD(c) * vmwcom(c) = sum{s,REG, VMCIF(c,s) * vmwcif(c,s)};
+
+Variable (all,c,COMM)
+    valuew(c) # value of world supply of good c #;
+Equation E_valuew
+# change in value of world output of comm. c at FOB prices #
+(all,c,COMM)
+    VWOW(c) * valuew(c) = sum{r,REG, VOW(c,r) * [pxw(c,r) + qc(c,r)]};
+
+Variable (all,c,COMM)
+    valuewu(c) # value of world supply of good c at user prices #;
+Equation E_valuewu
+# change in value of world output of commodity c at user prices #
+(all,c,COMM)
+    VWOU(c) * valuewu(c)
+        = sum{s,REG, VPP(c,s) * [ppa(c,s) + qpa(c,s)]
+        + VGP(c,s) * [pga(c,s) + qga(c,s)]
+        + sum{a,ACTS, VFP(c,a,s) * [pfa(c,a,s) + qfa(c,a,s)]}};
+
+!<
+    Price indices for aggregate trade
+    .................................
+>!
+
+Equation E_pxw
+# change in FOB price index of exports of m from r #
+(all,C,COMM)(all,r,REG)
+    VXW(c,r) * pxw(c,r)
+        = sum{d,REG, VFOB(c,r,d) * pfob(c,r,d)}
+        + IF[c in MARG, VST(c,r) * pds(c,r)];
+
+Variable (orig_level=1.0)(all,r,REG)
+    pxwreg(r) # price index of merchandise exports, by region #;
+Equation E_pxwreg
+# computes % change in price index of exports, by region #
+(all,r,REG)
+    VXWREGION(r) * pxwreg(r) = sum{c,COMM, VXW(c,r) * pxw(c,r)};
+
+Variable (orig_level=1.0)(all,c,COMM)
+    pxwcom(c) # price index of global merchandise exports by commodity #;
+Equation E_pxwcom
+# computes % change in price index of exports, by commodity #
+(all,c,COMM)
+    VXWCOMMOD(c) * pxwcom(c) = sum{r,REG, VXW(c,r) * pxw(c,r)};
+
+Variable (orig_level=1.0)
+    pxwwld # price index of world trade #;
+Equation E_pxwwld
+# computes % change in price index of global exports #
+    VXWLD * pxwwld = sum{r,REG, VXWREGION(r) * pxwreg(r)};
+
+Variable (all,c,COMM)(all,r,REG)
+    pmw(c,r) # world price of composite import c in region r #;
+Equation E_pmw
+# computes % change in CIF price index of imports of c into d #
+(all,c,COMM)(all,d,REG)
+    VMCIF(c,d) * pmw(c,d) = sum{s,REG, VCIF(c,s,d) * pcif(c,s,d)};
+
+Variable (orig_level=1.0)(all,r,REG)
+    pmwreg(r) # price index of merchandise imports, by region #;
+Equation E_pmwreg
+# computes % change in price index of imports, by region #
+(all,r,REG)
+    VMWREGION(r) * pmwreg(r) = sum{c,COMM, VMCIF(c,r) * pmw(c,r)};
+
+Variable (orig_level=1.0)(all,c,COMM)
+    pmwcom(c) # price index of global merchandise imports by commodity #;
+Equation E_pmwcom
+# computes % change in price index of imports, by commodity #
+(all,c,COMM)
+    VMWCOMMOD(c) * pmwcom(c) = sum{r,REG, VMCIF(c,r) * pmw(c,r)};
+
+Variable (all,c,COMM)
+    pw(c) # world price index for total good c supplies #;
+Equation E_pw
+# change in index of world prices, FOB, for total production of c #
+(all,c,COMM)
+    VWOW(c) * pw(c) = sum{r,REG, VOW(c,r) * pxw(c,r)};
+
+Variable (orig_level=1.0)(all,c,COMM)
+    pwu(c) # world price index for total good c supplies at user prices #;
+Equation E_pwu
+# change in index of user prices for deflating world production of c #
+(all,c,COMM)
+    VWOU(c) * pwu(c)
+        = sum{s,REG, VPP(c,s) * ppa(c,s)
+        + VGP(c,s) * pga(c,s)
+        + VIP(c,s) * pinv(s)
+        + sum{a,ACTS, VFP(c,a,s) * pfa(c,a,s)}};
+
+!<
+    Quantity indices for aggregate trade
+    ....................................
+>!
+
+Variable (orig_level=VXW)(all,c,COMM)(all,r,REG)
+    qxw(c,r) # aggregate exports of c from region r, FOB weights #;
+Equation E_qxw
+# change in volume of exports of (margin and non-margin) commodity c from r #
+(all,c,COMM)(all,r,REG)
+    VXW(c,r) * qxw(c,r)
+        = sum{d,REG, VFOB(c,r,d) * qxs(c,r,d)}
+        + IF[c in MARG, VST(c,r) * qst(c,r)];
+!<
+    modified from HT 89 for use with AnalyseGE
+>!
+
+Variable (orig_level=VXWREGION)(all,r,REG)
+    qxwreg(r) # volume of merchandise exports, by region #;
+Equation E_qxwreg
+# computes % change in quantity index of exports, by region #
+(all,r,REG)
+    VXWREGION(r) * qxwreg(r) = sum{c,COMM, VXW(c,r) * qxw(c,r)};
+!<
+    modified from HT 91 for use with AnalyseGE
+>!
+
+Variable (orig_level=VXWCOMMOD)(all,c,COMM)
+    qxwcom(c) # volume of global merchandise exports by commodity #;
+Equation E_qxwcom
+# computes % change in quantity index of exports, by commodity #
+(all,c,COMM)
+    VXWCOMMOD(c) * qxwcom(c) = sum{r,REG, VXW(c,r) * qxw(c,r)};
+!<
+    modified from HT 93 for use with AnalyseGE
+>!
+
+Variable (orig_level=VXWLD)
+    qxwwld # volume of world trade #;
+Equation E_qxwwld
+# computes % change in quantity index of global exports #
+    VXWLD * qxwwld = sum{r,REG, VXWREGION(r) * qxwreg(r)};
+!<
+    modified from HT 95 for use with AnalyseGE
+>!
+
+Variable (all,c,COMM)(all,d,REG)
+    qmw(c,d) # aggregate imports of c into region s, CIF weights #;
+Equation E_qmw
+# change in volume of imports of commodity c into d #
+(all,c,COMM)(all,d,REG)
+    VMCIF(c,d) * qmw(c,d) = sum{s,REG, VCIF(c,s,d) * qxs(c,s,d)};
+!<
+    modified from HT 90 for use with AnalyseGE
+>!
+
+Variable (orig_level=VMWREGION)(all,r,REG)
+    qmwreg(r) # volume of merchandise imports, by region #;
+Equation E_qmwreg
+# computes % change in quantity index of imports, by region #
+(all,s,REG)
+    VMWREGION(s) * qmwreg(s) = sum{c,COMM, VMCIF(c,s) * qmw(c,s)};
+!<
+    modified from HT 92 for use with AnalyseGE
+>!
+
+Variable (orig_level=VMWCOMMOD)(all,c,COMM)
+    qmwcom(c) # volume of global merchandise imports by commodity #;
+Equation E_qmwcom
+# computes % change in quantity index of imports, by commodity #
+(all,c,COMM)
+    VMWCOMMOD(c) * qmwcom(c) = sum{s,REG, VMCIF(c,s) * qmw(c,s)};
+!<
+    modified from HT 94 for use with AnalyseGE
+>!
+
+Variable (all,c,COMM)
+    qow(c) # quantity index for world supply of good c #;
+Equation E_qow
+# change in index of world production of c #
+(all,c,COMM)
+    VWOW(c) * qow(c) = sum{r,REG, VOW(c,r) * qc(c,r)};
+!<
+    modified from HT 96 for use with AnalyseGE
+>!
+
+Variable (orig_level=VWOU)(all,c,COMM)
+    qowu(c) # quantity index for world supply of good c at user prices #;
+Equation E_qowu
+# change in index of world production of c evaluated at user prices #
+(all,c,COMM)
+    VWOU(c) * qowu(c)
+        = sum{s,REG, VPP(c,s) * qpa(c,s)
+        + VGP(c,s) * qga(c,s)
+        + VIP(c,s) * qia(c,s)
+        + sum{a,ACTS, VFP(c,a,s) * qfa(c,a,s)}};
+
+!<
+    B-5. Trade balance indices
+    --------------------------
+>!
+
+Variable (change)(all,c,COMM)(all,r,REG)
+    del_tbalc(c,r) # change in trade balance by c and by r, $ US million #;
+!<
+    A positive value indicates that the change in exports exceeds the change
+    in imports.
+>!
+Equation E_del_tbalc
+# computes change in trade balance by commodity and by region #
+(all,c,COMM)(all,r,REG)
+    del_tbalc(c,r)
+        = [VXW(c,r) / 100] * vxwfob(c,r) - [VMCIF(c,r) / 100] * vmwcif(c,r);
+
+Variable (change)(all,r,REG)
+    del_tbal(r) # change in trade balance X - M, $ US million #;
+Equation E_del_tbal
+# computes change in trade balance (X - M), by region #
+(all,r,REG)
+    del_tbal(r)
+        = [VXWREGION(r) / 100] * vxwreg(r) - [VMWREGION(r) / 100] * vmwreg(r);
+
+!<
+    In order to maintain homogeneity in the presence of a fixed trade balance,
+    it is useful to have a nominal variable which this is measured against.
+    The next equation provides this, and we recommend users fix del_tbalry
+    instead of fixing del_tbal in future simulations.  The strategy is the same
+    one used above for taxes.
+>!
+
+Variable
+    ywld # world income #;
+Coefficient
+    INCOMEWLD # World income #;
+Formula
+    INCOMEWLD = sum{r,REG, INCOME(r)};
+
+Equation E_ywld
+# world income #
+    INCOMEWLD * ywld = sum{r,REG, INCOME(r) * y(r)};
+
+Variable (change)(all,r,REG)
+    del_tbalry(r) # change in trade bal. of r as a percentage of world income #;
+Coefficient (all,r,REG)
+    TBAL(r) # trade balance for region r #;
+Formula (all,r,REG)
+    TBAL(r) = VXWREGION(r) - VMWREGION(r);
+
+Equation E_del_tbalry
+# change in trade balance of region r as a percentage of world income #
+(all,r,REG)
+    INCOMEWLD * del_tbalry(r)
+        = VXWREGION(r) * vxwreg(r) - VMWREGION(r) * vmwreg(r)
+        - TBAL(r) * ywld;
+
+!<
+    B-6. Terms of trade (ToT) decomposition
+    ---------------------------------------
+    Computations for decomposition the terms-of-trade effect
+    Reference: Robert McDougall, SALTER No. 12 Working Paper
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)
+    SX_CR(c,r) # share of good c in total exports from r #;
+Formula (all,m,MARG)(all,r,REG)
+    SX_CR(m,r)
+        = [sum{s,REG, VFOB(m,r,s)} + VST(m,r)]
+        / [sum{c,COMM, sum{s,REG, VFOB(c,r,s)}}
+            + sum{k,MARG, VST(k,r)}];
+Formula (all,n,NMRG)(all,r,REG)
+    SX_CR(n,r)
+        = sum{s,REG, VFOB(n,r,s)}
+        / [sum{c,COMM, sum{s,REG, VFOB(c,r,s)}}
+            + sum{m,MARG, VST(m,r)}];
+
+Coefficient (all,m,MARG)(all,s,REG)
+    VTMCOMM(m,s) # margin usage of m in getting imports to region s #;
+Formula (all,m,MARG)(all,s,REG)
+    VTMCOMM(m,s) = sum{c,COMM, sum{r,REG, VTMFSD(m,c,r,s)}};
+
+Coefficient (all,c,COMM)(all,s,REG)
+    VMWDCRALL(c,s) # imports of c into s, with direct allocation of margins #;
+Formula (all,c,COMM)(all,s,REG)
+    VMWDCRALL(c,s) = sum{r,REG, VFOB(c,r,s)} + IF[c in MARG, VTMCOMM(c,s)];
+
+Coefficient (all,s,REG)
+    VMWDATOT(s) # total imports into s, calculated on direct allocation basis #;
+Formula (all,s,REG)
+    VMWDATOT(s) = sum{c,COMM, VMWDCRALL(c,s)};
+
+Coefficient (all,c,COMM)(all,r,REG)
+    SM_CR(c,r)  # share of good c in total imports into r #;
+Formula (all,c,COMM)(all,s,REG)
+    SM_CR(c,s) = VMWDCRALL(c,s) / VMWDATOT(s);
+
+Coefficient (all,c,COMM)(all,r,REG)(all,s,REG)
+    SM_CRS(c,r,s) # share of imports of good c into s from r at FOB prices #;
+Formula (all,c,COMM)(all,r,REG)(all,s,REG)
+    SM_CRS(c,r,s) = VFOB(c,r,s) / VMWDCRALL(c,s);
+
+Coefficient (all,m,MARG)(all,r,REG)
+    SMT_CR(m,r) # share of transport cost in imports of margin commodity #;
+Formula (all,m,MARG)(all,s,REG)
+    SMT_CR(m,s) = VTMCOMM(m,s) / VMWDCRALL(m,s);
+
+Variable (all,c,COMM)(all,r,REG)
+    pm_cr(c,r) # imports price index for good c and region r #;
+Equation E_pm_cr
+# price index for total imports of m in s -- margins commodities #
+(all,c,COMM)(all,s,REG)
+    pm_cr(c,s)
+        = sum{r,REG, SM_CRS(c,r,s) * pfob(c,r,s)}
+        + IF[c in MARG, SMT_CR(c,s) * pt(c)];
+
+Variable (all,c,COMM)(all,r,REG)
+    c1_cr(c,r) # contribution of world price, px_c, to ToT #;
+Equation E_c1_cr
+# contribution of world export price index of good c to ToT for region r #
+(all,c,COMM)(all,r,REG)
+    c1_cr(c,r) = [SX_CR(c,r) - SM_CR(c,r)] * [pxwcom(c) - pxwwld];
+
+Variable (all,c,COMM)(all,r,REG)
+    c2_cr(c,r) # contribution of regional export price, px_cr, to ToT #;
+Equation E_c2_cr
+# contribution of regional export price of good c for region r #
+(all,c,COMM)(all,r,REG)
+    c2_cr(c,r) = SX_CR(c,r) * [pxw(c,r) - pxwcom(c)];
+
+Variable (all,c,COMM)(all,r,REG)
+    c3_cr(c,r) # contribution of regional import price, pm_cr, to ToT #;
+Equation E_c3_cr
+# contribution of imports price index of good c for region r #
+(all,c,COMM)(all,r,REG)
+    c3_cr(c,r) = SM_CR(c,r) * [pm_cr(c,r) - pxwcom(c)];
+
+Variable (all,r,REG)
+    c1_r(r) # contribution of world prices for all goods to ToT #;
+Equation E_c1_r
+# contribution of world price indexes of all goods to ToT for r #
+(all,r,REG)
+    c1_r(r) = sum{c,COMM, c1_cr(c,r)};
+
+Variable (all,r,REG)
+    c2_r(r) # contribution of regional export prices to ToT #;
+Equation E_c2_r
+# contribution of regional exports prices to ToT for r #
+(all,r,REG)
+    c2_r(r) = sum{c,COMM, c2_cr(c,r)};
+
+Variable (all,r,REG)
+    c3_r(r) # contribution of regional import prices to ToT #;
+Equation E_c3_r
+# contribution of regional import prices to ToT for r #
+(all,r,REG)
+    c3_r(r) = sum{c,COMM, c3_cr(c,r)};
+
+Variable (all,r,REG)
+    tot2(r) # trade terms for region r, computed from components #;
+Equation E_tot2
+# trade terms for region r, computed from components #
+(all,r,REG)
+    tot2(r) = c1_r(r) + c2_r(r) - c3_r(r);
+
+!<
+    --------------------------------------------
+    11. Measurement and decomposition of welfare
+    --------------------------------------------
+
+    11-0. Variables and coefficients
+    11-1. Government consumption shadow demand system
+    11-2. Private consumption shadow demand dystem
+    11-3. Regional Household shadow demand system
+    11-4. Equivalent Variation
+    11-5. Decomposition of welfare [Section 3.11 in JGEA paper]
+
+    This section calculates equivalent variation "EV" and world equivalent
+    variation, "WEV", by determining the income "yev" that would be required
+    to achieve the current actual utility level "u" in a shadow demand system
+    in which prices are fixed.
+
+    Section 11-2 calculates the utility elasticity of private consumption
+    expenditure, "ueprivev", within a shadow demand system for private
+    consumption, for use in section 11-3. Section 11-3 calculates private
+    consumption expenditure "ypev" for use in 11-2, and regional income "yev"
+    for use in 11-4, within a shadow demand system for the regional household.
+    Section 11-4 calculates "EV" and "WEV".
+
+    Section 11-5 provides a decomposition welfare in the model as explained
+    in the GTAP model paper.
+>!
+
+!<
+    11-0. Variables and coefficients
+    --------------------------------
+    only used in this Equivalent Variation section of the summary indices
+    appendix
+>!
+
+Variable (all,r,REG)
+    uelasev(r) # elasticity of cost of utility wrt utility, for EV calc. #;
+Variable (all,r,REG)
+    ueprivev(r) # utility elast. of private consn expenditure, for EV calc. #;
+Variable (all,r,REG)
+    ugev(r) # per capita utility from gov't expend., for EV calc. #;
+Variable (all,r,REG)
+    upev(r) # per capita utility from private expend., for EV calc. #;
+Variable (all,r,REG)
+    qsaveev(r) # total quantity of saving demanded, for EV calc. #;
+Variable (all,r,REG)
+    yev(r) # regional household income in region r, for EV calc. #;
+Variable (all,r,REG)
+    ypev(r) # private consumption expenditure in region r, for EV calc. #;
+Variable (all,r,REG)
+    ygev(r) # government consumption expenditure in region r, for EV calc. #;
+
+Coefficient (all,r,REG)
+    INCOMEEV(r) # regional income, for EV calc. #;
+Formula (initial) (all,r,REG)
+    INCOMEEV(r) = INCOME(r);
+Update (all,r,REG)
+    INCOMEEV(r) = yev(r);
+
+Coefficient (all,r,REG)
+    UTILPRIVEV(r) # utility from private consumption, for EV calcs #;
+Formula (initial) (all,r,REG)
+    UTILPRIVEV(r) = UTILPRIV(r);
+Update (all,r,REG)
+    UTILPRIVEV(r) = upev(r);
+
+Coefficient (all,r,REG)
+    UTILGOVEV(r) # utility from private consumption, for EV calcs #;
+Formula (initial) (all,r,REG)
+    UTILGOVEV(r) = UTILGOV(r);
+Update (all,r,REG)
+    UTILGOVEV(r) = ugev(r);
+
+Coefficient (all,r,REG)
+    UTILSAVEEV(r) # utility from private consumption, for EV calcs #;
+Formula (initial) (all,r,REG)
+    UTILSAVEEV(r) = UTILSAVE(r);
+Update (change) (all,r,REG)
+    UTILSAVEEV(r) = [[qsaveev(r) - pop(r)] / 100] * UTILSAVEEV(r);
+
+!<
+    11-1. Government consumption shadow demand system
+    -------------------------------------------------
+>!
+
+Equation E_ugev
+# utility from government consumption in r #
+(all,r,REG)
+    ygev(r) - pop(r) = ugev(r);
+
+!<
+    11-2. Private consumption shadow demand system
+    ----------------------------------------------
+>!
+
+Variable (all,c,COMM)(all,r,REG)
+    qpev(c,r)
+    # private hhld demand for commodity c in region r, for EV calc. #;
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VPPEV(c,r)
+    # private hhld expend. on c in r valued at purch. prices, for EV calc. #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    VPPEV(c,r) = VPP(c,r);
+Update (all,c,COMM)(all,r,REG)
+    VPPEV(c,r) = qpev(c,r);
+
+Coefficient (all,r,REG)
+    VPPREGEV(r) # private consumption expenditure in region r, for EV calc. #;
+Formula (all,r,REG)
+    VPPREGEV(r) = sum{c,COMM, VPPEV(c,r)};
+!<
+    VPPREGEV should agree with PRIVEXPEV.
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)
+    CONSHREV(c,r)
+    # share of private hhld consn devoted to good c in r, for EV calc. #;
+Formula (all,c,COMM)(all,r,REG)
+    CONSHREV(c,r) = VPPEV(c,r) / VPPREGEV(r);
+Coefficient (all,c,COMM)(all,r,REG)
+    EYEV(c,r)
+    # expend. elast. of private hhld demand for c in r, for EV calc. #;
+Formula (all,c,COMM)(all,r,REG)
+    EYEV(c,r)
+        = [1.0 / sum{n,COMM, CONSHREV(n,r) * INCPAR(n,r)}]
+        * [INCPAR(c,r) * [1.0 - ALPHA(c,r)]
+            + sum{n,COMM, CONSHREV(n,r) * INCPAR(n,r) * ALPHA(n,r)}]
+        + ALPHA(c,r)
+        - sum{n,COMM, CONSHREV(n,r) * ALPHA(n,r)};
+
+Equation E_qpev
+    # private hhld demands for composite commodities, for EV calc. #
+    (all,c,COMM)(all,r,REG)
+    qpev(c,r) - pop(r) = EYEV(c,r) * [ypev(r) - pop(r)];
+!<
+    Prices are held constant for the EV calculation and so do not appear here.
+>!
+
+Coefficient (all,r,REG)
+    UELASPRIVEV(r)
+    # elast. of cost wrt utility from private consn, for EV calc. #;
+Formula (all,r,REG)
+    UELASPRIVEV(r) = sum{c,COMM, CONSHREV(c,r) * INCPAR(c,r)};
+
+Equation E_upev
+# computation of utility from private consumption in r #
+(all,r,REG)
+    ypev(r) - pop(r) = UELASPRIVEV(r) * upev(r);
+
+Coefficient (all,c,COMM)(all,r,REG)
+    XWCONSHREV(c,r)
+    # expansion-parameter-weighted consumption share, for EV calc. #;
+Formula (all,c,COMM)(all,r,REG)
+    XWCONSHREV(c,r) = CONSHREV(c,r) * INCPAR(c,r) / UELASPRIVEV(r);
+
+Equation E_ueprivev
+    # elasticity of cost wrt utility from private consn, for EV calc. #
+    (all,r,REG)
+    ueprivev(r)
+        = sum{c,COMM, XWCONSHREV(c,r) * [qpev(c,r) - ypev(r)]};
+!<
+    Prices are held constant for the EV calculation and so do not appear here.
+>!
+
+!<
+
+    11-3. Regional Household shadow demand system
+    ---------------------------------------------
+>!
+
+Variable (all,r,REG)
+    ysaveev(r) # NET saving expenditure, for EV calc. #;
+
+Coefficient (all,r,REG)
+    PRIVEXPEV(r)
+    # private consumption expenditure in region r, for EV calc. #;
+Formula (initial) (all,r,REG)
+    PRIVEXPEV(r) = PRIVEXP(r);
+Update (all,r,REG)
+    PRIVEXPEV(r) = ypev(r);
+!<
+    PRIVEXPEV should agree with VPPREGEV.
+>!
+
+Coefficient (all,r,REG)
+    GOVEXPEV(r)
+    # government consumption expenditure in region r, for EV calc. #;
+Formula (initial) (all,r,REG)
+    GOVEXPEV(r) = GOVEXP(r);
+Update (all,r,REG)
+    GOVEXPEV(r) = ygev(r);
+
+Coefficient (all,r,REG)
+    SAVEEV(r)
+    # saving in region r, for EV calc. #;
+Formula (initial) (all,r,REG)
+    SAVEEV(r) = SAVE(r);
+Update (all,r,REG)
+    SAVEEV(r) = ysaveev(r);
+
+Coefficient (all,r,REG)
+    XSHRPRIVEV(r)
+    # private expenditure share in regional income, for EV calc. #;
+Formula (all,r,REG)
+    XSHRPRIVEV(r) = PRIVEXPEV(r) / INCOMEEV(r);
+
+Coefficient (all,r,REG)
+    XSHRGOVEV(r)
+    # government expenditure share in regional income, for EV calc. #;
+Formula (all,r,REG)
+    XSHRGOVEV(r) = GOVEXPEV(r) / INCOMEEV(r);
+
+Coefficient (all,r,REG)
+    XSHRSAVEEV(r) # saving share in regional income, for EV calc. #;
+Formula (all,r,REG)
+    XSHRSAVEEV(r) = SAVEEV(r) / INCOMEEV(r);
+
+Variable (all,r,REG)
+    dpavev(r) # average distribution parameter shift, for EV calc. #;
+Equation E_dpavev
+# average distribution parameter shift, for EV calc. #
+    (all,r,REG)
+    dpavev(r)
+        = XSHRPRIVEV(r) * dppriv(r)
+        + XSHRGOVEV(r) * dpgov(r)
+        + XSHRSAVEEV(r) * dpsave(r);
+
+Equation E_uelasev
+    # elasticity of cost of utility wrt utility, for EV calc. #
+    (all,r,REG)
+    uelasev(r) = XSHRPRIV(r) * ueprivev(r) - dpavev(r);
+
+Equation E_ypev
+# private consumption expenditure, for EV calc. #
+    (all,r,REG)
+    ypev(r) - yev(r) = -[ueprivev(r) - uelasev(r)] + dppriv(r);
+
+Equation E_ygev
+# government consumption expenditure #
+(all,r,REG)
+    ygev(r) - yev(r) = uelasev(r) + dpgov(r);
+
+Equation E_ysaveev
+# saving #
+(all,r,REG)
+    ysaveev(r) - yev(r) = uelasev(r) + dpsave(r);
+
+Equation E_qsaveev
+# saving #
+(all,r,REG)
+    qsaveev(r) = ysaveev(r);
+!<
+    Note that because psave doesn't change, qsaveev moves with ysaveev.
+>!
+
+Coefficient (all,r,REG)
+    UTILELASEV(r)
+    # elasticity of cost of utility wrt utility, for EV calc. #;
+Formula (initial) (all,r,REG)
+    UTILELASEV(r) = UTILELAS(r);
+Update (all,r,REG)
+    UTILELASEV(r) = uelasev(r);
+
+Equation E_yev
+# equivalent income #
+(all,r,REG)
+    u(r)
+        = au(r)
+        + DPARPRIV(r) * loge(UTILPRIVEV(r)) * dppriv(r)
+        + DPARGOV(r) * loge(UTILGOVEV(r)) * dpgov(r)
+        + DPARSAVE(r) * loge(UTILSAVEEV(r)) * dpsave(r)
+        + [1.0 / UTILELASEV(r)] * [yev(r) - pop(r)];
+
+!<
+    11-4. Equivalent Variation
+    --------------------------
+>!
+
+Variable (change)(all,r,REG)
+    EV(r) # equivalent variation, $ US million #;
+Equation E_EV
+# regional EV #
+(all,r,REG)
+    EV(r) = [INCOMEEV(r) / 100] * yev(r);
+
+Variable (change)
+    WEV # equivalent variation for the world #;
+Equation E_WEV
+# EV for the world #
+    WEV = sum{r,REG, EV(r)};
+
+!<
+    11-5. Welfare decomposition
+    ---------------------------
+    See GTAP Technical Paper No. 5 for derivation and interpretation.
+    See also "The Standard GTAP Model (Version 7)" paper.
+>!
+
+!<
+    Declare new sets for Welfare decomposition and for use in DECOMP.TAB.
+    Supplementary sets for "toggles" in VIEWHAR.
+>!
+Set
+    DIR(domestic,imported);
+Set
+    CTAX(pfacttax,prodtax,inputtax,contax,invtax,govtax,xtax,mtax);
+Set
+    TECHTYPE(output,primfac,v_added,ininput,invest,transp,import);
+Set
+    COLUMN(alloc_A1,ENDWB1,tech_C1,pop_D1,tot_E1,IS_F1,pref_G1);
+
+Coefficient (all,r,REG)
+    EVSCALFACT(r) # equivalent variation scaling factor #;
+Formula (all,r,REG)
+    EVSCALFACT(r) = [UTILELASEV(r) / UTILELAS(r)] * [INCOMEEV(r) / INCOME(r)];
+
+Coefficient (all,m,MARG)(all,s,REG)
+    VTMD(m,s) # aggregate value of svce m in shipments to s #;
+Formula (all,m,MARG)(all,s,REG)
+    VTMD(m,s) = sum{c,COMM, sum{r,REG, VTMFSD(m,c,r,s)}};
+
+Variable (linear,change)(all,r,REG)
+    EV_ALT(r) # regional EV computed in alternative way #;
+Equation E_EV_ALT
+# decomposition of Equivalent Variation #
+(all,r,REG)
+    EV_ALT(r)
+        !< Preference shifts >!
+        = -[0.01 * UTILELASEV(r) * INCOMEEV(r)]
+        * [DPARPRIV(r) * loge(UTILPRIVEV(r) / UTILPRIV(r)) * dppriv(r)
+            + DPARGOV(r) * loge(UTILGOVEV(r) / UTILGOV(r)) * dpgov(r)
+            + DPARSAVE(r) * loge(UTILSAVEEV(r) / UTILSAVE(r)) * dpsave(r)]
+        !< Scaling factor >!
+        + [0.01 * EVSCALFACT(r)]
+        !< Changes in allocative efficiency >!
+        * [sum{c,COMM, sum{a,ACTS, PTAX(c,a,r) * [qca(c,a,r) - pop(r)]}}
+            + sum{e,ENDW, sum{a,ACTS,
+                INCTAX(e,a,r) * [qes(e,a,r) - pop(r)]}}
+            + sum{e,ENDW, sum{a,ACTS,
+                ETAX(e,a,r) * [qfe(e,a,r) - pop(r)]}}
+            + sum{c,COMM, sum{a,ACTS,
+                MFTAX(c,a,r) * [qfm(c,a,r) - pop(r)]}}
+            + sum{c,COMM, sum{a,ACTS,
+                DFTAX(c,a,r) * [qfd(c,a,r) - pop(r)]}}
+            + sum{c,COMM, MPTAX(c,r) * [qpm(c,r) - pop(r)]}
+            + sum{c,COMM, DPTAX(c,r) * [qpd(c,r) - pop(r)]}
+            + sum{c,COMM, MGTAX(c,r) * [qgm(c,r) - pop(r)]}
+            + sum{c,COMM, DGTAX(c,r) * [qgd(c,r) - pop(r)]}
+            + sum{c,COMM, MITAX(c,r) * [qim(c,r) - pop(r)]}
+            + sum{c,COMM, DITAX(c,r) * [qid(c,r) - pop(r)]}
+            + sum{c,COMM, sum{d,REG, XTAXD(c,r,d) * [qxs(c,r,d) - pop(r)]}}
+            + sum{c,COMM, sum{s,REG, MTAX(c,s,r) * [qxs(c,s,r) - pop(r)]}}
+        !< Changes in endowments >!
+        + sum{e,ENDW, sum{a,ACTS, EVOS(e,a,r) * [qes(e,a,r) - pop(r)]}}
+            !< Depreciation >!
+        - VDEP(r) * [kb(r) - pop(r)]
+        !< Changes in technology >!
+        + sum{a,ACTS, VOS(a,r) * ao(a,r)}
+            + sum{a,ACTS, VVA(a,r) * ava(a,r)}
+            + sum{c,COMM, sum{a,ACTS, VFP(c,a,r) * aint(a,r)}}
+            + sum{a,ACTS, sum{e,ENDW, VFP(e,a,r) * afe(e,a,r)}}
+            + sum{a,ACTS, sum{c,COMM, VFP(c,a,r) * afa(c,a,r)}}
+            + sum{m,MARG, sum{c,COMM, sum{s,REG,
+                VTMFSD(m,c,s,r) * atmfsd(m,c,s,r)}}}
+            + sum{c,COMM, sum{s,REG, VMSB(c,s,r) * ams(c,s,r)}}
+        !< Changes in terms of trade >!
+        + sum{c,COMM, sum{s,REG, VFOB(c,r,s) * pfob(c,r,s)}}
+            + sum{m,MARG, VST(m,r) * pds(m,r)}
+            + NETINV(r) * pinv(r)
+            - sum{c,COMM, sum{s,REG, VFOB(c,s,r) * pfob(c,s,r)}}
+            - sum{m,MARG, VTMD(m,r) * pt(m)}
+            - SAVE(r) * psave(r)]
+        !< Changes in population >!
+        + 0.01 * INCOMEEV(r) * pop(r);
+
+Variable (linear,change)
+    WEV_ALT # expression for WEV computed in alternative way #;
+Equation E_WEV_ALT
+# Equivalent Variation for the world #
+    WEV_ALT = sum{r,REG, EV_ALT(r)};
+
+Variable (linear,change) (all,r,REG)
+    CNTdpar(r) # contribution to EV of change in distribution parameters #;
+Equation E_CNTdpar
+# contribution to EV of change in distribution parameters #
+(all,r,REG)
+    CNTdpar(r)
+        = -0.01 * UTILELASEV(r) * INCOMEEV(r)
+        * [DPARPRIV(r) * loge(UTILPRIVEV(r) / UTILPRIV(r)) * dppriv(r)
+            + DPARGOV(r) * loge(UTILGOVEV(r) / UTILGOV(r)) * dpgov(r)
+            + DPARSAVE(r) * loge(UTILSAVEEV(r) / UTILSAVE(r)) * dpsave(r)];
+
+Variable (linear,change) (all,r,REG)
+    CNTpop(r) # contribution to EV in region r of change in population #;
+Equation E_CNTpop
+# contribution to EV in region r of change in population #
+(all,r,REG)
+    CNTpop(r) = 0.01 * INCOMEEV(r) * pop(r);
+
+Variable (linear,change) (all,r,REG)
+    CNTqor(r) # contribution to EV in region r of output changes #;
+Equation E_CNTqor
+# contribution to EV in region r of output changes #
+(all,r,REG)
+    CNTqor(r) = 0.01 * EVSCALFACT(r)
+              * sum{c,COMM, sum{a,ACTS, PTAX(c,a,r) * [qca(c,a,r) - pop(r)]}};
+
+Variable (linear,change) (all,a,ACTS)(all,r,REG)
+    CNTqo(a,r)
+    # contribution to EV of changes in industry output of act. a in region r #;
+Equation E_CNTqo
+# contribution to EV of changes in industry output of act. a in region r #
+(all,a,ACTS)(all,r,REG)
+    CNTqo(a,r) = [0.01 * EVSCALFACT(r)]
+                 * sum{c,COMM, PTAX(c,a,r) * [qca(c,a,r) - pop(r)]};
+
+Variable (linear,change) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTqca(c,a,r)
+    # contribution to EV of changes in output c of act. a in region r #;
+Equation E_CNTqca
+# contribution to EV of changes in industry output of act. a in region r #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTqca(c,a,r) = [0.01 * EVSCALFACT(r)]
+                    * PTAX(c,a,r) * [qca(c,a,r) - pop(r)];
+
+Variable (linear,change) (all,e,ENDW)(all,r,REG)
+    CNTqe(e,r)
+    # contribution to EV of changes in supply of ENDW e in reg. r #;
+Equation E_CNTqe
+# contribution to EV of changes in supply of ENDW e in reg. r #
+(all,e,ENDW)(all,r,REG)
+    CNTqe(e,r) = [0.01 * EVSCALFACT(r)]
+               * sum{a,ACTS, [EVFB(e,a,r) - EVOS(e,a,r)]
+                              * [qes(e,a,r) - pop(r)]};
+
+Variable (linear,change) (all,r,REG)
+    CNTqfer(r)
+    # contribution to EV of changes in use of all ENDW in r #;
+Equation E_CNTqfer
+# contribution to EV of changes in use of all ENDW in r #
+(all,r,REG)
+    CNTqfer(r)
+        = [0.01 * EVSCALFACT(r)]
+        * sum{e,ENDW, sum{a,ACTS, ETAX(e,a,r) *  [qfe(e,a,r) - pop(r)]}};
+
+Variable (linear,change) (all,e,ENDW)(all,r,REG)
+    CNTqfeer(e,r)
+    # contribution to EV of changes in use of ENDW e in all firms in r #;
+Equation E_CNTqfeer
+# contribution to EV of changes in use of ENDW e in all firms in r #
+(all,e,ENDW)(all,r,REG)
+    CNTqfeer(e,r)
+        = [0.01 * EVSCALFACT(r)]
+        * sum{a,ACTS, ETAX(e,a,r) *  [qfe(e,a,r) - pop(r)]};
+
+Variable (linear,change) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    CNTqfe(e,a,r)
+    # contribution to EV of changes in use of ENDW e in a in r #;
+Equation E_CNTqfe
+# contribution to EV of changes in use of ENDW e in a in r #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    CNTqfe(e,a,r)
+        = [0.01 * EVSCALFACT(r)] * ETAX(e,a,r) * [qfe(e,a,r) - pop(r)];
+
+Variable (linear,change) (all,r,REG)(all,d,DIR)
+    CNTqfr(r,d)
+    # cont. to EV of changes in use of dom. and imp. intermediates in r #;
+Equation E_CNTqfr
+# cont. to EV of changes in use of dom. and imp. intermediates in r #
+(all,r,REG)(all,d,DIR)
+    CNTqfr(r,d)
+        = IF[d="domestic", [0.01 * EVSCALFACT(r)]
+            * sum{c,COMM, sum{a,ACTS, DFTAX(c,a,r) *  [qfd(c,a,r) - pop(r)]}}]
+        + IF[d="imported", [0.01 * EVSCALFACT(r)]
+            * sum{c,COMM, sum{a,ACTS, MFTAX(c,a,r) *  [qfm(c,a,r) - pop(r)]}}];
+
+Variable (linear,change) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTqfm(c,a,r)
+    # cont. to EV of changes in use of imported intermediates by a in r #;
+Equation E_CNTqfm
+# cont. to EV of changes in use of imported intermediates in r #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTqfm(c,a,r)
+        = [0.01 * EVSCALFACT(r)] * MFTAX(c,a,r) * [qfm(c,a,r) - pop(r)];
+
+Variable (linear,change) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTqfd(c,a,r)
+    # cont. to EV of changes in use of domestic intermediates by a in r #;
+Equation E_CNTqfd
+# cont. to EV of changes in use of domestic intermediates by a in r #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTqfd(c,a,r)
+        = [0.01 * EVSCALFACT(r)] * DFTAX(c,a,r) * [qfd(c,a,r) - pop(r)];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTqpm(c,r)
+    # contribution to EV of changes in consumption of imported good c in r #;
+Equation E_CNTqpm
+# contribution to EV of changes in consumption of imported good c in r #
+(all,c,COMM)(all,r,REG)
+    CNTqpm(c,r) = [0.01 * EVSCALFACT(r)] * MPTAX(c,r) * [qpm(c,r) - pop(r)];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTqpd(c,r)
+    # contribution to EV of changes in consumption of domestic good c in r #;
+Equation E_CNTqpd
+# contribution to EV of changes in consumption of domestic good c in r #
+(all,c,COMM)(all,r,REG)
+    CNTqpd(c,r) = [0.01 * EVSCALFACT(r)] * DPTAX(c,r) * [qpd(c,r) - pop(r)];
+
+Variable (linear,change) (all,r,REG)(all,d,DIR)
+    CNTqpr(r,d)
+    # cont. to EV of changes in consumption of dom. and imp. goods in r #;
+Equation E_CNTqpr
+# cont. to EV of changes in consumption of dom. and imp. goods in r #
+(all,r,REG)(all,d,DIR)
+    CNTqpr(r,d)
+        = IF[d="domestic", [0.01 * EVSCALFACT(r)]
+                           * sum{c,COMM, DPTAX(c,r) *  [qpd(c,r) - pop(r)]}]
+        + IF[d="imported", [0.01 * EVSCALFACT(r)]
+                           * sum{c,COMM, MPTAX(c,r) * [qpm(c,r) - pop(r)]}];
+
+Variable (linear,change) (all,r,REG)(all,d,DIR)
+    CNTqia(r,d)
+    # contribution to EV of changes in dom. and imp. investment goods in r #;
+Equation E_CNTqia
+# contribution to EV of changes in dom. and imp. investment goods in r #
+(all,r,REG)(all,d,DIR)
+    CNTqia(r,d)
+        = IF[d="domestic", sum{c,COMM,
+                DITAX(c,r) * [0.01 * EVSCALFACT(r)] * [qid(c,r) - pop(r)]}]
+        + IF[d="imported", sum{c,COMM,
+                MITAX(c,r) * [0.01 * EVSCALFACT(r)] * [qim(c,r) - pop(r)]}];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTqim(c,r)
+    # contribution to EV of changes in imported investment good c in r #;
+Equation E_CNTqim
+# contribution to EV of changes in imported investment good c in r #
+(all,c,COMM)(all,r,REG)
+    CNTqim(c,r) = MITAX(c,r) * [0.01 * EVSCALFACT(r)] * [qim(c,r) - pop(r)];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTqid(c,r)
+    # contribution. to EV of changes in domestic investment good c in r #;
+Equation E_CNTqid
+# contribution. to EV of changes in domestic investment good c in r #
+(all,c,COMM)(all,r,REG)
+    CNTqid(c,r) = DITAX(c,r) * [0.01 * EVSCALFACT(r)] * [qid(c,r) - pop(r)];
+
+Variable (linear,change) (all,r,REG)(all,d,DIR)
+    CNTqgr(r,d)
+    # cont. to EV of changes in gov't consumption of dom. and imp goods in r #;
+Equation E_CNTqgr
+# cont. to EV of changes in gov't consumption of dom. and imp goods in r #
+(all,r,REG)(all,d,DIR)
+    CNTqgr(r,d)
+        = IF[d="domestic", [0.01 * EVSCALFACT(r)]
+                            * sum{c,COMM, DGTAX(c,r) * [qgd(c,r) - pop(r)]}]
+        + IF[d="imported", [0.01 * EVSCALFACT(r)]
+                            * sum{c,COMM, MGTAX(c,r) * [qgm(c,r) - pop(r)]}];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTqgm(c,r)
+    # contribution to EV of changes in gov't consumption of import c in r #;
+Equation E_CNTqgm
+# contribution to EV of changes in gov't consumption of import c in r #
+(all,c,COMM)(all,r,REG)
+    CNTqgm(c,r) =  [0.01 * EVSCALFACT(r)] * MGTAX(c,r) * [qgm(c,r) - pop(r)];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTqgd(c,r)
+    # contribution to EV of changes in gov't consumption of domestic c in r #;
+Equation E_CNTqgd
+# contribution to EV of changes in gov't consumption of domestic c in r #
+(all,c,COMM)(all,r,REG)
+    CNTqgd(c,r) = [0.01 * EVSCALFACT(r)] * DGTAX(c,r) * [qgd(c,r) - pop(r)];
+
+Variable (linear,change) (all,r,REG)
+    CNTqxsr(r)
+    # cont. to EV of changes in exports of all goods from SRCE r to all DEST #;
+Equation E_CNTqxsr
+# cont. to EV of changes in exports of all goods from SRCE r to all DEST #
+(all,r,REG)
+    CNTqxsr(r) = [0.01 * EVSCALFACT(r)]
+               * sum{c,COMM, sum{s,REG, XTAXD(c,r,s) * [qxs(c,r,s) - pop(r)]}};
+
+Variable (linear,change) (all,c,COMM)(all,s,REG)(all,d,REG)
+    CNTqxs(c,s,d)
+    # contribution to EV of changes in exports of c from SRCE s to DEST d #;
+Equation E_CNTqxs
+# contribution to EV of changes in exports of c from SRCE s to DEST d #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    CNTqxs(c,s,d) = [0.01 * EVSCALFACT(s)]
+                   * XTAXD(c,s,d) *  [qxs(c,s,d) - pop(s)];
+
+Variable (linear,change) (all,r,REG)
+    CNTqmsr(r)
+    # cont. to EV of changes in imports of all goods from all SRCE to DEST r #;
+Equation E_CNTqmsr
+# cont. to EV of changes in imports of all goods from all SRCE to DEST d #
+(all,d,REG)
+    CNTqmsr(d) = [0.01 * EVSCALFACT(d)]
+               * sum{c,COMM, sum{s,REG, MTAX(c,s,d) *  [qxs(c,s,d) - pop(d)]}};
+
+Variable (linear,change) (all,c,COMM)(all,s,REG)(all,d,REG)
+    CNTqms(c,s,d)
+    # contribution to EV of changes in imports of c from SRCE s to DEST d #;
+Equation E_CNTqms
+# contribution to EV of changes in imports of c from SRCE s to DEST d #
+(all,c,COMM)(all,s,REG)(all,d,REG)
+    CNTqms(c,s,d) = [0.01 * EVSCALFACT(d)]
+                  * MTAX(c,s,d) * [qxs(c,s,d) - pop(d)];
+
+Variable (linear,change) (all,r,REG)(all,t,CTAX)
+    CNTalleffr(r,t) # total contribution to regional EV of allocative effects #;
+Equation E_CNTalleffr
+# total contribution to regional EV of allocative effects #
+(all,r,REG)(all,t,CTAX)
+    CNTalleffr(r,t)
+        = [0.01 * EVSCALFACT(r)]
+        * [ IF[t="prodtax", sum{c,COMM, sum{a,ACTS,
+                                PTAX(c,a,r) * [qca(c,a,r) - pop(r)]}}
+                          + sum{e,ENDW, sum{a,ACTS,
+                                INCTAX(e,a,r) * [qes(e,a,r) - pop(r)]}}]
+          + IF[t="pfacttax",sum{e,ENDW, sum{a,ACTS,
+                                ETAX(e,a,r) * [qfe(e,a,r) - pop(r)]}}]
+          + IF[t="inputtax",sum{c,COMM, sum{a,ACTS,
+                                MFTAX(c,a,r) * [qfm(c,a,r) - pop(r)]}}
+                            + sum{c,COMM, sum{a,ACTS,
+                                DFTAX(c,a,r) * [qfd(c,a,r) - pop(r)]}}]
+          + IF[t="contax", sum{c,COMM, MPTAX(c,r) * [qpm(c,r) - pop(r)]}
+                         + sum{c,COMM, DPTAX(c,r) * [qpd(c,r) - pop(r)]}]
+          + IF[t="govtax", sum{c,COMM, MGTAX(c,r) * [qgm(c,r) - pop(r)]}
+                         + sum{c,COMM, DGTAX(c,r) * [qgd(c,r) - pop(r)]}]
+          + IF[t="invtax", sum{c,COMM, MITAX(c,r) * [qim(c,r) - pop(r)]}
+                         + sum{c,COMM, DITAX(c,r) * [qid(c,r) - pop(r)]}]
+          + IF[t="xtax",   sum{c,COMM, sum{s,REG,
+                               XTAXD(c,r,s) * [qxs(c,r,s) - pop(r)]}}]
+          + IF[t="mtax", sum{c,COMM, sum{s,REG,
+                               MTAX(c,s,r) * [qxs(c,s,r) - pop(r)]}}]];
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)
+    CNTalleffcr(c,r)
+    # total contribution to regional EV of allocative effects #;
+Equation E_CNTalleffcr
+# total contribution to regional EV of allocative effects #
+(all,c,COMM)(all,r,REG)
+    CNTalleffcr(c,r)
+        = [0.01 * EVSCALFACT(r)]*
+        [ sum{a,ACTS, MFTAX(c,a,r) * [qfm(c,a,r) - pop(r)]}
+        + sum{a,ACTS, DFTAX(c,a,r) * [qfd(c,a,r) - pop(r)]}
+        + MPTAX(c,r) * [qpm(c,r) - pop(r)]
+        + DPTAX(c,r) * [qpd(c,r) - pop(r)]
+        + MGTAX(c,r) * [qgm(c,r) - pop(r)]
+        + DGTAX(c,r) * [qgd(c,r) - pop(r)]
+        + MITAX(c,r) * [qim(c,r) - pop(r)]
+        + DITAX(c,r) * [qid(c,r) - pop(r)]
+        + sum{s,REG, XTAXD(c,r,s) * [qxs(c,r,s) - pop(r)]}
+        + sum{s,REG, MTAX(c,s,r) * [qxs(c,s,r) - pop(r)]} ] ;
+
+Variable (linear,change) (all,r,REG)
+    CNTtotr(r)
+    # contribution to regional EV of changes in its terms of trade #;
+Equation E_CNTtotr
+# contribution to regional EV of changes in its terms of trade #
+(all,r,REG)
+    CNTtotr(r)
+        = [0.01 * EVSCALFACT(r)]
+        * [sum{c,COMM, sum{s,REG, VFOB(c,r,s) * [pfob(c,r,s) - pxwwld]}}
+            + sum{m,MARG, VST(m,r) * [pds(m,r) - pxwwld]}
+            - sum{c,COMM, sum{s,REG, VFOB(c,s,r) * [pfob(c,s,r) - pxwwld]}}
+            - sum{m,MARG, VTMD(m,r) * [pt(m) - pxwwld]}];
+
+Variable (linear,change) (all,r,REG)
+    CNTpinv(r) # contribution to regional EV of changes in investment price #;
+Equation E_CNTpinv
+# contribution to regional EV of changes in investment price index #
+(all,r,REG)
+    CNTpinv(r)
+        = [0.01 * EVSCALFACT(r)]
+        * [NETINV(r) * [pinv(r) - pxwwld] - SAVE(r) * [psave(r) - pxwwld]];
+
+Variable (linear,change) (all,r,REG)
+    CNTendwr(r) # contribution to regional EV of changes in all ENDW #;
+Equation E_CNTendwr
+# contribution to regional EV of changes in all ENDW #
+(all,r,REG)
+    CNTendwr(r)
+        = [0.01 * EVSCALFACT(r)]
+        * [sum{e,ENDW, sum{a,ACTS, EVOS(e,a,r) * [qes(e,a,r) - pop(r)]}}
+            - VDEP(r) * [kb(r) - pop(r)]];
+
+Variable (linear,change) (all,e,ENDW)(all,r,REG)
+    CNTendw(e,r) # contribution to regional EV of changes in ENDW e in r #;
+Equation E_CNTendw
+# contribution to regional EV of changes in ENDW e in r #
+(all,e,ENDW)(all,r,REG)
+    CNTendw(e,r) = [0.01 * EVSCALFACT(r)] *
+                   sum{a,ACTS, [EVOS(e,a,r) * [qes(e,a,r) - pop(r)]]};
+
+Variable (linear,change) (all,r,REG)(all,t,TECHTYPE)
+    CNTtechr(t,r) # contribution to regional EV of all technical change #;
+Equation E_CNTtechr
+# contribution to regional EV of all technical change #
+(all,t,TECHTYPE)(all,r,REG)
+    CNTtechr(t,r)
+        = [0.01 * EVSCALFACT(r)]
+        * [ IF[t="output",  sum{a,ACTS, VOS(a,r) * ao(a,r)}]
+          + IF[t="ininput", sum{a,ACTS, sum{c,COMM,
+                                [VMFP(c,a,r) + VDFP(c,a,r)] * afa(c,a,r)}}
+                            + sum{c,COMM, sum{a,ACTS,
+                                 VFP(c,a,r) * aint(a,r)}}]
+          + IF[t="primfac", sum{a,ACTS,
+                            sum{e,ENDW, VFP(e,a,r) * afe(e,a,r)}}]
+          + IF[t="v_added", sum{a,ACTS, VVA(a,r) * ava(a,r)}]
+          + IF[t="transp",  sum{m,MARG, sum{c,COMM, sum{s,REG,
+                            VTMFSD(m,c,s,r) * atmfsd(m,c,s,r)}}}
+          + IF[t="import",  sum{c,COMM,
+                            sum{s,REG, VMSB(c,s,r) * ams(c,s,r)}}]]];
+
+Variable (linear,change) (all,a,ACTS)(all,r,REG)
+    CNTtech_ao(a,r)
+    # cont. to regional EV of output augmenting tech change in a #;
+Equation E_CNTtech_ao
+# cont. to regional EV of output augmenting tech change in a #
+(all,a,ACTS)(all,r,REG)
+    CNTtech_ao(a,r) = [0.01 * EVSCALFACT(r)] * VOS(a,r) * ao(a,r);
+
+Variable (linear,change) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    CNTtech_afe(e,a,r)
+    # cont. to EV of primary factor e augmenting tech change in a #;
+Equation E_CNTtech_afe
+# cont. to EV of primary factor e augmenting tech change in a #
+(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    CNTtech_afe(e,a,r) = [0.01 * EVSCALFACT(r)] * VFP(e,a,r) * afe(e,a,r);
+
+Variable (linear,change) (all,a,ACTS)(all,r,REG)
+    CNTtech_ava(a,r)
+    # cont. to EV of value added augmenting tech change in act. a #;
+Equation E_CNTtech_ava
+# cont. to EV of value added augmenting tech change in act. a #
+(all,a,ACTS)(all,r,REG)
+    CNTtech_ava(a,r) = [0.01 * EVSCALFACT(r)] * VVA(a,r) * ava(a,r);
+
+Variable (linear,change) (all,a,ACTS)(all,r,REG)
+    CNTtech_aint(a,r)
+    # cont. to EV of composite c input augmenting tech change in act. a #;
+Equation E_CNTtech_aint
+# cont. to EV of composite c input augmenting tech change in act. a #
+(all,a,ACTS)(all,r,REG)
+    CNTtech_aint(a,r)
+        = [0.01 * EVSCALFACT(r)]
+        * sum{c,COMM, [VMFP(c,a,r) + VDFP(c,a,r)] * aint(a,r)};
+
+Variable (linear,change) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTtech_af(c,a,r)
+    # cont. to EV of composite c input augmenting tech change in act. a #;
+Equation E_CNTtech_af
+# cont. to EV of composite c input augmenting tech change in act. a #
+(all,c,COMM)(all,a,ACTS)(all,r,REG)
+    CNTtech_af(c,a,r)
+        = [0.01 * EVSCALFACT(r)] * [VMFP(c,a,r) + VDFP(c,a,r)] * afa(c,a,r);
+
+Variable (linear,change)(all,m,MARG)(all,c,COMM)(all,r,REG)(all,s,REG)
+    CNTtech_atmfsd(m,c,r,s)
+    # cont. to EV of tech change in transportation efficiency #;
+Equation E_CNTtech_atmfsd
+# cont. to EV of tech change in transportation efficiency #
+(all,m,MARG)(all,c,COMM)(all,r,REG)(all,s,REG)
+    CNTtech_atmfsd(m,c,r,s)
+        = [0.01 * EVSCALFACT(s)] * VTMFSD(m,c,r,s) * atmfsd(m,c,r,s);
+
+Variable (linear,change) (all,c,COMM)(all,r,REG)(all,s,REG)
+    CNTtech_ams(c,r,s)
+    # cont. to EV of bilateral import augmenting tech change for COMM c #;
+Equation E_CNTtech_ams
+# cont. to EV of bilateral import augmenting tech change for COMM c #
+(all,c,COMM)(all,r,REG)(all,s,REG)
+    CNTtech_ams(c,r,s) = [0.01 * EVSCALFACT(r)] * VMSB(c,r,s) * ams(c,r,s);
+
+Variable (linear,change) (all,r,REG)
+    CNTkb(r)
+    # cont. to EV of changes to beg. period capital stock and depreciation #;
+Equation E_CNTkb
+# cont. to EV of changes to beg. period capital stock and depreciation #
+(all,r,REG)
+    CNTkb(r) = - [0.01 * EVSCALFACT(r)] * VDEP(r) * [kb(r) - pop(r)];
+
+!<
+    ===========================
+    END OF GTAP model equations
+    ===========================
+>!
+
+!<
+    ================================================
+    Welfare summary and post-simulation calculations
+    ================================================
+>!
+
+!<
+    --------------------------
+    C. Welfare summary modules
+    --------------------------
+    C-A:  EV decomposition: Summary
+    C-A1: Allocative efficiency effect: Commodity summary
+    C-A2: Allocative efficiency effect: Tax type summary
+    C-AX: Decomposition of allocative effect, by tax type and commodity
+    C-B1: Endowment effect: Gross of depreciation
+    C-B2: Endowment effect: Depreciation
+    C-C1: Technical change effect
+    C-D1: Population effect
+    C-E1: Terms of trade (ToT) effect
+    C-F1: I-S Effect: Explanatory factors
+>!
+
+!<
+    Preliminaries: Assign initial values
+    ------------------------------------
+>!
+
+Zerodivide (nonzero_by_zero) default 0;
+Zerodivide (zero_by_zero) default 0;
+
+Coefficient (parameter) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BEVFP(e,a,r) # producer expenditure on c by act. a #;
+Formula (initial) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BEVFP(e,a,r) = EVFP(e,a,r);
+
+Coefficient (parameter) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVMFP(c,a,r) # purchases of imported c r for use in a in region r #;
+Formula (initial) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVMFP(c,a,r) = VMFP(c,a,r);
+
+Coefficient (parameter) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVDFP(c,a,r) # purchases of domestic c r for use in a in region r #;
+Formula (initial) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVDFP(c,a,r) = VDFP(c,a,r);
+
+Coefficient (parameter) (all,d,ACTS)(all,r,REG)
+    BVOS(d,r) # value of commodity c output in region r #;
+Formula (initial)(all,a,ACTS)(all,r,REG)
+    BVOS(a,r)
+        = sum{e,ENDW, BEVFP(e,a,r)}
+        + sum{c,COMM, BVMFP(c,a,r) + BVDFP(c,a,r)};
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)(all,s,REG)
+    BVXSB(c,r,s)
+    # exports of c from r to s at basic prices (tradeables only) #;
+Formula (initial) (all,c,COMM)(all,r,REG)(all,s,REG)
+    BVXSB(c,r,s) = VXSB(c,r,s);
+
+Coefficient (parameter)(all,c,COMM)(all,r,REG)
+    BVDPB(c,r) # private household expenditure on domestic c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDPB(c,r) = VDPB(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVDGB(c,r) # government household expenditure on domestic c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDGB(c,r) = VDGB(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVDFB(c,a,r) # purchases of domestic c for use in a in region r #;
+Formula (initial) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVDFB(c,a,r) = VDFB(c,a,r) ;
+
+Coefficient (parameter) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BEVFB(e,a,r) # producer expenditure on c by a in r at basic prices #;
+Formula (initial)  (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BEVFB(e,a,r) = EVFB(e,a,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVDB(c,r) # domestic sales of c in r at basic prices (tradeables only) #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDB(c,r) =  VDB(c,r);
+
+Coefficient (parameter) (all,m,MARG)(all,r,REG)
+    BVST(m,r)
+    # exports of m from r for int'l transp. at basic prices (tradeables only) #;
+Formula (initial) (all,m,MARG)(all,r,REG)
+    BVST(m,r) =  VST(m,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVCB(c,r) # value of commodity c output in region r at basic prices #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVCB(c,r) = VCB(c,r);
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVCB(c,r) = BVDB(c,r) + sum{s,REG, BVXSB(c,r,s)}
+              + IF[c in MARG, BVST(c,r)];
+
+Coefficient (parameter) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BVEB(e,a,r) # value of endowment e in region r at basic prices #;
+Formula (initial) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BVEB(e,a,r) = EVFB(e,a,r);
+
+Coefficient (parameter) (all,a,ACTS)(all,r,REG)
+    BMAKEACT(a,r) # value of total output of firm a at initial basic prices #;
+Formula (initial) (all,a,ACTS)(all,r,REG)
+    BMAKEACT(a,r) = MAKEBACT(a,r);
+
+Coefficient (parameter)  (all,a,ACTS)(all,r,REG)
+    BOUTAX(a,r) # power of activity output tax, base #;
+Formula (initial)  (all,a,ACTS)(all,r,REG)
+    BOUTAX(a,r) = [BMAKEACT(a,r) - BVOS(a,r)] / BMAKEACT(a,r) * 100;
+
+Coefficient (parameter) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BEVOS(e,a,r) # initial endowment supply #;
+Formula (initial) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BEVOS(e,a,r) = EVOS(e,a,r);
+
+Coefficient (parameter)(all,e,ENDW)(all,r,REG)
+    BINCTAX(e,r) # initial income tax #;
+Formula (initial)  (all,e,ENDW)(all,r,REG)
+    BINCTAX(e,r) = sum{a,ACTS,
+                   [BVEB(e,a,r) - BEVOS(e,a,r)] / BVEB(e,a,r) * 100};
+
+Coefficient (parameter) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVMFB(c,a,r) # purchases of imports c for use in act. a in region r #;
+Formula (initial) (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    BVMFB(c,a,r) = VMFB(c,a,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVMPB(c,r) # private household expenditure on c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVMPB(c,r) = VMPB(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVMPP(c,r) # private household expenditure on imported c #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVMPP(c,r) = VMPP(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVDPP(c,r) # private household expenditure on domestic c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDPP(c,r) = VDPP(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVMGB(c,r) # gov't household expenditure on c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVMGB(c,r) = VMGB(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVMGP(c,r) # government household expenditure on imported c #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVMGP(c,r) = VMGP(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVDGP(c,r) # government household expenditure on domestic c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDGP(c,r) = VDGP(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVMIB(c,r) # investment expenditure on c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVMIB(c,r) = VMIB(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVMIP(c,r) # investment expenditure on imported c #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVMIP(c,r) = VMIP(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVDIP(c,r) # investment expenditure on domestic c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDIP(c,r) = VDIP(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,r,REG)
+    BVDIB(c,r) # investment expenditure on domestic c in r #;
+Formula (initial) (all,c,COMM)(all,r,REG)
+    BVDIB(c,r) = VDIB(c,r);
+
+Coefficient (parameter) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BVMSB(c,s,d) # imports of c from r to s at domestic basic prices #;
+Formula (initial) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BVMSB(c,s,d) = VMSB(c,s,d);
+
+Coefficient (parameter) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BVCIF(c,s,d) # imports of c from r to s valued cif (tradeables only) #;
+Formula (initial) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BVCIF(c,s,d) = VCIF(c,s,d);
+
+Coefficient (parameter) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BMTAX(c,s,d) # power of import tax, base #;
+Formula (initial) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BMTAX(c,s,d) = [BVMSB(c,s,d) - BVCIF(c,s,d)] / BVCIF(c,s,d) * 100;
+
+Coefficient (parameter) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BVFOB(c,s,d) # exports of c from r to s valued fob (tradeables only) #;
+Formula (initial) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BVFOB(c,s,d) = VFOB(c,s,d);
+
+Coefficient (parameter) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BXTAX(c,s,d) # power of exports tax, base #;
+Formula (initial) (all,c,COMM)(all,s,REG)(all,d,REG)
+    BXTAX(c,s,d) = [BVFOB(c,s,d) - BVXSB(c,s,d)] / BVFOB(c,s,d) * 100;
+
+Coefficient (parameter) (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BETAX(e,a,r) # power of exports tax, base #;
+Formula (initial)(all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    BETAX(e,a,r) = [BEVFP(e,a,r) - BEVFB(e,a,r)] / BEVFB(e,a,r) * 100;
+
+Coefficient (parameter) (all,r,REG)
+    BSAVE(r) # expenditure on NET saving in region r at producer prices #;
+Formula (initial) (all,r,REG)
+    BSAVE(r) = SAVE(r);
+
+Coefficient (parameter) (all,r,REG)
+    ISBAL(r) # I-S balance, NETINV(r) - SAVE(r) #;
+Formula (initial) (all,r,REG)
+    ISBAL(r) = NETINV(r) - BSAVE(r);
+Zerodivide (nonzero_by_zero) off;
+
+!<
+    Begin post-sim calculations
+    ...........................
+>!
+
+postsim (begin);
+Zerodivide (nonzero_by_zero) default 0.5;
+
+File (new) WELVIEW # output file containing welfare decomposition summary #;
+
+!<
+    SET definitions for Welfare summary file. Supplementary sets for "toggles"
+    in VIEWHAR.
+>!
+Set
+    ALLOCEFF = ENDW + ACTS + COMM;
+Set
+    ENDWACTS = ENDW + ACTS;
+Set
+    TAXSUM(pfacttax,prodtax,comtax);
+Set
+    TYPE(xtax,mtax);
+Subset
+    TYPE is subset of CTAX;
+Set
+    PRICES(pworld,pexport,pimport);
+Set
+    ACTIVITY(firm, private, investment, govt);
+Set
+    COL(welcnt, dvol, taxrateb, taxrateu);
+Set
+    DIREC(import,export);
+Set
+    FORM(percent,value);
+Set
+    COLM(ISbal,p_cgds,p_save);
+
+!<
+    C-A: EV decomposition summary
+    -----------------------------
+>!
+
+Coefficient (all,r,REG)(all,c,COLUMN)
+    WELFARE(r,c) # aggregate report of welfare change #;
+Formula (all,r,REG)
+    WELFARE(r,"alloc_A1")= sum{t, CTAX, CNTalleffr(r,t)};
+Formula (all,r,REG)
+    WELFARE(r,"ENDWB1") = CNTendwr(r);
+Formula (all,r,REG)
+    WELFARE(r,"tech_C1") = sum{t,TECHTYPE, CNTtechr(t,r)};
+Formula (all,r,REG)
+    WELFARE(r,"pop_D1")  = CNTpop(r);
+Formula (all,r,REG)
+    WELFARE(r,"tot_E1")  = CNTtotr(r);
+Formula (all,r,REG)
+    WELFARE(r,"IS_F1")   = CNTpinv(r);
+Formula (all,r,REG)
+    WELFARE(r,"PREF_G1") = CNTdpar(r);
+
+Write
+    WELFARE to file WELVIEW header "A"
+    longname "EV Decomposition: Summary";
+
+!<
+    C-A1: Allocative efficiency effect: Activity, comodity and endowment Summary
+    ----------------------------------------------------------------------------
+>!
+
+Coefficient (all,a,ALLOCEFF)(all,r,REG)
+    CNTalleff(a,r) # allocative efficiency #;
+Formula (all,r,REG)(all,e,ENDW)
+    CNTalleff(e,r) = CNTqfeer(e,r) + CNTqe(e,r);
+Formula (all,r,REG)(all,c,COMM)
+    CNTalleff(c,r) = CNTalleffcr(c,r);
+Formula (all,r,REG)(all,a,ACTS)
+    CNTalleff(a,r) = sum{c,COMM, CNTqca(c,a,r)};
+
+Write
+    CNTalleff to file WELVIEW header "A1"
+    longname "Allocative Efficiency Effect: Summary";
+
+!<
+    C-A2: Allocative efficiency effect: Tax type summary
+    ----------------------------------------------------
+>!
+Coefficient (all,r,REG)(all,t,CTAX)
+    CNTalleffkr(r,t) # allocative efficiency effect #;
+Formula (all,r,REG)(all,t,CTAX)
+    CNTalleffkr(r,t) = CNTalleffr(r,t);
+Write
+    CNTalleffkr to file WELVIEW header "A2"
+    longname "Allocative Efficiency Effect: Tax Type Summary";
+
+!<
+    C-AX: Decomposition of allocative effect: Tax type and commodity
+    ----------------------------------------------------------------
+
+    C-A21:  Output tax effect
+    C-A22:  Domestic tax effect
+    C-A23:  Trade tax effect
+    C-A3:   Endowment tax effect
+>!
+
+!<
+    C-A21:  Output tax effect
+    .........................
+>!
+
+Coefficient (all,e,ENDWACTS)(all,r,REG)
+    OTAX(e,r) # output tax effect #;
+Formula (all,e,ENDW)(all,r,REG)
+    OTAX(e,r) = CNTqe(e,r);
+Formula (all,a,ACTS)(all,r,REG)
+    OTAX(a,r) = CNTqo(a,r);
+
+Write
+    OTAX to file WELVIEW header "A21"
+    longname "Output Tax Effect";
+
+!<
+    C-A211: Output tax effect: Explanatory factors
+    ..............................................
+>!
+
+Coefficient (all,a,ACTS)(all,r,REG)
+    UOUTAX(a,r) # power of activity output tax, updated #;
+Formula (all,a,ACTS)(all,r,REG)
+    UOUTAX(a,r) = [MAKEBACT(a,r) - VOS(a,r)] / MAKEBACT(a,r) * 100;
+
+Coefficient (all,e,ENDW)(all,r,REG)
+    UINCTAX(e,r) # power of income tax, updated #;
+Formula (all,e,ENDW)(all,r,REG)
+    UINCTAX(e,r) = [sum{a,ACTS, EVFB(e,a,r) - EVOS(e,a,r)}]
+                 / sum{a,ACTS, EVFB(e,a,r)} * 100;
+
+Coefficient (all,ea,ENDWACTS)(all,r,REG)(all,co,COL)
+    OUTPUT(ea,r,co) # output tax, explanatory factors #;
+Formula (all,a,ACTS)(all,r,REG)(all,co,COL)
+    OUTPUT(a,r,co)
+        = IF[co="welcnt", OTAX(a,r)]
+        + IF[co="dvol", BMAKEACT(a,r) * qo(a,r) / 100]
+        + IF[co="taxrateb", BOUTAX(a,r)]
+        + IF[co="taxrateu", UOUTAX(a,r)];
+Formula (all,e,ENDW)(all,r,REG)(all,co,COL)
+    OUTPUT(e,r,co)
+        = IF[co="welcnt", OTAX(e,r)]
+        + IF[co="dvol", sum{a,ACTS, BVEB(e,a,r) * qes(e,a,r) / 100}]
+        + IF[co="taxrateb", BINCTAX(e,r)]
+        + IF[co="taxrateu", UINCTAX(e,r)];
+
+Write
+    OUTPUT to file WELVIEW header "A211"
+    longname "Output Tax Effect: Explanatory Factors";
+
+!<
+    C-A22:  Domestic tax effect
+    ---------------------------
+
+    C-A22:  Domestic tax effect: Summary
+    C-A221: Intermed. input tax effect
+    C-A222: Investment interm. input tax effect
+    C-A22F: Intermed. input tax effect: Explanatory factors
+    C-A22P: Private cons. tax effect: Explanatory factors
+    C-A22G: Government cons. tax effect: Explanatory factors
+    C-A22I: Investment demand Tax Effect: Explanatory factors
+>!
+
+!<
+    C-A22: Domestic tax effect: Summary
+    ...................................
+>!
+
+Coefficient (all,c,COMM)(all,ac,ACTIVITY)(all,r,REG)(all,t,DIR)
+    ATAX(c,ac,r,t) # tax effect: summary #;
+Formula (all,c,COMM)(all,ac,ACTIVITY)(all,r,REG)
+    ATAX(c,ac,r,"domestic")
+        = IF[ac="firm",       sum{a,ACTS, CNTqfd(c,a,r)}]
+        + IF[ac="private",    CNTqpd(c,r)]
+        + IF[ac="govt",       CNTqgd(c,r)]
+        + IF[ac="investment", CNTqid(c,r)];
+Formula (all,c,COMM)(all,ac,ACTIVITY)(all,r,REG)
+    ATAX(c,ac,r,"imported")
+        = IF[ac="firm",       sum{a,ACTS, CNTqfm(c,a,r)}]
+        + IF[ac="private",    CNTqpm(c,r)]
+        + IF[ac="govt",       CNTqgm(c,r)]
+        + IF[ac="investment", CNTqim(c,r)];
+
+Write
+    ATAX to file WELVIEW header "A22"
+    longname "Domestic Tax Effect: Summary";
+
+!<
+    C-A221: Intermediate input tax effect
+    .....................................
+>!
+
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)(all,d,DIR)
+    STAX(c,a,r,d) # intermediate input tax effect #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)(all,d,DIR)
+    STAX(c,a,r,d)
+        = IF[d="domestic", CNTqfd(c,a,r)]
+        + IF[d="imported", CNTqfm(c,a,r)];
+
+Write
+    STAX to file WELVIEW header "A221"
+    longname "Intermed. Input Tax Effect";
+
+!<
+    C-A222: Investment intermediate input tax effect
+    ................................................
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)(all,d,DIR)
+    ITAX(c,r,d) # investment intermediate input tax effect #;
+Formula (all,c,COMM)(all,r,REG)(all,d,DIR)
+    ITAX(c,r,d)
+        = IF[d="domestic", CNTqid(c,r)]
+        + IF[d="imported", CNTqim(c,r)];
+
+Write
+    ITAX to file WELVIEW header "A222"
+    longname "Investment Intermed. Input Tax Effect";
+
+!<
+    C-A22F: Intermediate input tax effect: Explanatory factors
+    ..........................................................
+>!
+
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)(all,d,DIR)(all,co,COL)
+    FIRM(c,a,r,d,co) # explanatory factors: firm interm. input tax effect #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)(all,co,COL)
+    FIRM(c,a,r,"domestic",co)
+        = IF[co="dvol",     [BVDFB(c,a,r) * qfd(c,a,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVDFP(c,a,r) - BVDFB(c,a,r)] / BVDFB(c,a,r)]
+        + IF[co="taxrateu", 100 * [VDFP(c,a,r) - VDFB(c,a,r)] / VDFB(c,a,r)];
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)(all,co,COL)
+    FIRM(c,a,r,"imported",co)
+        = IF[co="dvol",     [BVMFB(c,a,r) * qfm(c,a,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVMFP(c,a,r) - BVMFB(c,a,r)] / BVMFB(c,a,r)]
+        + IF[co="taxrateu", 100 * [VMFP(c,a,r) - VMFB(c,a,r)] / VMFB(c,a,r)];
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)(all,d,DIR)
+    FIRM(c,a,r,d,"welcnt") = STAX(c,a,r,d);
+
+Write
+    FIRM to file WELVIEW header "A22F"
+    longname "Intermed. Input Tax Effect: Explanatory Factors";
+
+!<
+    C-A22P: Private consumption tax Effect: Explanatory Factors
+    ...........................................................
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)(all,d,DIR)(all,co,COL)
+    PRIVATE(c,r,d,co) # explanatory factors: priv hh consumption tax effect #;
+Formula (all,c,COMM)(all,r,REG)(all,co,COL)
+    PRIVATE(c,r,"domestic",co)
+        = IF[co="dvol",     [BVDPB(c,r) * qpd(c,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVDPP(c,r) - BVDPB(c,r)] / BVDPB(c,r)]
+        + IF[co="taxrateu", 100 * [VDPP(c,r) - VDPB(c,r)] / VDPB(c,r)];
+Formula (all,c,COMM)(all,r,REG)(all,co,COL)
+    PRIVATE(c,r,"imported",co)
+        = IF[co="dvol",     [BVMPB(c,r) * qpm(c,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVMPP(c,r) - BVMPB(c,r)] / BVMPB(c,r)]
+        + IF[co="taxrateu", 100 * [VMPP(c,r) - VMPB(c,r)] / VMPB(c,r)];
+Formula (all,c,COMM)(all,r,REG)(all,d,DIR)
+    PRIVATE(c,r,d,"welcnt") = ATAX(c,"private",r,d);
+
+Write
+    PRIVATE to file WELVIEW header "A22P"
+    longname "Private Cons. Tax Effect: Explanatory Factors";
+
+!<
+    C-A22G: Government consumption tax effect: Explanatory factors
+    ..............................................................
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)(all,d,DIR)(all,co,COL)
+    GOVT(c,r,d,co) # explanatory factors: gov't hh consumption tax effect #;
+Formula (all,c,COMM)(all,r,REG)(all,co,COL)
+    GOVT(c,r,"domestic",co)
+        = IF[co="dvol",     [BVDGB(c,r) * qgd(c,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVDGP(c,r) - BVDGB(c,r)] / BVDGB(c,r)]
+        + IF[co="taxrateu", 100 * [VDGP(c,r) - VDGB(c,r)] / VDGB(c,r)];
+Formula (all,c,COMM)(all,r,REG)(all,co,COL)
+    GOVT(c,r,"imported",co)
+        = IF[co="dvol",     [BVMGB(c,r) * qgm(c,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVMGP(c,r) - BVMGB(c,r)] / BVMGB(c,r)]
+        + IF[co="taxrateu", 100 * [VMGP(c,r) - VMGB(c,r)] / VMGB(c,r)];
+Formula (all,c,COMM)(all,r,REG)(all,d,DIR)
+    GOVT(c,r,d,"welcnt") = ATAX(c,"govt",r,d);
+
+Write
+    GOVT to file WELVIEW header "A22G"
+    longname "Government Cons. Tax Effect: Explanatory Factors";
+
+!<
+    C-A22I: Investment tax effect: Explanatory factors
+    ..................................................
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)(all,d,DIR)(all,co,COL)
+    INVESTMENT(c,r,d,co) # explanatory factors: investment tax effect #;
+Formula (all,c,COMM)(all,r,REG)(all,co,COL)
+    INVESTMENT(c,r,"domestic",co)
+        = IF[co="dvol",     [BVDIB(c,r) * qid(c,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVDIP(c,r) - BVDIB(c,r)] / BVDIB(c,r)]
+        + IF[co="taxrateu", 100 * [VDIP(c,r) - VDIB(c,r)] / VDIB(c,r)];
+Formula (all,c,COMM)(all,r,REG)(all,co,COL)
+    INVESTMENT(c,r,"imported",co)
+        = IF[co="dvol",     [BVMIB(c,r) * qim(c,r)] / 100]
+        + IF[co="taxrateb", 100 * [BVMIP(c,r) - BVMIB(c,r)] / BVMIB(c,r)]
+        + IF[co="taxrateu", 100 * [VMIP(c,r) - VMIB(c,r)] / VMIB(c,r)];
+Formula (all,c,COMM)(all,r,REG)(all,d,DIR)
+    INVESTMENT(c,r,d,"welcnt") = ATAX(c,"investment",r,d);
+
+Write
+    INVESTMENT to file WELVIEW header "A22I"
+    longname "Investment Tax Effect: Explanatory Factors";
+
+!<
+    C-A23: Trade tax effect
+    ------------------------
+
+    C-A23: Trade tax effect
+    C-A231: Trade tax effect: Explanatory factors
+>!
+
+!<
+    C-A23: Trade tax effect
+    ........................
+>!
+
+Coefficient (all,c,COMM)(all,r,REG)(all,s,REG)(all,k,TYPE)
+    TTAX(c,r,s,k) # trade tax effect #;
+Formula (all,c,COMM)(all,r,REG)(all,s,REG)
+    TTAX(c,r,s,"xtax") = CNTqxs(c,r,s);
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    TTAX(c,s,d,"mtax") = CNTqms(c,s,d);
+
+Write
+    TTAX to file WELVIEW header "A23"
+    longname "Trade Tax Effect";
+
+!<
+    C-A231: Trade tax effect: Explanatory factors
+    .............................................
+>!
+
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    UMTAX(c,s,d) # power of import tax, updated # ;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    UMTAX(c,s,d) = [VMSB(c,s,d) - VCIF(c,s,d)] / VCIF(c,s,d) * 100;
+
+Coefficient (all,c,COMM)(all,s,REG)(all,d,REG)
+    UXTAX(c,s,d) # power of export tax, updated #;
+Formula (all,c,COMM)(all,s,REG)(all,d,REG)
+    UXTAX(c,s,d) = [VFOB(c,s,d) - VXSB(c,s,d)] / VFOB(c,s,d) * 100;
+
+Coefficient (all,c,COMM)(all,r,REG)(all,s,REG)(all,co,COL)(all,d,DIREC)
+    TRADE(c,r,s,co,d) # trade tax effect: explanatory factors # ;
+Formula (all,c,COMM)(all,r,REG)(all,s,REG)(all,co,COL)
+    TRADE(c,r,s,co,"export")
+        = IF[co="welcnt",   TTAX(c,r,s,"xtax")]
+        + IF[co="dvol",     BVXSB(c,r,s) * qxs(c,r,s) / 100]
+        + IF[co="taxrateb", BXTAX(c,r,s)]
+        + IF[co="taxrateu", UXTAX(c,r,s)];
+Formula (all,c,COMM)(all,r,REG)(all,s,REG)(all,co,COL)
+    TRADE(c,r,s,co,"import")
+        = IF[co="welcnt",   TTAX(c,r,s,"mtax")]
+        + IF[co="dvol",     BVXSB(c,r,s) * qxs(c,r,s) / 100]
+        + IF[co="taxrateb", BMTAX(c,r,s)]
+        + IF[co="taxrateu", UMTAX(c,r,s)];
+
+Write
+    TRADE to file WELVIEW header "A231"
+    longname "Trade Tax Effect: Explanatory Factors";
+
+!<
+    C-A3:   Endowment tax effect
+    ----------------------------
+>!
+
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    UETAX(e,a,r) # power of factor tax, updated #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    UETAX(e,a,r) = [EVFP(e,a,r) - EVFB(e,a,r)] / EVFB(e,a,r) * 100;
+! Note: PFACTOR in welfare decomp was changed to WPFACTOR because
+        the variable pfactor(r) has already been defined !
+Coefficient (all,e,ENDW)(all,a,ACTS)(all,r,REG)(all,co,COL)
+    WPFACTOR(e,a,r,co) # factor tax effect #;
+Formula (all,e,ENDW)(all,a,ACTS)(all,r,REG)(all,co,COL)
+    WPFACTOR(e,a,r,co)
+        = IF[co="welcnt",   CNTqfe(e,a,r)]
+        + IF[co="dvol",     BEVFB(e,a,r) * qfe(e,a,r) / 100]
+        + IF[co="taxrateb", BETAX(e,a,r)]
+        + IF[co="taxrateu", UETAX(e,a,r)];
+
+Write WPFACTOR to file WELVIEW header "A31"
+    longname "Endowment Tax Effect: Explanatory Factors";
+Write CNTqfeer to file WELVIEW header "A3"
+    longname "Endowment Tax Effect";
+
+!<
+    C-B1: Endowment effect: Gross of depreciation
+    ---------------------------------------------
+>!
+
+Coefficient (all,r,REG)(all,e,ENDW)
+    CNTendowment(r,e) # contribution to welfare by ENDW e in region r #;
+Formula (all,r,REG)(all,e,ENDW)
+    CNTendowment(r,e) = CNTendw(e,r);
+Write
+    CNTendowment to file WELVIEW header "B1"
+    longname "Endowment Effect, Gross of Depreciation";
+
+!<
+    C-B2: Endowment effect: depreciation
+    ------------------------------------
+>!
+
+Write
+    CNTkb to file WELVIEW header "B2"
+    longname "Endowment Effect: Depreciation";
+
+!<
+    C-C1: Technical change effect
+    -----------------------------
+
+    C-C1:  Technical change effect: Summary
+    C-C1X: Technical change effect: Further decomposition
+>!
+
+Coefficient (all,r,REG)(all,t,TECHTYPE)
+    CNTtech(r,t) # contribution to welfare change by tech #;
+Formula (all,r,REG)(all,t,TECHTYPE)
+    CNTtech(r,t) = CNTtechr(t,r);
+
+Write
+    CNTtech to file WELVIEW header "C1"
+    longname "Technical Change Effect: Summary";
+
+Write
+    CNTtech_ao to file WELVIEW header "C11"
+    longname "(ao) Output Augm. Tech. Change Effect";
+Write
+    CNTtech_afe to file WELVIEW header "C12"
+    longname "(afe) Primary Factor Augm. Tech. Change Effect";
+Write
+    CNTtech_ava to file WELVIEW header "C13"
+    longname "(ava) Value Added Augm. Tech. Change Effect";
+Write
+    CNTtech_aint to file WELVIEW header "C14"
+    longname "(aint) Composite Intermed. Input Augm. Tech. Change Effect";
+Write
+     CNTtech_af to file WELVIEW header "C15"
+    longname "(af) Intermed. Input Augm. Tech. Change Effect";
+Write
+    CNTtech_atmfsd to file WELVIEW header "C16"
+    longname "(atmfsd) Internat. Margin Augm. Tech. Change Effect";
+Write
+    CNTtech_ams to file WELVIEW header "C17"
+    longname "(ams) Bilateral Import Augm. Tech. Change Effect";
+
+!<
+    C-D1: Population effect
+    -----------------------
+
+    No decomposition required here.
+>!
+
+!<
+    C-E1: Terms of Trade (ToT) effect
+    ---------------------------------
+>!
+
+! Note: TOT(c,r,t,s) in Welfare Decomp was renamed to WTOT(c,r,t,s) because a
+        prior tot(r) variable has been declared in the model!
+Coefficient (all,c,COMM)(all,r,REG)(all,t,PRICES)(all,s,FORM)
+    WTOT(c,r,t,s)
+    # terms trade effects decomposed by effects of different prices #;
+Formula (all,c,COMM)(all,r,REG)
+    WTOT(c,r,"pworld","percent") = c1_cr(c,r);
+Formula (all,c,COMM)(all,r,REG)
+    WTOT(c,r,"pexport","percent") = c2_cr(c,r);
+Formula (all,c,COMM)(all,r,REG)
+    WTOT(c,r,"pimport","percent") = -c3_cr(c,r);
+Formula (all,c,COMM)(all,r,REG)
+    WTOT(c,r,"pworld","value")
+        = CNTtotr(r) * c1_cr(c,r)
+        / sum{k,COMM, sum{t,PRICES, WTOT(c,r,t,"percent")}};
+Formula (all,c,COMM)(all,r,REG)
+    WTOT(c,r,"pexport","value")
+        = CNTtotr(r) * c2_cr(c,r)
+        / sum{t,PRICES, sum{k,COMM, WTOT(k,r,t,"percent")}};
+Formula (all,c,COMM)(all,r,REG)
+    WTOT(c,r,"pimport","value")
+        = -c3_cr(c,r) * CNTtotr(r)
+        / sum{t,PRICES, sum{k,COMM, WTOT(k,r,t,"percent")}};
+
+Write
+    WTOT to file WELVIEW header "E1"
+    longname "Terms of Trade Effect";
+
+!<
+    C-F1: I-S Effect: Explanatory factors
+    -------------------------------------
+>!
+
+Coefficient (all,r,REG)(all,c,COLM)
+    CGDSCOMP(r,c) # components of cgds effect #;
+Formula (all,r,REG)
+    CGDSCOMP(r,"ISbal") = ISBAL(r);
+Formula (all,r,REG)
+    CGDSCOMP(r,"p_cgds") = pinv(r);
+Formula (all,r,REG)
+    CGDSCOMP(r,"p_save") = psave(r);
+Write
+    CGDSCOMP to file WELVIEW header "F1"
+    longname "I-S Effect: Explanatory Factors";
+
+!<
+    -----------------------------
+    END OF Welfare summary module
+    -----------------------------
+>!
+
+!<
+    -------------------------------------------------
+    D. GTAPVol (post-simulation) summary calculations
+    -------------------------------------------------
+>!
+
+!<
+    Compute the relevant volume changes
+    -----------------------------------
+>!
+
+COEFFICIENT (all,c,COMM)(all,s,REG)(all,d,REG)
+    DQXS(c,s,d)
+    # ch. in vol. of exports of c from region s to d at initial basic prices #;
+FORMULA  (all,c,COMM)(all,s,REG)(all,d,REG)
+    DQXS(c,s,d) = [qxs(c,s,d) / 100] * BVXSB(c,s,d);
+
+COEFFICIENT (all,c,COMM)(all,r,REG)
+    DQDS(c,r)
+    # ch. in vol. of domestic sales of com. c in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,r,REG)
+    DQDS(c,r) = [qds(c,r) / 100] * BVDB(c,r) ;
+
+COEFFICIENT (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    DQFE(e,a,r)
+    # ch. in vol. of endowment e by activity a in r at initial basic prices #;
+FORMULA (all,e,ENDW)(all,a,ACTS)(all,r,REG)
+    DQFE(e,a,r) = [qfe(e,a,r) / 100] * BEVFB(e,a,r) ;
+
+COEFFICIENT (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    DQFM(c,a,r)
+    # ch. in vol. of imp. intermed. c by act. a in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    DQFM(c,a,r) = [qfm(c,a,r) / 100] * BVMFB(c,a,r) ;
+
+COEFFICIENT (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    DQFD(c,a,r)
+    # ch. in vol. of dom. intermed. c by act. a in r at initial basic prices #;
+FORMULA     (all,c,COMM)(all,a,ACTS)(all,r,REG)
+         DQFD(c,a,r) = [qfd(c,a,r) / 100] * BVDFB(c,a,r) ;
+
+COEFFICIENT (all,c,COMM)(all,r,REG)
+    DQPM(c,r)
+    # ch. in vol. of priv. hhld cons. for imp. c in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,r,REG)
+    DQPM(c,r) = [qpm(c,r) / 100] * BVMPB(c,r) ;
+
+COEFFICIENT (all,c,COMM)(all,r,REG)
+    DQPD(c,r)
+    # ch. in vol. of priv. hhld cons. for dom. c in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,r,REG)
+    DQPD(c,r) = [qpd(c,r) / 100] * BVDPB(c,r) ;
+
+COEFFICIENT (all,c,COMM)(all,r,REG)
+    DQGM(c,r)
+    # ch. in vol. of government cons. for imp. c in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,r,REG)
+    DQGM(c,r) = [qgm(c,r) / 100] * BVMGB(c,r) ;
+
+COEFFICIENT (all,c,COMM)(all,r,REG)
+    DQGD(c,r)
+    # ch. in vol. of government cons. for dom. c in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,r,REG)
+    DQGD(c,r) = [qgd(c,r) / 100] * BVDGB(c,r) ;
+
+COEFFICIENT (all,c,COMM)(all,r,REG)
+    DQO(c,r)
+    # ch. in vol. of supply of com. c in r at initial basic prices #;
+FORMULA (all,c,COMM)(all,r,REG)
+    DQO(c,r) = [qc(c,r) / 100] * BVCB(c,r) ;
+
+COEFFICIENT (all,s,REG)(all,d,REG)
+    DTOT(s,d)
+    # ch. in vol. of total exports from region s to d at initial basic prices #;
+FORMULA (all,s,REG)(all,d,REG)
+    DTOT(s,d) = sum{c,COMM, DQXS(c,s,d)};
+
+Zerodivide off;
+
+FILE
+ (New) GTAPVOL # HAR file of volume changes # ;
+!< Write the output of this module to ViewHAR for easy viewing and summation >!
+
+Write
+    DQXS to file GTAPVOL header "DQXS";
+    DQDS to file GTAPVOL header "DQDS";
+    DQFE to file GTAPVOL header "DQFE";
+    DQFM to file GTAPVOL header "DQFM";
+    DQFD to file GTAPVOL header "DQFD";
+    DQPM to file GTAPVOL header "DQPM";
+    DQPD to file GTAPVOL header "DQPD";
+    DTOT to file GTAPVOL header "DTOT";
+    DQO  to file GTAPVOL header "DQO ";
+    DQGD to file GTAPVOL header "DQGD";
+    DQGM to file GTAPVOL header "DQGM";
+
+!<
+    --------------
+    END OF GTAPVol
+    --------------
+>!
+postsim (end);
+!<
+    -----------------------------------
+    END OF post-simulation calculations
+    -----------------------------------
+>!
+
+!<
+    ----------------------------------------------
+    E. Data balance check and summary calculations
+    ----------------------------------------------
+>!
+
+Set
+    COSTS # industry cost summary # = "IntDom" + "IntImp" + ENDW + "PTAX"  ;
+Set
+    GDPIN # income-side GDP # = ENDW + "IndTaxes";
+Set
+    SALES # Commodity Sales Summary #
+    (Intermediate,Household,Investment,Government,Exports,IntnlMargins);
+
+Coefficient (all,a,ACTS)(all,r,REG)(all,c,COSTS)
+    COSTSUM(a,r,c) # industry cost summary #;
+Formula
+ (all,a,ACTS)(all,r,REG) COSTSUM(a,r,"IntDom") = sum{c,COMM, VDFP(c,a,r)};
+ (all,a,ACTS)(all,r,REG) COSTSUM(a,r,"IntImp") = sum{c,COMM, VMFP(c,a,r)};
+ (all,a,ACTS)(all,r,REG)(all,e,ENDW) COSTSUM(a,r,e) = EVFP(e,a,r);
+ (all,a,ACTS)(all,r,REG) COSTSUM(a,r,"PTAX")   = sum{c,COMM, PTAX(c,a,r)};
+ (all,a,ACTS)(all,r,REG)(all,e,ENDW) COSTSUM(a,r,e) = EVFP(e,a,r);
+ (all,a,ACTS)(all,r,REG) COSTSUM(a,r,"PTAX")   = sum{c,COMM, PTAX(c,a,r)};
+Write
+    COSTSUM to file GTAPSUM header "COST";
+
+Coefficient (all,r,REG)(all,g,GDPIN)
+   GDPINC(r,g) # income-side GDP #;
+Formula
+   (all,r,REG)(all,e,ENDW) GDPINC(r,e) = sum{a,ACTS, EVFP(e,a,r)};
+   (all,r,REG) GDPINC(r,"IndTaxes") =   INDTAX(r) - TAXRFU(r);
+Write
+    GDPINC to file GTAPSUM header "GDPI";
+
+Coefficient (all,c,COMM)(all,r,REG)(all,s,SALES)
+    SALESUM(c,r,s) # commodity sales summary #;
+Formula
+(all,c,COMM)(all,r,REG) SALESUM(c,r,"Intermediate") = sum{a,ACTS, VDFB(c,a,r)};
+(all,c,COMM)(all,r,REG) SALESUM(c,r,"Household")    = VDPB(c,r);
+(all,c,COMM)(all,r,REG) SALESUM(c,r,"Investment")   = VDIB(c,r);
+(all,c,COMM)(all,r,REG) SALESUM(c,r,"Government")   = VDGB(c,r);
+(all,c,COMM)(all,r,REG) SALESUM(c,r,"Exports")      = VXDXSB(c,r);
+(all,c,MARG)(all,r,REG) SALESUM(c,r,"IntnlMargins") = VST(c,r);
+(all,c,NMRG)(all,r,REG) SALESUM(c,r,"IntnlMargins") = 0;
+Write
+    SALESUM to file GTAPSUM header "SALE";
+
+Coefficient (all,c,COMM)(all,r,REG)
+    VDBCHK(c,r) # VCB(c,r) - MAKEBCOM(c,r) should be tiny #;
+Formula (all,c,COMM)(all,r,REG)
+    VDBCHK(c,r) = VCB(c,r) - MAKEBCOM(c,r);
+Write
+    VDBCHK to file GTAPSUM header "VMCK";
+Formula (all,c,COMM)(all,r,REG)
+    VDBCHK(c,r) = 100*VDBCHK(c,r) / VCB(c,r);
+Write
+    VDBCHK to file GTAPSUM header "VMCP" longname "VDBCHK as %";
+
+Coefficient (all,c,COMM)(all,r,REG)(all,s,REG)
+    TRDCHK(c,r,s) # VCIF(i,r,s) - [VFOB(i,r,s) + VTFSD(i,r,s)] should be tiny #;
+Formula (all,c,COMM)(all,r,REG)(all,s,REG)
+    TRDCHK(c,r,s) = VCIF(c,r,s) - [VFOB(c,r,s) + VTFSD(c,r,s)];
+Write
+    TRDCHK to file GTAPSUM header "TRCK";
+Formula (all,c,COMM)(all,r,REG)(all,s,REG)
+    TRDCHK(c,r,s) = 100*TRDCHK(c,r,s) / VCIF(c,r,s);
+Write
+    TRDCHK to file GTAPSUM header "TRCP" longname "TRDCHK as %";
+
+Coefficient (all,m,MARG)
+    VTMCHK(m) # VTMUSE(m) - VTMPROV(m) should be tiny #;
+Formula (all,m,MARG)
+    VTMCHK(m) = VTMUSE(m) - VTMPROV(m);
+Write
+    VTMCHK to file GTAPSUM header "VTCK";
+Formula (all,m,MARG)
+    VTMCHK(m) = 100*VTMCHK(m) / VTMUSE(m);
+Write
+    VTMCHK to file GTAPSUM header "VTCP" longname "VTMCHK as %";
+
+Coefficient (all,c,COMM)(all,s,REG)
+    CHKMKClIMP(c,s) # Checking the accounting on imports supply and demand #;
+Formula (all,c,COMM)(all,s,REG)
+    CHKMKClIMP(c,s)
+        = sum{r,REG, VMSB(c,r,s)}
+        - sum{a,ACTS, VMFB(c,a,s)}
+        - VMPB(c,s) - VMGB(c,s) - VMIB(c,s);
+Write
+    CHKMKClIMP to file GTAPSUM header "MPCK";
+Formula (all,c,COMM)(all,s,REG)
+    CHKMKClIMP(c,s) = 100*CHKMKClIMP(c,s)
+                   / [sum{r,REG, VMSB(c,r,s)} + sum{a,ACTS, VMFB(c,a,s)}];
+Write
+    CHKMKClIMP to file GTAPSUM header "MPCP" longname "CHKMKClIMP as %";
+
+Coefficient (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VOSCHK(c,a,r) # MAKEB - [MAKES + PTAX] should be tiny #;
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VOSCHK(c,a,r) = MAKEB(c,a,r) - [MAKES(c,a,r) + PTAX(c,a,r)];
+Write
+    VOSCHK to file GTAPSUM header "VOCK";
+Formula (all,c,COMM)(all,a,ACTS)(all,r,REG)
+    VOSCHK(c,a,r) = 100*VOSCHK(c,a,r) / MAKEB(c,a,r);
+Write
+    VOSCHK to file GTAPSUM header "VOCS" longname "VOSCHK as %";
+
+postsim (begin);
+Write
+    VDBCHK to file GTAPSUM header "VMCQ" longname "PostSim VDBCHK as %";
+    TRDCHK to file GTAPSUM header "TRCQ" longname "PostSim TRDCHK as %";
+    VTMCHK to file GTAPSUM header "VTCQ" longname "PostSim VTMCHK as %";
+    CHKMKClIMP to file GTAPSUM header "MPCQ" longname "PostSim CHKMKClIMP as %";
+    VOSCHK to file GTAPSUM header "VOCQ" longname "PostSim VOPCHK as %";
+postsim (end);
+
+Assertion
+    (all,c,COMM)(all,r,REG) ABS[VDBCHK(c,r)] <= 0.5;
+    (all,c,COMM)(all,r,REG)(all,s,REG) ABS[TRDCHK(c,r,s)] <= 0.5;
+    (all,m,MARG) ABS[VTMCHK(m)] <= 0.5;
+    (all,c,COMM)(all,s,REG) ABS[CHKMKClIMP(c,s)] <= 0.5;
+    (all,c,COMM)(all,a,ACTS)(all,r,REG) ABS[VOSCHK(c,a,r)] <= 0.5;
+
+!<
+    =====================
+    END OF GTAP.TAB FILE
+    =====================
+>!
