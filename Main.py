@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-4-27"
+__altered__ = "2018-4-30"
 
 # Import methods
 # Import External Methods
