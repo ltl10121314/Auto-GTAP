@@ -136,6 +136,7 @@ class SimulationCMF(object):
                 "xSubset REG1 is subset of REG;\n",
                 "xSet XREG = REG - REG1;\n",
                 "!@ end of CMFSTART part\n",
+                "log file=yes;\n",
                 "aux files = GTAPv7;\n",
                 "file gtapSETS = sets.har;\n",
                 "file gtapDATA = basedata.har;\n",
