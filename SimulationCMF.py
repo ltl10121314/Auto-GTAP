@@ -140,7 +140,6 @@ class SimulationCMF(object):
                 "file gtapSETS = sets.har;\n",
                 "file gtapDATA = basedata.har;\n",
                 "Updated file gtapDATA = <cmf>.har;\n",
-                "Solution file = GTAPv7;\n",
                 "file gtapPARM = default.prm;\n",
                 "Verbal Description =\n",
                 "Numeraire shock;\n"
