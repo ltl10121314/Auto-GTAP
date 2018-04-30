@@ -30,7 +30,9 @@ CleanWorkFiles()
 for simulation_name in config.simulation_list:
     CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
     SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
-                  config.sim_property(simulation_name, "input_directory"), config.sim_property(simulation_name, "shock")).create("Gas")
+                  config.sim_property(simulation_name, "input_directory"),
+                  config.sim_property(simulation_name, "shock"),
+                  config.sim_property(simulation_name, "model_type")).create("Gas")
     # AggregateModelData(simulation_name)
     # MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
     # SplitCommodities(simulation_name)
