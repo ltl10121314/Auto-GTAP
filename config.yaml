@@ -77,7 +77,7 @@ simulations:
     model_type: gtap-v7
     solution_method: j
     modify_har: false
-    shock: experiment
+    shock: pfactorworld
   GTAP-E-Gragg:
     input_directory: GTAP-V7
     model_file_name: gtap

@@ -105,5 +105,7 @@ class SimulationShocks(object):
             line_list_shocks = line_list_gdp_shocks \
                                + line_list_gas_shocks_actual \
                                + line_list_oil_shocks_actual
+        if self.shock_type == "pfactorworld":
+            line_list_shocks = ['Shock pfactwld = uniform 10;\n']
 
         return line_list_shocks

@@ -30,7 +30,7 @@ class CreateMAP(object):
             'qiw("Oil","USA")\n'
         ]
 
-        line_list_total = line_list_gas + line_list_oil
+        line_list_total = []
 
         # Create final file
         file_name = self.project_name + "_" + self.simulation_name
