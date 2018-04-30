@@ -33,10 +33,10 @@ for simulation_name in config.simulation_list:
                   config.sim_property(simulation_name, "input_directory"),
                   config.sim_property(simulation_name, "shock"),
                   config.sim_property(simulation_name, "model_type")).create("Gas")
-    # AggregateModelData(simulation_name)
-    # MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
-    # SplitCommodities(simulation_name)
-    # MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", "GTAPV7")
+    AggregateModelData(simulation_name)
+    MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
+    SplitCommodities(simulation_name)
+    MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", "GTAP-V7")
     if config.sim_property(simulation_name, "modify_har"):
         ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
                   config.yaml_file["parameter_modifications"][

@@ -27,9 +27,12 @@ class MoveDatabaseFiles(object):
 
         
         if self.source=="MSplitCom-Exe":
-            source_flows_file=""
-            source_parameters_file = ""
-            source_sets_file=""
+            source_folder = work_directory + "MSplitCom-Exe\\output"
+            source_flows_file = "{0}\\basedata.har".format(source_folder)
+            source_parameters_file = "{0}\\default.prm".format(source_folder)
+            source_sets_file = "{0}\\sets.har".format(source_folder)
+            source_tax_rates_file = "{0}\\taxrates.har".format(source_folder)
+            source_view_file = "{0}\\gtapview.har".format(source_folder)
         
         if self.destination=="MSplitCom-Exe":
             destination_folder = work_directory + "MSplitCom-Exe\\input"
@@ -43,6 +46,14 @@ class MoveDatabaseFiles(object):
             destination_flows_file = ""
             destination_parameters_file = ""
             destination_sets_file = ""
+
+        if self.destination == "GTAP-V7":
+            destination_folder = work_directory + "GTAP-V7"
+            destination_flows_file = "{0}\\basedata.har".format(destination_folder)
+            destination_parameters_file = "{0}\\default.prm".format(destination_folder)
+            destination_sets_file = "{0}\\sets.har".format(destination_folder)
+            destination_tax_rates_file = "{0}\\baserate.har".format(destination_folder)
+            destination_view_file = "{0}\\baseview.har".format(destination_folder)
 
         self.files = {
             "flows": [source_flows_file, destination_flows_file],
