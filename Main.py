@@ -33,10 +33,10 @@ for simulation_name in config.simulation_list:
                   config.sim_property(simulation_name, "input_directory"),
                   config.sim_property(simulation_name, "shock"),
                   config.sim_property(simulation_name, "model_type")).create("Gas")
-    AggregateModelData(simulation_name)
-    MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
-    SplitCommodities(simulation_name)
-    MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", "GTAP-V7")
+    # AggregateModelData(simulation_name)
+    # MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
+    # SplitCommodities(simulation_name)
+    # MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", "GTAP-V7")
     if config.sim_property(simulation_name, "modify_har"):
         ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
                   config.yaml_file["parameter_modifications"][
@@ -47,8 +47,6 @@ for simulation_name in config.simulation_list:
 for simulation_name in config.simulation_list:
     os.chdir("Work_Files\\{0}\\{1}".format(simulation_name,config.sim_property(simulation_name, "input_directory")))
     # Create GSS and GST files for shocks and model gemsim
-    CreateSTI(config.sim_property(simulation_name, "model_file_name"), "NA",
-              config.sim_property(simulation_name, "model_type"))
     subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "model_file_name")))
     subprocess.call("gemsim -cmf sim_{0}.cmf".format(simulation_name))
 
