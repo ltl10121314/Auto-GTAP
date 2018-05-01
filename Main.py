@@ -33,7 +33,7 @@ CleanWorkFiles()
 #Workspace preparations idiosyncratic to particular simulations
 for simulation_name in config.simulation_list:
     for part_num in config.num_parts(simulation_name):
-        part_type=
+        part_type=config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["type"]
         CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
         SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
                       config.sim_property(simulation_name, "input_directory"),
