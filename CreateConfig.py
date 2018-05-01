@@ -39,3 +39,6 @@ class CreateConfig(object):
         all_folders = [simulation_folder] + other_folders
 
         return all_folders
+
+    def num_parts(self, simulation_name:str):
+        return len(self.yaml_file["simulations"][simulation_name]["subparts"])

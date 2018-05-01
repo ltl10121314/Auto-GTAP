@@ -73,17 +73,24 @@ simulations:
     modify_har: false
     shock: pfactorworld
   GTAP-V6:
-    input_directory: GTAP-V6
-    model_file_name: gtap
-    other_input_directories:
-      - MSplitCom-Exe
-      - GTPAg2
-    model_type: gtap-v6
-    solution_method: j
-    modify_har: false
-    shock: pfactorworld
-    map:
-      - 'pxwreg("EU_28")'
+    subparts:
+      1:
+        type: GTPAg2
+        input_folder: GTPAg2
+        work_folder: GTPAg2
+      2:
+        type: MSplitCom-Exe
+        input_folder: MSplitCom-Exe
+        work_folder: MSplitCom-Exe
+      3:
+        type: GTAP-V6
+        input_folder: GTAP-V6
+        work_folder: GTAP-V6
+        model_file_name: gtap
+        solution_method: j
+        shock: pfactorworld
+        map:
+          - 'pxwreg("EU_28")'
   GTAP-E-Gragg:
     input_directory: GTAP-V7
     model_file_name: gtap

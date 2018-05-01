@@ -32,19 +32,21 @@ CleanWorkFiles()
 
 #Workspace preparations idiosyncratic to particular simulations
 for simulation_name in config.simulation_list:
-    CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
-    SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
-                  config.sim_property(simulation_name, "input_directory"),
-                  config.sim_property(simulation_name, "shock"),
-                  config.sim_property(simulation_name, "model_type"))
-    AggregateModelData(simulation_name)
-    MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
-    SplitCommodities(simulation_name)
-    MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", config.sim_property(simulation_name, "model_type"))
-    if config.sim_property(simulation_name, "modify_har"):
-        ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
-                  config.yaml_file["parameter_modifications"][
-                      config.sim_property(simulation_name, "parameter_modifications")])
+    for part_num in config.num_parts(simulation_name):
+        part_type=
+        CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
+        SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
+                      config.sim_property(simulation_name, "input_directory"),
+                      config.sim_property(simulation_name, "shock"),
+                      config.sim_property(simulation_name, "model_type"))
+        AggregateModelData(simulation_name)
+        MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
+        SplitCommodities(simulation_name)
+        MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", config.sim_property(simulation_name, "model_type"))
+        if config.sim_property(simulation_name, "modify_har"):
+            ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
+                      config.yaml_file["parameter_modifications"][
+                          config.sim_property(simulation_name, "parameter_modifications")])
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
