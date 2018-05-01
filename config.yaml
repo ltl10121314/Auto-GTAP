@@ -90,7 +90,7 @@ simulations:
     modify_har: false
     shock: pfactorworld
     map:
-      - 'pxwreg("EU_28")\n'
+      - 'pxwreg("EU_28")'
   GTAP-E-Gragg:
     input_directory: GTAP-V7
     model_file_name: gtap

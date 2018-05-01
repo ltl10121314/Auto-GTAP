@@ -13,7 +13,7 @@ class CreateMAP(object):
     def __init__(self, project_name: str, simulation_name: str, map_lines: list) -> None:
         self.project_name = project_name
         self.simulation_name = simulation_name
-        self.map_lines
+        self.map_lines=map_lines
 
         line_list_gas = [
             'pm("Gas","USA")\n',
