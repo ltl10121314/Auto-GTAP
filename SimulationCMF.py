@@ -20,13 +20,6 @@ class SimulationCMF(object):
         self.shock_type = shock_type
         self.model_type = model_type
 
-
-    def shockedsectors(self):
-        list_shocked_sectors = self.simulation_name
-        return list_shocked_sectors
-
-    def create(self, shocked_sector: str) -> None:
-
         cmf_file_name = self.project + "_" + self.simulation_name + ".cmf"
         # Create list of lines to be added to CMF file
 
@@ -171,6 +164,7 @@ class SimulationCMF(object):
                 "xSubset REG1 is subset of REG;\n",
                 "xSet XREG = REG - REG1;\n",
                 "!@ end of CMFSTART part\n",
+                "log file=yes;\n",
                 "aux files = GTAPv7;\n",
                 "file gtapSETS = sets.har;\n",
                 "file gtapDATA = basedata.har;\n",

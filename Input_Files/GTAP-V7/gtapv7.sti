@@ -1,0 +1,277 @@
+!   gtapv7.sti
+!   ==========
+!
+!   TABLO sti file for GTAPv7 model
+!
+bat         ! Run in batch.
+
+gtapv7      ! name of TABLO input file
+gtapv7      ! name of information file
+c           ! Perform condensation
+o           ! Omit one or more variables
+atall
+avaall
+tfe
+tfd
+tfm
+tgd
+tgm
+tpd
+tpm
+tid
+tim
+!condoptbegin
+!b                  
+!qes                 
+!E_peb              
+!b                  
+!pga                 
+!E_pga               
+
+b                   
+pfactreal           
+E_pfactreal         
+b                   
+CNTqpm              
+E_CNTqpm            
+b                   
+CNTqfd              !mustsub
+E_CNTqfd            
+b                   
+CNTqfr              
+E_CNTqfr            
+b                   
+CNTtechr            
+E_CNTtechr          
+b                   
+CNTqfm              !mustsub
+E_CNTqfm            
+b                   
+qfe                 
+E_qfe               
+b                   
+CNTalleffr          
+E_CNTalleffr        
+b                   
+CNTqim              
+E_CNTqim            
+b                   
+pfd                 !mustsub
+E_pfd               
+b                   
+qia                 
+E_qia               
+b                   
+qtmfsd              !mustsub
+E_qtmfsd            
+b                   
+qfd                 
+E_qfd               
+b                   
+CNTqfe              
+E_CNTqfe            
+b                   
+CNTqgr              
+E_CNTqgr            
+b                   
+c2_cr               
+E_c2_cr             
+b                   
+ptrans              !mustsub
+E_ptrans            
+!b                  
+!qpa                 
+!E_qpa               
+b                   
+atmfsd              !mustsub
+E_atmfsd            
+b                   
+afa                 !mustsub
+E_afa               
+b                   
+qca                 !mustsub
+E_qca               
+b                   
+qfa                 !mustsub
+E_qfa               
+b                   
+pca                 !mustsub
+E_pca               
+b                   
+qfm                 !mustsub
+E_qfm               
+b                   
+compvalad           
+E_compvalad         
+b                   
+qgd                 
+E_qgd               
+b                   
+pfa                 !mustsub
+E_pfa               
+b                   
+pes                 
+E_pes               
+b                   
+pgd                 
+E_pgd               
+b                   
+ps                  !mustsub
+E_ps                
+b                   
+CNTtech_ava         
+E_CNTtech_ava       
+b                   
+CNTendw             
+E_CNTendw           
+b                   
+qint                
+E_qint              
+b                   
+CNTqe               
+E_CNTqe             
+b                   
+pmds                !mustsub
+E_pmds              
+b                   
+pcif                !mustsub
+E_pcif              
+!b                   
+!del_ptax            !mustsub
+!E_del_ptax          
+b                   
+qpd                 
+E_qpd               
+b                   
+CNTqpd              
+E_CNTqpd            
+b                   
+CNTqid              
+E_CNTqid            
+b                   
+c3_cr               
+E_c3_cr             
+b                   
+CNTqms              !mustsub
+E_CNTqms            
+!b                  
+!ao                  
+!E_ao                
+b                   
+qim                 
+E_qim               
+b                   
+CNTtech_ao          
+E_CNTtech_ao        
+b                   
+CNTqca              !mustsub
+E_CNTqca            
+b                   
+qxs                 !mustsub
+E_qxs               
+b                   
+c1_cr               
+E_c1_cr             
+b                   
+CNTqfeer            
+E_CNTqfeer          
+b                   
+qmw                 
+E_qmw               
+b                   
+ppm                 
+E_ppm               
+!b                  
+!qga                 
+!E_qga               
+b                   
+qpm                 
+E_qpm               
+b                   
+CNTtech_ams         !mustsub
+E_CNTtech_ams       
+b                   
+CNTqgd              
+E_CNTqgd            
+b                   
+pfm                 !mustsub
+E_pfm               
+b                   
+qva                 
+E_qva               
+b                   
+pfob                !mustsub
+E_pfob              
+b                   
+pint                
+E_pint              
+b                   
+pfe                 
+E_pfe               
+b                   
+CNTalleffcr         
+E_CNTalleffcr       
+b                   
+CNTtech_af          !mustsub
+E_CNTtech_af        
+b                   
+CNTtech_aint        
+E_CNTtech_aint      
+b                   
+CNTtech_afe         
+E_CNTtech_afe       
+!b                  
+!vmwcif              
+!E_vmwcif            
+b                   
+afe                 
+E_afe               
+b                   
+qid                 
+E_qid               
+b                   
+pva                 
+E_pva               
+!b                  
+!qms                 
+!E_qms               
+b                   
+qgm                 
+E_qgm               
+!b                  
+!atpd                
+!E_atpd              
+b                   
+CNTqo               
+E_CNTqo             
+b                   
+CNTtech_atmfsd      !mustsub
+E_CNTtech_atmfsd    
+b                   
+CNTqgm              
+E_CNTqgm            
+b                   
+ppd                 
+E_ppd               
+b                   
+pgm                 
+E_pgm               
+b                   
+CNTqxs              !mustsub
+E_CNTqxs            
+b                   
+qpev                
+E_qpev              
+b                   
+aint                
+E_aint              
+!condoptend
+e           ! Exit condensation.
+a           ! Proceed to automatic code generation.
+pgs         ! Write a GEMSIM program.
+
+gtapv7      ! name of GEMSIM program file
+!
+!
+!   end of stored input
+!   -------------------
