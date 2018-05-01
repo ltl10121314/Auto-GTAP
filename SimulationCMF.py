@@ -118,6 +118,41 @@ class SimulationCMF(object):
 
             line_list_shocks = SimulationShocks(self.shock_type).create()
 
+        if self.model_type == "gtap-v6":
+            line_list_header = [
+                "CPU = yes; ! log show simulation times\n",
+                "NDS = no ; ! no displays\n",
+                "Extrapolation accuracy file = NO ; ! No XAC file\n",
+                "log file=yes;\n",
+                "aux files = GTAP;\n",
+                "file gtapSETS = sets.har;\n",
+                "file gtapDATA = basedata.har;\n",
+                "Updated file gtapDATA = <cmf>.har;\n",
+                "\n",
+                "file gtapPARM = default.prm;\n",
+                "\n",
+                "Verbal Description = none;\n",
+                "\n"]
+
+            # Create lines that define which variables are endogeneous and exogeneous
+            line_list_exogendo = [
+                "exogenous\n",
+                "          pop\n",
+                "          psaveslack pfactwld\n",
+                "          profitslack incomeslack endwslack\n",
+                "          cgdslack tradslack\n",
+                "          ams atm atf ats atd\n",
+                "          aosec aoreg avasec avareg\n",
+                "          afcom afsec afreg afecom afesec afereg\n",
+                "          aoall afall afeall\n",
+                "          au dppriv dpgov dpsave\n",
+                "          to tp tm tms tx txs\n",
+                "          qo(ENDW_COMM,REG) ;\n",
+                "Rest Endogenous ;"
+            ]
+
+            line_list_shocks = SimulationShocks(self.shock_type).create()
+
         if self.model_type == "gtap-v7":
             line_list_header = [
                 "! This Command file\n",

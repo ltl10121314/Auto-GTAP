@@ -30,7 +30,8 @@ class CreateMAP(object):
             'qiw("Oil","USA")\n'
         ]
 
-        line_list_total = ['pms("c_Crops","EU_28")\n']
+        # line_list_total = ['pms("c_Crops","EU_28")\n']
+        line_list_total = ['pxwreg("EU_28")\n']
 
         # Create final file
         file_name = self.project_name + "_" + self.simulation_name

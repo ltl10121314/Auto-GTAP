@@ -42,13 +42,8 @@ class MoveDatabaseFiles(object):
             destination_tax_rates_file = "{0}\\baserate.har".format(destination_folder)
             destination_view_file = "{0}\\baseview.har".format(destination_folder)
 
-        if self.destination == "GTAP-V6":
-            destination_flows_file = ""
-            destination_parameters_file = ""
-            destination_sets_file = ""
-
-        if self.destination == "GTAP-V7":
-            destination_folder = work_directory + "GTAP-V7"
+        if self.destination == "GTAP-V7" or self.destination == "GTAP-V6":
+            destination_folder = work_directory + self.destination
             destination_flows_file = "{0}\\basedata.har".format(destination_folder)
             destination_parameters_file = "{0}\\default.prm".format(destination_folder)
             destination_sets_file = "{0}\\sets.har".format(destination_folder)
