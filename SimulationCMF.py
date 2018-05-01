@@ -20,13 +20,6 @@ class SimulationCMF(object):
         self.shock_type = shock_type
         self.model_type = model_type
 
-
-    def shockedsectors(self):
-        list_shocked_sectors = self.simulation_name
-        return list_shocked_sectors
-
-    def create(self, shocked_sector: str) -> None:
-
         cmf_file_name = self.project + "_" + self.simulation_name + ".cmf"
         # Create list of lines to be added to CMF file
 
