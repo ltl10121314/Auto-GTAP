@@ -56,7 +56,7 @@ for simulation_name in config.simulation_list:
 
     # Export Results of Simulation
     # Export sl4 to csv via sltoht
-    CreateMAP("sim", simulation_name)
+    CreateMAP("sim", simulation_name, config.sim_property(simulation_name, "map"))
     CreateSTI("NA", simulation_name, "sltoht")
     subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
     os.chdir("..")

@@ -8,11 +8,12 @@ class CreateMAP(object):
     """Creates the MAP File for use in SLTOTH
     Map gives the list of variables to be exported from the sl4 to the csv results file"""
 
-    __slots__ = ["project_name", "simulation_name"]
+    __slots__ = ["project_name", "simulation_name", "map_lines"]
 
-    def __init__(self, project_name: str, simulation_name: str) -> None:
+    def __init__(self, project_name: str, simulation_name: str, map_lines: list) -> None:
         self.project_name = project_name
         self.simulation_name = simulation_name
+        self.map_lines
 
         line_list_gas = [
             'pm("Gas","USA")\n',
@@ -31,7 +32,8 @@ class CreateMAP(object):
         ]
 
         # line_list_total = ['pms("c_Crops","EU_28")\n']
-        line_list_total = ['pxwreg("EU_28")\n']
+        # line_list_total = ['pxwreg("EU_28")\n']
+        line_list_total = self.map_lines
 
         # Create final file
         file_name = self.project_name + "_" + self.simulation_name
