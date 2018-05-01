@@ -62,13 +62,6 @@ simulations:
     solution_method: g
     modify_har: false
     shock: experiment
-  GTAP-V6:
-    input_directory: GTAP-V6
-    model_file_name: gtap
-    model_type: gtap-v6
-    solution_method: j
-    modify_har: false
-    shock: experiment
   GTAP-V7:
     input_directory: GTAP-V7
     model_file_name: gtap
