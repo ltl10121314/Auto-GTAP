@@ -1,7 +1,7 @@
 #__author__ = "Andre Barbe"
 #__project__ = "Auto-GTAP"
 #__created__ = "2018-3-12"
-#__altered__ = "2018-4-13"
+#__altered__ = "2018-5-1"
 
 # Simulations
 simulations_to_run:
@@ -9,8 +9,8 @@ simulations_to_run:
 #  - GTAP-E-Gragg
 #  - GTAP-E-Custom-G
 #  - GTAP-E-Johan
-#    - GTAP-V7
-    - GTAP-V6
+#  - GTAP-V7
+   - GTAP-V6
 parameter_modifications:
   low-elasticity:
       -
