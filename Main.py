@@ -79,7 +79,7 @@ for simulation_name in config.simulation_list:
 
 # Import simulation results into a single database
 # Copy results to output directory
-databaseSL4 = ImportCSV_SL4(config.model_csv_paths).create()
+databaseSL4 = ImportCSV_SL4(config.csv_paths()).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
 ExportDictionary("Results.csv", databaseMod)
 
