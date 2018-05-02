@@ -38,7 +38,7 @@ for simulation_name in config.simulation_list:
         part_input_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["input_folder"]
         part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["work_folder"]
 
-        CopyInputFiles(simulation_name, part_input_folder, part_work_folder)
+        CopyInputFiles(simulation_name, part_input_folder, part_work_folder).copy()
 
         if part_num != 1:
             prev_part_num = part_num - 1
@@ -48,7 +48,7 @@ for simulation_name in config.simulation_list:
             MoveDatabaseFiles(simulation_name, prev_part_type, part_type)
 
         if part_type == "GTPAg2":
-            AggregateModelData(simulation_name)
+            AggregateModelData(simulation_name, part_work_folder)
         if part_type == "MSplitCom-Exe":
             SplitCommodities(simulation_name)
         if part_type == "modify_har":
