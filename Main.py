@@ -56,27 +56,27 @@ for simulation_name in config.simulation_list:
                       config.yaml_file["parameter_modifications"][
                           config.sim_property(simulation_name, "parameter_modifications")])
         if part_type == "GTAP-V6":
-            SimulationCMF("sim", simulation_name,
-                          "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
-                          config.sim_property(simulation_name, "input_directory"),
-                          config.sim_property(simulation_name, "shock"),
-                          config.sim_property(simulation_name, "model_type"))
+            part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
+            part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+                "solution_method"]
+            SimulationCMF("sim", simulation_name, "default_{0}".format(part_solution_method), part_work_folder,
+                          part_shock, part_type)
+            # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
+            os.chdir(
+                "Work_Files\\{0}\\{1}".format(simulation_name, part_work_folder))
+            # Create GSS and GST files for shocks and model gemsim
+            model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
+            subprocess.call("tablo -sti {0}.sti".format(model_file_name))
+            subprocess.call("gemsim -cmf sim_{0}.cmf".format(simulation_name))
 
-# Run Simulation
-# Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
-for simulation_name in config.simulation_list:
-    os.chdir("Work_Files\\{0}\\{1}".format(simulation_name,config.sim_property(simulation_name, "input_directory")))
-    # Create GSS and GST files for shocks and model gemsim
-    subprocess.call("tablo -sti {0}.sti".format(config.sim_property(simulation_name, "model_file_name")))
-    subprocess.call("gemsim -cmf sim_{0}.cmf".format(simulation_name))
-
-    # Export Results of Simulation
-    # Export sl4 to csv via sltoht
-    CreateMAP("sim", simulation_name, config.sim_property(simulation_name, "map"))
-    CreateSTI("NA", simulation_name, "sltoht")
-    subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
-    os.chdir("..")
-    os.chdir("..")
+            # Export Results of Simulation
+            # Export sl4 to csv via sltoht
+            map = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["map"]
+            CreateMAP("sim", simulation_name, map)
+            CreateSTI("NA", simulation_name, "sltoht")
+            subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
+            os.chdir("..")
+            os.chdir("..")
 
 # Import simulation results into a single database
 # Copy results to output directory
