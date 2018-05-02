@@ -85,7 +85,14 @@ simulations:
       3:
         type: GTAP-V6
         input_folder: GTAP-V6
-        work_folder: GTAP-V6
+        work_folder: gtap1
+        model_file_name: gtap
+        solution_method: j
+        shock: pop5
+      4:
+        type: GTAP-V6
+        input_folder: GTAP-V6
+        work_folder: gtap2
         model_file_name: gtap
         solution_method: j
         shock: pfactorworld
