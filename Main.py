@@ -32,7 +32,7 @@ CleanWorkFiles()
 
 #Workspace preparations idiosyncratic to particular simulations
 for simulation_name in config.simulation_list:
-    for part_num in range(1, config.num_parts(simulation_name)):
+    for part_num in range(1, config.num_parts(simulation_name) + 1):
 
         part_type=config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["type"]
         part_input_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["input_folder"]
