@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
-__project__ = "GTAP-E Validation"
+__project__ = "Auto-GTAP"
 __created__ = "2018-4-18"
-__altered__ = "2018-4-18"
+__altered__ = "2018-5-2"
 
 
 class SimulationShocks(object):
@@ -105,6 +105,10 @@ class SimulationShocks(object):
             line_list_shocks = line_list_gdp_shocks \
                                + line_list_gas_shocks_actual \
                                + line_list_oil_shocks_actual
+
+        if self.shock_type == "pop5":
+            line_list_shocks = ['Shock pop(REG) = uniform 5;\n']
+
         if self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;\n']
 
