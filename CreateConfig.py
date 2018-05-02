@@ -17,14 +17,6 @@ class CreateConfig(object):
 
         self.simulation_list = self.yaml_file["simulations_to_run"]
 
-        # self.input_directory_list = []
-        # self.model_csv_paths = []
-        # for simulation in self.simulation_list:
-        #     self.input_directory_list.append(self.sim_property(simulation, "input_directory"))
-        #     model_csv_path = simulation + "//" + self.sim_property(simulation,
-        #                                                            "input_directory") + "//sim_" + simulation + ".csv"
-        #     self.model_csv_paths.append(model_csv_path)
-
     def sim_property(self, simulation_name: str, property_name: str):
         return self.yaml_file["simulations"][simulation_name][property_name]
 
@@ -42,3 +34,12 @@ class CreateConfig(object):
 
     def num_parts(self, simulation_name:str):
         return len(self.yaml_file["simulations"][simulation_name]["subparts"])
+
+    def csv_paths(self):
+        model_csv_paths = []
+        for simulation in self.simulation_list:
+            final_part = self.num_parts(simulation)
+            final_part_work_directory = self.yaml_file["simulations"][simulation]["subparts"][final_part]["work_folder"]
+            model_csv_path = simulation + "//" + final_part_work_directory + "//sim_" + simulation + ".csv"
+            model_csv_paths.append(model_csv_path)
+        return model_csv_paths
