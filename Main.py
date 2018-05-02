@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-4-30"
+__altered__ = "2018-5-2"
 
 # Import methods
 # Import External Methods
@@ -32,21 +32,35 @@ CleanWorkFiles()
 
 #Workspace preparations idiosyncratic to particular simulations
 for simulation_name in config.simulation_list:
-    for part_num in config.num_parts(simulation_name):
+    for part_num in range(1, config.num_parts(simulation_name)):
+
         part_type=config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["type"]
-        CopyInputFiles(simulation_name,config.subfolders_to_copy(simulation_name))
-        SimulationCMF("sim", simulation_name, "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
-                      config.sim_property(simulation_name, "input_directory"),
-                      config.sim_property(simulation_name, "shock"),
-                      config.sim_property(simulation_name, "model_type"))
-        AggregateModelData(simulation_name)
-        MoveDatabaseFiles(simulation_name, "GTPAg2", "MSplitCom-Exe")
-        SplitCommodities(simulation_name)
-        MoveDatabaseFiles(simulation_name, "MSplitCom-Exe", config.sim_property(simulation_name, "model_type"))
-        if config.sim_property(simulation_name, "modify_har"):
+        part_input_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["input_folder"]
+        part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["work_folder"]
+
+        CopyInputFiles(simulation_name, part_input_folder, part_work_folder)
+
+        if part_num != 1:
+            prev_part_num = part_num - 1
+            prev_part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num][
+                "work_folder"]
+            prev_part_type = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num]["type"]
+            MoveDatabaseFiles(simulation_name, prev_part_type, part_type)
+
+        if part_type == "GTPAg2":
+            AggregateModelData(simulation_name)
+        if part_type == "MSplitCom-Exe":
+            SplitCommodities(simulation_name)
+        if part_type == "modify_har":
             ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
                       config.yaml_file["parameter_modifications"][
                           config.sim_property(simulation_name, "parameter_modifications")])
+        if part_type == "GTAP-V6":
+            SimulationCMF("sim", simulation_name,
+                          "default_{0}".format(config.sim_property(simulation_name, "solution_method")),
+                          config.sim_property(simulation_name, "input_directory"),
+                          config.sim_property(simulation_name, "shock"),
+                          config.sim_property(simulation_name, "model_type"))
 
 # Run Simulation
 # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
