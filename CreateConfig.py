@@ -17,13 +17,13 @@ class CreateConfig(object):
 
         self.simulation_list = self.yaml_file["simulations_to_run"]
 
-        self.input_directory_list = []
-        self.model_csv_paths = []
-        for simulation in self.simulation_list:
-            self.input_directory_list.append(self.sim_property(simulation, "input_directory"))
-            model_csv_path = simulation + "//" + self.sim_property(simulation,
-                                                                   "input_directory") + "//sim_" + simulation + ".csv"
-            self.model_csv_paths.append(model_csv_path)
+        # self.input_directory_list = []
+        # self.model_csv_paths = []
+        # for simulation in self.simulation_list:
+        #     self.input_directory_list.append(self.sim_property(simulation, "input_directory"))
+        #     model_csv_path = simulation + "//" + self.sim_property(simulation,
+        #                                                            "input_directory") + "//sim_" + simulation + ".csv"
+        #     self.model_csv_paths.append(model_csv_path)
 
     def sim_property(self, simulation_name: str, property_name: str):
         return self.yaml_file["simulations"][simulation_name][property_name]
