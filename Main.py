@@ -45,7 +45,7 @@ for simulation_name in config.simulation_list:
             prev_part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num][
                 "work_folder"]
             prev_part_type = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num]["type"]
-            MoveDatabaseFiles(simulation_name, prev_part_type, part_type)
+            MoveDatabaseFiles(simulation_name ,prev_part_type, part_type,prev_part_work_folder,part_work_folder)
 
         if part_type == "GTPAg2":
             AggregateModelData(simulation_name, part_work_folder)

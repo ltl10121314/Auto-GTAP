@@ -89,6 +89,8 @@ simulations:
         model_file_name: gtap
         solution_method: j
         shock: pop5
+        map:
+          - 'pxwreg("EU_28")'
       4:
         type: GTAP-V6
         input_folder: GTAP-V6
