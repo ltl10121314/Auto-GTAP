@@ -24,14 +24,14 @@ class SimulationCMF(object):
         # Create list of lines to be added to CMF file
 
         # Create lines for solution method
-        if self.solution_method == "default_j":
+        if self.solution_method == "j":
             line_list_method = [
                 "Method = Johansen;\n",
                 "Steps = 1;\n",
                 "automatic accuracy = no;\n",
                 "subintervals = 1;\n",
                 "\n"]
-        elif self.solution_method == "default_g":
+        elif self.solution_method == "g":
             line_list_method = [
                 "Method = Gragg; Steps = 2 4 6; subintervals = 10;\n",
                 "automatic accuracy = yes ; accuracy figures = 4; accuracy percent = 99;\n",
@@ -111,7 +111,7 @@ class SimulationCMF(object):
 
             line_list_shocks = SimulationShocks(self.shock_type).create()
 
-        if self.model_type == "gtap-v6":
+        if self.model_type == "GTAP-V6":
             line_list_header = [
                 "CPU = yes; ! log show simulation times\n",
                 "NDS = no ; ! no displays\n",

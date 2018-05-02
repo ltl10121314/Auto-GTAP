@@ -59,8 +59,7 @@ for simulation_name in config.simulation_list:
             part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
             part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "solution_method"]
-            SimulationCMF("sim", simulation_name, "default_{0}".format(part_solution_method), part_work_folder,
-                          part_shock, part_type)
+            SimulationCMF("sim", simulation_name, part_solution_method, part_work_folder, part_shock, part_type)
             # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
             os.chdir(
                 "Work_Files\\{0}\\{1}".format(simulation_name, part_work_folder))
