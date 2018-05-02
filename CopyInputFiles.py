@@ -10,13 +10,12 @@ from CreateConfig import CreateConfig
 class CopyInputFiles(object):
     """Copies files from the input files directory to the work files directory"""
 
-    __slots__ = ["simulation_name","subfolders_to_copy"]
+    __slots__ = ["simulation_name", "input_folder", "work_folder"]
 
-    def __init__(self, simulation_name: str, subfolders_to_copy: list) -> None:
+    def __init__(self, simulation_name: str, input_folder: str, work_folder: str) -> None:
         self.simulation_name = simulation_name
-        self.subfolders_to_copy=subfolders_to_copy
+        self.input_folder = input_folder
+        self.work_folder = work_folder
 
-        for input_folder in subfolders_to_copy:
-            # copy files with file_name from Input_Files to Work_Files in folder simulation_name
-            shutil.copytree('Input_Files\\{0}'.format(input_folder),
-                            'Work_Files\\{0}\\{1}'.format(self.simulation_name, input_folder))
+        shutil.copytree('Input_Files\\{0}'.format(input_folder),
+                        'Work_Files\\{0}\\{1}'.format(self.simulation_name, input_folder))
