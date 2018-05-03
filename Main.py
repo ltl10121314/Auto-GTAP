@@ -76,9 +76,11 @@ for simulation_name in config.simulation_list:
             subprocess.call("sltoht -sti sim_{0}_sltoht.sti".format(simulation_name))
             os.chdir("..")
             os.chdir("..")
+            os.chdir("..")
 
 # Import simulation results into a single database
 # Copy results to output directory
+os.chdir("Work_Files")
 databaseSL4 = ImportCSV_SL4(config.csv_paths()).create()
 databaseMod = ModifyDatabase(databaseSL4).create()
 ExportDictionary("Results.csv", databaseMod)
