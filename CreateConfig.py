@@ -40,6 +40,6 @@ class CreateConfig(object):
         for simulation in self.simulation_list:
             final_part = self.num_parts(simulation)
             final_part_work_directory = self.yaml_file["simulations"][simulation]["subparts"][final_part]["work_folder"]
-            model_csv_path = simulation + "//" + final_part_work_directory + "//sim_" + simulation + ".csv"
+            model_csv_path = simulation + "//" + final_part_work_directory + "//gtap.csv"
             model_csv_paths.append(model_csv_path)
         return model_csv_paths

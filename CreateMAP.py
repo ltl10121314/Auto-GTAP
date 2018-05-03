@@ -16,6 +16,5 @@ class CreateMAP(object):
         self.map_lines = map_lines
 
         # Create final file
-        file_name = self.project_name + "_" + self.simulation_name
-        with open("{0}.map".format(file_name), "w+") as writer:  # Create the empty file
+        with open("gtap.map", "w+") as writer:  # Create the empty file
             writer.writelines(self.map_lines)  # write the line list to the file

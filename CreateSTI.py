@@ -25,19 +25,19 @@ class CreateSTI(object):
                 "bat         		! Run in batch. \n",
                 "log		        ! Start a log file \n",
                 "b		        	! Output to both terminal and log file \n",
-                "sim_{0}_sltoth_sti.log	    	! Name of log file\n".format(self.simulation_name),
+                "{0}_sltoth.log	    	! Name of log file\n".format(self.input_file_name),
                 "ses                ! Output to spreadsheet with element labels \n",
                 ",                  ! Character to use for data separation \n",
                 "shl                ! Show level results, if available \n",
                 "                   ! Done selecting general options \n",
-                "sim_{0}.sl4            ! Location of sl4 file to convert to csv \n".format(self.simulation_name),
+                "{0}.sl4            ! Location of sl4 file to convert to csv \n".format(self.input_file_name),
                 "c                  ! Want both levels and cumulative from solution file \n",
                 "y                  ! Use file to choose which variables and components to ouptut \n",
-                "sim_{0}.map            ! Name of file to use choosing which variables and components to output \n".format(
-                    self.simulation_name),
-                "sim_{0}.csv            ! Name of file to output to".format(self.simulation_name)
+                "{0}.map            ! Name of file to use choosing which variables and components to output \n".format(
+                    self.input_file_name),
+                "{0}.csv            ! Name of file to output to".format(self.input_file_name)
             ]
-            output_file_name = "sim_{0}_sltoht".format(self.simulation_name)
+            output_file_name = "{0}_sltoht".format(self.input_file_name)
 
         # Create final file
         with open("{0}.sti".format(output_file_name), "w+") as writer:  # Create the empty file

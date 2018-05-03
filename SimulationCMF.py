@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-13"
-__altered__ = "2018-5-1"
+__altered__ = "2018-5-3"
 
 from SimulationShocks import SimulationShocks
 
@@ -10,18 +10,19 @@ class SimulationCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the policy simulation (as opposed to the shock
     calculation)"""
 
-    __slots__ = ["project", "simulation_name", "solution_method", "model_folder", "shock_type", "model_type"]
+    __slots__ = ["simulation_name", "solution_method", "model_folder", "shock_type", "model_type"]
 
-    def __init__(self, project: str, simulation_name: str, solution_method: str, model_folder: str,
-                 shock_type: str, model_type: str) -> None:
-        self.project = project
-        self.simulation_name = simulation_name
+    def __init__(self, simulation_name: str, solution_method: str, model_folder: str, shock_type: str,
+                 model_type: str) -> None:
         self.solution_method = solution_method
         self.model_folder = model_folder
         self.shock_type = shock_type
         self.model_type = model_type
+        self.simulation_name = simulation_name
 
-        cmf_file_name = self.project + "_" + self.simulation_name + ".cmf"
+        if self.model_type == "GTAP-V6":
+            cmf_file_name = "gtap.cmf"
+
         # Create list of lines to be added to CMF file
 
         # Create lines for solution method
@@ -53,11 +54,11 @@ class SimulationCMF(object):
                 "aux files = GTAP;\n",
                 "file gtapSETS = sets.har;\n",
                 "file gtapDATA = basedata.har;\n",
-                "Updated file gtapDATA = <cmf>.har;\n",
+                "Updated file gtapDATA = gtap.har;\n",
                 "\n",
                 "file gtapPARM = default.prm;\n",
                 "\n",
-                "Verbal Description = none;\n",
+                "Verbal Description = {0};\n".format(shock_type),
                 "\n"]
 
             # Create lines that define which variables are endogeneous and exogeneous
@@ -121,7 +122,7 @@ class SimulationCMF(object):
                 "aux files = GTAP;\n",
                 "file gtapSETS = sets.har;\n",
                 "file gtapDATA = basedata.har;\n",
-                "Updated file gtapDATA = <cmf>.har;\n",
+                "Updated file gtapDATA = gtap.har;\n",
                 "\n",
                 "file gtapPARM = default.prm;\n",
                 "\n",
