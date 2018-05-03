@@ -1,0 +1,37 @@
+#__author__ = "Andre Barbe"
+#__project__ = "Auto-GTAP"
+#__created__ = "2018-3-12"
+#__altered__ = "2018-5-1"
+
+# Simulations
+simulations_to_run:
+   - GTAP-V6
+simulations:
+  GTAP-V6:
+    subparts:
+      1:
+        type: GTPAg2
+        input_folder: GTPAg2
+        work_folder: GTPAg2
+      2:
+        type: MSplitCom-Exe
+        input_folder: MSplitCom-Exe
+        work_folder: MSplitCom-Exe
+      3:
+        type: GTAP-V6
+        input_folder: GTAP-V6
+        work_folder: gtap1
+        model_file_name: gtap
+        solution_method: j
+        shock: pop5
+        map:
+          - 'pxwreg("EU_28")'
+      4:
+        type: GTAP-V6
+        input_folder: GTAP-V6
+        work_folder: gtap2
+        model_file_name: gtap
+        solution_method: j
+        shock: pfactorworld
+        map:
+          - 'pxwreg("EU_28")'

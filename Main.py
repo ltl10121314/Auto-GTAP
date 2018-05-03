@@ -24,7 +24,7 @@ from AggregateModelData import AggregateModelData
 # Call Methods
 
 # Load config files that will control program
-config = CreateConfig("config.yaml")
+config = CreateConfig("config-gtap.yaml")
 # Delete working files directory
 CleanWorkFiles()
 
