@@ -32,6 +32,17 @@ simulations:
     solution_method: j
     modify_har: false
     shock: experiment
+    map:
+      - 'pm("Gas","USA")\n'
+      - 'aoall("Gas","USA")\n'
+      - 'qo("Gas","USA")\n'
+      - 'qxw("Gas","USA")\n'
+      - 'qiw("Gas","USA")\n'
+      - 'pm("Oil","USA")\n'
+      - 'aoall("Oil","USA")\n'
+      - 'qo("Oil","USA")\n'
+      - 'qxw("Oil","USA")\n'
+      - 'qiw("Oil","USA")'
   GTAP-E-Custom-J:
     input_directory: GTAP-E-Custom
     model_file_name: gtap
