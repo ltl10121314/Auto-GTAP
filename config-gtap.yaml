@@ -23,7 +23,7 @@ simulations:
         work_folder: gtap1
         model_file_name: gtap
         solution_method: j
-        shock: pop5
+        shock: gdp5
         map:
           - 'pxwreg("EU_28")'
       4:
