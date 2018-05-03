@@ -27,12 +27,21 @@ simulations:
         map:
           - 'pxwreg("EU_28")'
       4:
+        type: GTAP-V6
+        input_folder: GTAP-V6
+        work_folder: alter
+        model_file_name: gtap
+        solution_method: j
+        shock: alterto5
+        map:
+          - 'pxwreg("EU_28")'
+      5:
         type: GTPVEW-V6
         input_folder: GTPVEW-V6
         work_folder: gtpvew
         model_file_name: gtpvew
         cmf_file_name: GTAPVu2
-      5:
+      6:
         type: GTAP-V6
         input_folder: GTAP-V6
         work_folder: gtap2

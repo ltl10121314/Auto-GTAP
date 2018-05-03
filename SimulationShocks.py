@@ -22,6 +22,15 @@ class SimulationShocks(object):
                 'Shock qgdp(REG) = uniform 5;\n'
             ]
 
+        if self.shock_type == "alterto5":
+            line_list_shocks = [
+                "xSet REG1 (RestofWorld);\n",
+                "xSubset REG1 is subset of REG;\n",
+                "xSet XREG = REG - REG1;\n",
+                'swap dtbalr(XREG) = cgdslack(XREG);\n'
+                'Shock to(NSAV_COMM,REG) = uniform 5;\n'
+            ]
+
         if self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;\n']
 
