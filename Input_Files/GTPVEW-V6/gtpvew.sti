@@ -1,0 +1,25 @@
+!   gtpvew.sti
+!   ========
+!
+!   TABLO sti file for GTPVEW
+!
+bat         ! Run in batch.
+
+gtpvew        ! name of TABLO input file
+gtpvew        ! name of information file
+a           ! Proceed to automatic code generation.
+pgs         ! Write a GEMPACK program.
+
+gtpvew        ! name of GEMPACK program file
+!
+!
+!   end of stored input
+!   -------------------
+
+
+
+
+
+
+
+
