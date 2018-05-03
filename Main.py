@@ -4,9 +4,7 @@ __created__ = "2018-3-9"
 __altered__ = "2018-5-2"
 
 # Import methods
-# Import External Methods
-import os, subprocess
-
+import os, subprocess  # External methods
 # Import My Methods
 from CleanWorkFiles import CleanWorkFiles
 from CopyInputFiles import CopyInputFiles
@@ -30,7 +28,8 @@ config = CreateConfig("config.yaml")
 # Delete working files directory
 CleanWorkFiles()
 
-# For each simulation, perform the different subparts (data aggregation, splitting, experiment simulation, etc) that make up that simulation
+# For each simulation, perform the different subparts (data aggregation, splitting,
+# experiment simulation, etc) that make up that simulation
 for simulation_name in config.simulation_list:
     # Add one to final range so that python will run the last part too
     for part_num in range(1, config.num_parts(simulation_name) + 1):
