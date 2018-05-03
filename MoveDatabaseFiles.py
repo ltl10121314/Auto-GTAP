@@ -54,14 +54,14 @@ class MoveDatabaseFiles(object):
             destination_sets_file = "{0}sets.har".format(destination_folder)
             destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
             destination_view_file = "{0}baseview.har".format(destination_folder)
-    
+
         if self.source_type == "GTAP-V7" or self.source_type == "GTAP-V6":
             source_folder = source_part_folder
             source_flows_file = "{0}sim_GTAP-V6.har".format(source_folder)
             source_parameters_file = "{0}default.prm".format(source_folder)
             source_sets_file = "{0}sets.har".format(source_folder)
-            source_tax_rates_file = "{0}baserate.har".format(source_folder) #needs to be updated
-            source_view_file = "{0}baseview.har".format(source_folder) #needs to be updated
+            source_tax_rates_file = "{0}baserate.har".format(source_folder)  # needs to be updated
+            source_view_file = "{0}baseview.har".format(source_folder)  # needs to be updated
 
         self.files = {
             "flows": [source_flows_file, destination_flows_file],

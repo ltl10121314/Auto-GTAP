@@ -5,6 +5,7 @@ __altered__ = "2018-5-1"
 
 from SimulationShocks import SimulationShocks
 
+
 class SimulationCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the policy simulation (as opposed to the shock
     calculation)"""
@@ -45,19 +46,19 @@ class SimulationCMF(object):
         # Create lines for header that gives file locations
         if self.model_type == "gtap-e":
             line_list_header = [
-            "CPU = yes; ! log show simulation times\n",
-            "NDS = no ; ! no displays\n",
-            "Extrapolation accuracy file = NO ; ! No XAC file\n",
-            "log file=yes;\n",
-            "aux files = GTAP;\n",
-            "file gtapSETS = sets.har;\n",
-            "file gtapDATA = basedata.har;\n",
-            "Updated file gtapDATA = <cmf>.har;\n",
-            "\n",
-            "file gtapPARM = default.prm;\n",
-            "\n",
-            "Verbal Description = none;\n",
-            "\n"]
+                "CPU = yes; ! log show simulation times\n",
+                "NDS = no ; ! no displays\n",
+                "Extrapolation accuracy file = NO ; ! No XAC file\n",
+                "log file=yes;\n",
+                "aux files = GTAP;\n",
+                "file gtapSETS = sets.har;\n",
+                "file gtapDATA = basedata.har;\n",
+                "Updated file gtapDATA = <cmf>.har;\n",
+                "\n",
+                "file gtapPARM = default.prm;\n",
+                "\n",
+                "Verbal Description = none;\n",
+                "\n"]
 
             # Create lines that define which variables are endogeneous and exogeneous
             line_list_exogendo = [
@@ -203,6 +204,6 @@ class SimulationCMF(object):
                           + line_list_shocks
 
         # Create final file
-        cmf_file_name_with_path = "Work_Files\\" +self.simulation_name+"\\"+ self.model_folder + "\\" + cmf_file_name
+        cmf_file_name_with_path = "Work_Files\\" + self.simulation_name + "\\" + self.model_folder + "\\" + cmf_file_name
         with open(cmf_file_name_with_path, "w+") as writer:  # Create the empty file
             writer.writelines(line_list_total)  # write the line list to the file

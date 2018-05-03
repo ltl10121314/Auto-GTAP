@@ -32,7 +32,7 @@ class CreateConfig(object):
 
         return all_folders
 
-    def num_parts(self, simulation_name:str):
+    def num_parts(self, simulation_name: str):
         return len(self.yaml_file["simulations"][simulation_name]["subparts"])
 
     def csv_paths(self):

@@ -30,11 +30,11 @@ config = CreateConfig("config.yaml")
 # Setup files for running GEMSIM
 CleanWorkFiles()
 
-#Workspace preparations idiosyncratic to particular simulations
+# Workspace preparations idiosyncratic to particular simulations
 for simulation_name in config.simulation_list:
     for part_num in range(1, config.num_parts(simulation_name) + 1):
 
-        part_type=config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["type"]
+        part_type = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["type"]
         part_input_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["input_folder"]
         part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["work_folder"]
 
@@ -45,7 +45,7 @@ for simulation_name in config.simulation_list:
             prev_part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num][
                 "work_folder"]
             prev_part_type = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num]["type"]
-            MoveDatabaseFiles(simulation_name ,prev_part_type, part_type,prev_part_work_folder,part_work_folder)
+            MoveDatabaseFiles(simulation_name, prev_part_type, part_type, prev_part_work_folder, part_work_folder)
 
         if part_type == "GTPAg2":
             AggregateModelData(simulation_name, part_work_folder)

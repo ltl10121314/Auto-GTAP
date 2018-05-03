@@ -12,10 +12,10 @@ class ModifyHAR(object):
     __slots__ = ["directory", "input_file", "output_file", "sti_file", "modifications"]
 
     def __init__(self, directory: str, input_file: str, output_file: str, modifications: list) -> None:
-        self.directory= directory
-        self.input_file = directory+"\\"+ input_file
-        self.output_file = directory+"\\"+output_file
-        self.sti_file=directory+"\\cmd_modify_har.sti"
+        self.directory = directory
+        self.input_file = directory + "\\" + input_file
+        self.output_file = directory + "\\" + output_file
+        self.sti_file = directory + "\\cmd_modify_har.sti"
         self.modifications = modifications
         self.CreateSTI()
         subprocess.call("modhar -sti {0}".format(self.sti_file))
