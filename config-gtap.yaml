@@ -27,6 +27,10 @@ simulations:
         map:
           - 'pxwreg("EU_28")'
       4:
+        type: GTAP-Adjust
+        input_folder: GTAP-Adjust
+        work_folder: adjust
+      5:
         type: GTAP-V6
         input_folder: GTAP-V6
         work_folder: gtap1
@@ -35,13 +39,13 @@ simulations:
         shock: gdp5
         map:
           - 'pxwreg("EU_28")'
-      5:
+      6:
         type: GTPVEW-V6
         input_folder: GTPVEW-V6
         work_folder: gtpvew
         model_file_name: gtpvew
         cmf_file_name: GTAPVu2
-      6:
+      7:
         type: GTAP-V6
         input_folder: GTAP-V6
         work_folder: gtap2

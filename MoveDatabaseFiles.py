@@ -31,7 +31,7 @@ class MoveDatabaseFiles(object):
             source_tax_rates_file = "{0}baserate.har".format(flexagg_output_folder)
             source_view_file = "{0}baseview.har".format(flexagg_output_folder)
 
-        if self.source_type == "MSplitCom-Exe":
+        if self.source_type == "MSplitCom-Exe" or self.source_type == "GTAP-Adjust":
             source_folder = source_part_folder + "output\\"
             source_flows_file = "{0}basedata.har".format(source_folder)
             source_parameters_file = "{0}default.prm".format(source_folder)
@@ -39,7 +39,7 @@ class MoveDatabaseFiles(object):
             source_tax_rates_file = "{0}taxrates.har".format(source_folder)
             source_view_file = "{0}gtapview.har".format(source_folder)
 
-        if self.destination_type == "MSplitCom-Exe":
+        if self.destination_type == "MSplitCom-Exe" or self.destination_type == "GTAP-Adjust":
             destination_folder = destination_part_folder + "input\\"
             destination_flows_file = "{0}basedata.har".format(destination_folder)
             destination_parameters_file = "{0}default.prm".format(destination_folder)
@@ -47,7 +47,7 @@ class MoveDatabaseFiles(object):
             destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
             destination_view_file = "{0}baseview.har".format(destination_folder)
 
-        if self.destination_type == "GTAP-V7" or self.destination_type == "GTAP-V6" or self.destination_type == "Shocks-V6":
+        if self.destination_type == "GTAP-V7" or self.destination_type == "GTAP-V6":
             destination_folder = destination_part_folder
             destination_flows_file = "{0}basedata.har".format(destination_folder)
             destination_parameters_file = "{0}default.prm".format(destination_folder)

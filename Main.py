@@ -20,6 +20,7 @@ from ModifyHAR import ModifyHAR
 from MoveDatabaseFiles import MoveDatabaseFiles
 from SplitCommodities import SplitCommodities
 from AggregateModelData import AggregateModelData
+from GTAPAdjustCMF import GTAPAdjustCMF
 
 # Call Methods
 
@@ -73,6 +74,18 @@ for simulation_name in config.simulation_list:
             # Create GSS and GST files for shocks and model gemsim
             subprocess.call("tablo -sti {0}.sti".format(model_file_name))
             subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name))
+            os.chdir("..")
+            os.chdir("..")
+            os.chdir("..")
+
+        if part_type == "GTAP-Adjust":
+            part_shock = "placeholder"
+
+            GTAPAdjustCMF(simulation_name, part_solution_method, part_work_folder, part_shock)
+
+            # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
+            os.chdir("Work_Files\\{0}\\{1}".format(simulation_name, part_work_folder))
+            subprocess.call("adjust.bat")
             os.chdir("..")
             os.chdir("..")
             os.chdir("..")

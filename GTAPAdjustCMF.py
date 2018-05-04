@@ -9,14 +9,12 @@ from SimulationShocks import SimulationShocks
 class GTAPAdjustCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the GTAP adjust (as opposed to the policy simulation)"""
 
-    __slots__ = ["simulation_name", "solution_method", "model_folder", "shock_type", "model_type"]
+    __slots__ = ["simulation_name", "solution_method", "model_folder", "shock_type"]
 
-    def __init__(self, simulation_name: str, solution_method: str, model_folder: str, shock_type: str,
-                 model_type: str) -> None:
+    def __init__(self, simulation_name: str, solution_method: str, model_folder: str, shock_type: str) -> None:
         self.solution_method = solution_method
         self.model_folder = model_folder
         self.shock_type = shock_type
-        self.model_type = model_type
         self.simulation_name = simulation_name
 
         cmf_file_name = "gtapadjust.cmf"
@@ -31,9 +29,9 @@ class GTAPAdjustCMF(object):
             '! Output files:\n',
             'File Initial = work\InitialRpt.har; ! Diagnostic output for pre-adjustment data\n',
             'File Final   = work\FinalRpt.har;   ! Diagnostic output for post-adjustment data\n',
-            'Solution File = work\adjust;        ! Diagnostic output \n',
+            'Solution File = work\\adjust;        ! Diagnostic output \n',
             '! Updated files:\n',
-            'Updated File INFILE = work\adjusted.har; ! Adjusted Normalized GTAP data \n',
+            'Updated File INFILE = work\\adjusted.har; ! Adjusted Normalized GTAP data \n',
             '\n',
             '! Solution method\n',
             'method = Euler ;\n',
@@ -77,7 +75,10 @@ class GTAPAdjustCMF(object):
             '!swap  q1absorp = q2absorp;  ! optional: link aborption to GDP \n',
             '!swap  q3absorp = vGDPWLD;   ! needed if q2absorb exogenous; fix world GDP  \n',
             '\n',
-            '!********** YOU SHOULD NORMALLY EDIT ONLY BELOW THIS LINE ***********! \n',
+            '!********** YOU SHOULD NORMALLY EDIT ONLY BELOW THIS LINE ***********! \n'
+        ]
+
+        line_list_shocks_original = [
             '\n',
             '!    old exog                new exog   !   \n',
             'swap qdem("omn","Australia")=vCOSTS("omn","Australia");\n',
@@ -110,7 +111,13 @@ class GTAPAdjustCMF(object):
             'Verbal Description = Adjust GTAP database  ;\n'
         ]
 
-        line_list_shocks = SimulationShocks(self.shock_type).create()
+        line_list_shocks = [
+            '\n',
+            '!    old exog                new exog   !   \n',
+            'swap qdem("GrainsCropsA","Oceania")=vCOSTS("GrainsCropsA","Oceania");\n',
+            'final_level  vCOSTS("GrainsCropsA","Oceania")= 50000; \n',
+            'Verbal Description = Adjust GTAP database  ;\n'
+        ]
 
         # Combine line lists
         line_list_total = line_list_main + line_list_shocks
