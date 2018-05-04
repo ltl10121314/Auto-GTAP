@@ -10,7 +10,7 @@ shocks      ! name of information file
 a           ! Proceed to automatic code generation.
 pgs         ! Write a GEMPACK program.
 
-shock       ! name of GEMPACK program file
+shocks       ! name of GEMPACK program file
 !
 !
 !   end of stored input
