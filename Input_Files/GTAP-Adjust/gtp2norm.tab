@@ -1,0 +1,485 @@
+! GTP2NORM.TAB
+ Program to turn a standard GTAP database into a simplified [normalized] form
+which is easier to manipulate. The normalized form:
+* uses the same parameters file as standard GTAP
+* has no separate sets file: these are included in the flows file
+* the flows file has fewer but bigger matrices 
+* the flows file shows taxes explicitly, rather than as differences
+
+ A companion program, NORM2GTP.TAB, performs the reverse conversion. It should
+be possible to recover an exact duplicate of the original flows by running
+first GTP2NORM, then NORM2GTP.
+
+The format of the "standard" GTAP flows data file is defined as the matrices
+needed by the GTAP model (Version 6.2). 
+!
+
+File
+        INFILE # Standard GTAP flows data file #;
+      GTAPSETS # Standard GTAP sets file #;
+ (new) OUTFILE # Normalized GTAP data - containing flows and sets #;
+ (new)    DIAG # Diagnostic file #;
+
+Set ! standard GTAP sets on sets file !
+REG       # Regions #            read elements from file GTAPSETS header "H1";
+TRAD_COMM # Traded commodities # read elements from file GTAPSETS header "H2";
+MARG_COMM # Margin commodities # read elements from file GTAPSETS header "MARG";
+CGDS_COMM # Investment good #    read elements from file GTAPSETS header "H9";
+ENDW_COMM # Primary factors #    read elements from file GTAPSETS header "H6";
+
+Set  ! standard consequential GTAP sets !
+PROD_COMM # Produced commodities  # = TRAD_COMM + CGDS_COMM;
+DEMD_COMM # Demanded commodities # = ENDW_COMM + TRAD_COMM;
+NSAV_COMM # Non-savings commodities # = DEMD_COMM + CGDS_COMM;
+Subset
+PROD_COMM is subset of NSAV_COMM;
+MARG_COMM is subset of TRAD_COMM;
+Set NMRG_COMM # Non-margin commodities # = TRAD_COMM - MARG_COMM;
+
+Set
+ IND # Industries # = TRAD_COMM;
+ COM # Commodities # = TRAD_COMM;
+ FAC # Primary factors # = ENDW_COMM;
+ MAR # International trade margin commodities # = MARG_COMM;
+Write
+(Set) REG to file OUTFILE header "REG";
+(Set) COM to file OUTFILE header "COM";
+(Set) IND to file OUTFILE header "IND";
+(Set) MAR to file OUTFILE header "MAR";
+(Set) FAC to file OUTFILE header "FAC";
+(Set) CGDS_COMM to file OUTFILE header "INV";
+
+!   Aide-Memoire for Sets
+    ---------------------
+
+    |--------------------------------------|
+    |         DEMD_COMM                    |
+    |----------------------------------------------------|
+    | ENDW_COMM |       TRAD_COMM          |  CGDS_COMM  |
+    |----------------------------------------------------|
+    |        NSAV_COMM                                   |
+    |----------------------------------------------------|
+                |                     PROD_COMM          |
+                |----------------------------------------|
+
+    For Endowments,
+    |-------------------------|
+    | ENDW_COMM               |
+    |-------------------------|
+    | ENDWM_COMM | ENDWS_COMM |
+    |-------------------------|
+!
+
+Coefficient ! Coefficients used by GTAP model !
+(all,e,ENDW_COMM)(all,r,REG) EVOA(e,r)
+ # Endowments - Output at Agents' Prices #;
+(all,r,REG) SAVE(r) # Savings - Net Expenditure at Agents' Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VDGA(t,r)
+ # Intermediates - Government Domestic Purchases at Agents' Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VDGM(t,r)
+ # Intermediates - Government Domestic Purchases at Market Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VIGA(t,r)
+ # Intermediates - Government Imports at Agents' Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VIGM(t,r)
+ # Intermediates - Government Imports at Market Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VDPA(t,r)
+ # Intermediates - Household Domestic Purchases at Agents' Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VDPM(t,r)
+ # Intermediates - Household Domestic Purchases at Market Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VIPA(t,r)
+ # Intermediates - Household Imports at Agents' Prices #;
+(all,t,TRAD_COMM)(all,r,REG) VIPM(t,r)
+ # Intermediates - Household Imports at Market Prices #;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) EVFA(e,p,r)
+ # Endowments - Firms' Purchases at Agents' Prices #;
+(all,t,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VDFA(t,p,r)
+ # Intermediates - Firms' Domestic Purchases at Agents' Prices #;
+(all,t,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VIFA(t,p,r)
+ # Intermediates - Firms' Imports at Agents' Prices #;
+(all,e,ENDW_COMM)(all,p,PROD_COMM)(all,r,REG) VFM(e,p,r)
+ # Endowments - Firms' Purchases at Market Prices #;
+(all,t,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VIFM(t,p,r)
+ # Intermediates - Firms' Imports at Market Prices #;
+(all,t,TRAD_COMM)(all,p,PROD_COMM)(all,r,REG) VDFM(t,p,r)
+ # Intermediates - Firms' Domestic Purchases at Market Prices #;
+(all,r,REG) VDEP(r) # Capital Stock - Value of Depreciation #;
+(all,t,TRAD_COMM)(all,r,REG)(all,a,REG) VIMS(t,r,a)
+ # Trade - Bilateral Imports at Market Prices #;
+(all,t,TRAD_COMM)(all,r,REG)(all,a,REG) VIWS(t,r,a)
+ # Trade - Bilateral Imports at World Prices #;
+(all,t,TRAD_COMM)(all,r,REG)(all,a,REG) VXWD(t,r,a)
+ # Trade - Bilateral Exports at World Prices #;
+(all,t,TRAD_COMM)(all,r,REG)(all,a,REG) VXMD(t,r,a)
+ # Trade - Bilateral Exports at Market Prices #;
+(all,m,MARG_COMM)(all,r,REG) VST(m,r)
+ # Trade - Exports for International Transportation, Market Prices #;
+(all,m,MARG_COMM)(all,t,TRAD_COMM)(all,r,REG)(all,a,REG) VTMFSD(m,t,r,a)
+ # Margins on International Trade #;
+
+Read
+ SAVE from file INFILE header "SAVE";
+ EVOA from file INFILE header "EVOA";
+ VDGA from file INFILE header "VDGA";
+ VDGM from file INFILE header "VDGM";
+ VIGA from file INFILE header "VIGA";
+ VIGM from file INFILE header "VIGM";
+ VDPA from file INFILE header "VDPA";
+ VDPM from file INFILE header "VDPM";
+ VIPA from file INFILE header "VIPA";
+ VIPM from file INFILE header "VIPM";
+ EVFA from file INFILE header "EVFA";
+ VDFA from file INFILE header "VDFA";
+ VIFA from file INFILE header "VIFA";
+ VFM from file INFILE header "VFM ";
+ VIFM from file INFILE header "VIFM";
+ VDFM from file INFILE header "VDFM";
+ VDEP from file INFILE header "VDEP";
+ VIMS from file INFILE header "VIMS";
+ VIWS from file INFILE header "VIWS";
+ VXWD from file INFILE header "VXWD";
+ VXMD from file INFILE header "VXMD";
+ VST from file INFILE header "VST ";
+ VTMFSD from file INFILE header "VTWR";
+
+!*******************!
+
+! Sets for normalized format !
+Set
+ MOREDEM # More demanders # (HOU,INV,GOV);
+ USER # All local users # = TRAD_COMM + MOREDEM;
+ SRC (dom,imp);
+ PRODTAX (PTAX);
+ MORECOST = ENDW_COMM + PRODTAX;
+ COST # All industry costs # = TRAD_COMM + MORECOST;
+
+!Write (Set) COST to file OUTFILE header "ALLC";!
+Coefficient
+  (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG) BAS(c,s,u,r);
+  (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG) PUR(c,s,u,r);
+  (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG) TAX(c,s,u,r);
+Formula
+  (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG) BAS(c,s,u,r)=0;
+  (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG) PUR(c,s,u,r)=0;
+!bas !
+  (all,c,TRAD_COMM)(all,u,TRAD_COMM)(all,r,REG) BAS(c,"dom",u,r)=VDFM(c,u,r);
+  (all,c,TRAD_COMM)(all,u,TRAD_COMM)(all,r,REG) BAS(c,"imp",u,r)=VIFM(c,u,r);
+  (all,e,ENDW_COMM)(all,u,TRAD_COMM)(all,r,REG) BAS(e,"dom",u,r)=VFM(e,u,r);
+
+  (all,c,TRAD_COMM)(all,r,REG)BAS(c,"dom","INV",r)=sum{u,CGDS_COMM,VDFM(c,u,r)};
+  (all,c,TRAD_COMM)(all,r,REG)BAS(c,"imp","INV",r)=sum{u,CGDS_COMM,VIFM(c,u,r)};
+  (all,e,ENDW_COMM)(all,r,REG)BAS(e,"dom","INV",r)=sum{u,CGDS_COMM,VFM(e,u,r)};
+
+  (all,c,TRAD_COMM)(all,r,REG) BAS(c,"dom","GOV",r)=VDGM(c,r);
+  (all,c,TRAD_COMM)(all,r,REG) BAS(c,"imp","GOV",r)=VIGM(c,r);
+
+  (all,c,TRAD_COMM)(all,r,REG) BAS(c,"dom","HOU",r)=VDPM(c,r);
+  (all,c,TRAD_COMM)(all,r,REG) BAS(c,"imp","HOU",r)=VIPM(c,r);
+
+!pur!
+  (all,c,TRAD_COMM)(all,u,TRAD_COMM)(all,r,REG) PUR(c,"dom",u,r)=VDFA(c,u,r);
+  (all,c,TRAD_COMM)(all,u,TRAD_COMM)(all,r,REG) PUR(c,"imp",u,r)=VIFA(c,u,r);
+  (all,e,ENDW_COMM)(all,u,TRAD_COMM)(all,r,REG) PUR(e,"dom",u,r)=EVFA(e,u,r);
+
+  (all,c,TRAD_COMM)(all,r,REG)PUR(c,"dom","INV",r)=sum{u,CGDS_COMM,VDFA(c,u,r)};
+  (all,c,TRAD_COMM)(all,r,REG)PUR(c,"imp","INV",r)=sum{u,CGDS_COMM,VIFA(c,u,r)};
+  (all,e,ENDW_COMM)(all,r,REG)PUR(e,"dom","INV",r)=sum{u,CGDS_COMM,EVFA(e,u,r)};
+
+  (all,c,TRAD_COMM)(all,r,REG) PUR(c,"dom","GOV",r)=VDGA(c,r);
+  (all,c,TRAD_COMM)(all,r,REG) PUR(c,"imp","GOV",r)=VIGA(c,r);
+
+  (all,c,TRAD_COMM)(all,r,REG) PUR(c,"dom","HOU",r)=VDPA(c,r);
+  (all,c,TRAD_COMM)(all,r,REG) PUR(c,"imp","HOU",r)=VIPA(c,r);
+
+! construct TRADE matrix: for each COM*REG*REG this has 6 layers:!
+Set XX   (BASIC,                    !  exports at source market prices !
+          EXPTAX,                   !  trade tax levied at source !
+          IMPTAX);                  !  trade tax levied at dest !
+                                    !  then add international trade margins !
+Set TRADES # Basic, exptax, imptax, margins # = XX + MARG_COMM;
+!Write (Set) TRADES to file OUTFILE header "TRDS";!
+Coefficient
+(all,x,TRADES)(all,t,COM)(all,r,REG)(all,a,REG)
+  TRADE(x,t,r,a) # GTAP trade data #;
+Formula
+(all,x,TRADES)(all,t,TRAD_COMM)(all,r,REG)(all,a,REG)   TRADE(x,t,r,a)=0;
+
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+             TRADE("BASIC",i,f,t)  = VXMD(i,f,t);
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+             TRADE("EXPTAX",i,f,t) = VXWD(i,f,t) - VXMD(i,f,t); !XTAXD(i,r,s)!
+(all,m,MARG_COMM)(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+             TRADE(m,i,f,t) = VTMFSD(m,i,f,t);        ! margins !
+(all,i,TRAD_COMM)(all,f,REG)(all,t,REG)
+             TRADE("IMPTAX",i,f,t) = VIMS(i,f,t) - VIWS(i,f,t);
+
+Coefficient
+(all,t,TRAD_COMM)(all,r,REG)(all,a,REG)   TRADECHK(t,r,a)
+  # Trade matrix check......should be tiny #;
+Formula
+(all,t,TRAD_COMM)(all,r,REG)(all,a,REG)   TRADECHK(t,r,a) =
+   sum{x,TRADES,   TRADE(x,t,r,a)} - VIMS(t,r,a);
+
+Write TRADECHK to file DIAG header "TRDC";
+
+Coefficient (all,i,DEMD_COMM)(all,j,PROD_COMM)(all,r,REG) VFA(i,j,r)
+ # Firm's expenditure on i by industry j #;
+Formula (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG) VFA(i,j,r) = EVFA(i,j,r);
+Formula (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,s,REG)
+ VFA(i,j,s) = VDFA(i,j,s) + VIFA(i,j,s);
+
+Coefficient (all,i,NSAV_COMM)(all,r,REG) VOA(i,r)
+    # Value of commodity i output in region r #;
+Formula (all,i,ENDW_COMM)(all,r,REG) VOA(i,r) = EVOA(i,r);
+Formula (all,i,PROD_COMM)(all,r,REG) VOA(i,r) = sum{j,DEMD_COMM, VFA(j,i,r)};
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VDM(i,r) # Domestic sales of i in r at market prices (tradeables only) #;
+Formula (all,i,TRAD_COMM)(all,r,REG)
+    VDM(i,r) = VDPM(i,r) + VDGM(i,r) + sum{j,PROD_COMM, VDFM(i,j,r)};
+Coefficient (all,i,NSAV_COMM)(all,r,REG) VOM(i,r)
+ # Value of commodity i output in region r at market prices #;
+Formula (all,i,ENDW_COMM)(all,r,REG)
+    VOM(i,r) = sum{j,PROD_COMM, VFM(i,j,r)};
+Formula (all,m,MARG_COMM)(all,r,REG)
+    VOM(m,r) = VDM(m,r) + sum{s,REG, VXMD(m,r,s)} + VST(m,r);
+Formula (all,i,NMRG_COMM)(all,r,REG)
+    VOM(i,r) = VDM(i,r) + sum{s,REG, VXMD(i,r,s)};
+Formula (all,h,CGDS_COMM)(all,r,REG)
+    VOM(h,r) = VOA(h,r);
+
+! Production tax is residual !
+Coefficient (all,i,NSAV_COMM)(all,r,REG)
+    PTAX(i,r) # Output tax on good i in region r #;
+Formula (all,i,NSAV_COMM)(all,r,REG)
+    PTAX(i,r) = VOM(i,r) - VOA(i,r);
+
+Write PTAX to file DIAG header "PTAX";
+
+Formula  (all,u,TRAD_COMM)(all,r,REG) PUR("PTAX","dom",u,r)= PTAX(u,r);
+ (all,r,REG) PUR("PTAX","dom","INV",r)= sum{u,CGDS_COMM,PTAX(u,r)};
+
+  (all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+ TAX(c,s,u,r) = PUR(c,s,u,r) - BAS(c,s,u,r);
+
+Write
+ BAS to file DIAG header "BAS";
+ PUR to file DIAG header "PUR";
+ TAX to file DIAG header "TAX";
+
+Set TYP (BAS,TAX);
+Coefficient
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,u,r,t) # GTAP national data #;
+Formula
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+  NATIONAL(c,s,u,r,"Bas") = BAS(c,s,u,r);
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)
+  NATIONAL(c,s,u,r,"Tax") = TAX(c,s,u,r);
+
+Write
+(Set) TRADES to file OUTFILE header "TRD";
+(Set) COST to file OUTFILE header "COST";
+(Set) USER to file OUTFILE header "USER";
+ TRADE to file OUTFILE header "TRAD";
+ NATIONAL to file OUTFILE header "NATL";
+
+! addition june 2008 for multiproduction !
+Coefficient (all,i,IND)(all,r,REG) COSTS(i,r) # Industry costs #;
+Formula     (all,i,IND)(all,r,REG) COSTS(i,r)
+   = sum{k,COST, sum{s,SRC, sum{t,TYP, NATIONAL(k,s,i,r,t)}}};
+Coefficient (all,c,COM)(all,i,IND)(all,r,REG) MAKE(c,i,r) # MAKE matrix #;
+Formula (all,c,COM)(all,i,IND)(all,r,REG) MAKE(c,i,r) = 0;
+Formula (all,x,COM)(all,r,REG) MAKE(x,x,r) = COSTS(x,r);
+Write MAKE to file OUTFILE header "MAKE";
+
+Coefficient
+(all,r,REG) VKB(r) # Capital Stock - Value at Beginning-of-Period #;
+(all,r,REG) DPARSUM(r)
+ # Sum of Distribution Parameters in Household Demand System #;
+Read
+ VKB from file INFILE header "VKB ";
+ DPARSUM from file INFILE header "DPSM";
+Write ! copy over some headers unchanged !
+ EVOA to file OUTFILE header "EVOA" longname
+ " Endowments - Output at Agents' Prices ";
+ SAVE to file OUTFILE header "SAVE" longname
+ " Savings - Net Expenditure at Agents' Prices ";
+ VKB to file OUTFILE header "VKB " longname
+ "Capital Stock - Value at Beginning-of-Period";
+ VDEP to file OUTFILE header "VDEP" longname
+ "Capital Stock - Value of Depreciation";
+ DPARSUM to file OUTFILE header "DPSM" longname
+ "Sum of Distribution Parameters in Household Demand System";
+ VST to file OUTFILE header "VST" longname
+ "Trade - Exports for International Transportation, Market Prices";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG) VOM2(i,r)
+ # Value of commodity i output in region r at market prices #;
+Formula (all,i,TRAD_COMM)(all,r,REG) VOM2(i,r) =
+  sum{u,USER, BAS(i,"dom",u,r)}+  sum{t,REG,  TRADE("BASIC",i,r,t)};
+
+Set REP (org,new,dif);
+Coefficient
+ (all,i,TRAD_COMM)(all,r,REG)(all,x,REP) VOMREP(i,r,x)
+   # Import market clearing check #;
+ (all,i,TRAD_COMM)(all,r,REG) VOMDIF(i,r) # Import market clearing check #;
+Formula (all,i,TRAD_COMM)(all,r,REG)(all,x,REP) VOMREP(i,r,x)=42;
+ (all,i,TRAD_COMM)(all,r,REG) VOMREP(i,r,"org") = VOM(i,r);
+ (all,i,TRAD_COMM)(all,r,REG) VOMREP(i,r,"new") = VOM2(i,r);
+ (all,i,TRAD_COMM)(all,r,REG) VOMREP(i,r,"dif") = VOM2(i,r)-VOM(i,r);
+ (all,i,TRAD_COMM)(all,r,REG) VOMDIF(i,r) = VOM2(i,r)-VOM(i,r);
+Write
+ VOMDIF to file DIAG header "VOMD";
+ VOMREP to file DIAG header "VOMR";
+
+Coefficient (all,j,TRAD_COMM)(all,r,REG) VOA2(j,r)
+ # Value of industry i costs in region r #;
+Formula (all,j,TRAD_COMM)(all,r,REG) VOA2(j,r) =
+  sum{c,COST,sum{s,SRC, PUR(c,s,j,r)}} - PTAX(j,r);
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)(all,x,REP) VOAREP(i,r,x);
+Formula (all,i,TRAD_COMM)(all,r,REG)(all,x,REP) VOAREP(i,r,x)=42;
+ (all,i,TRAD_COMM)(all,r,REG) VOAREP(i,r,"org")=VOA(i,r);
+ (all,i,TRAD_COMM)(all,r,REG) VOAREP(i,r,"new")=VOA2(i,r);
+ (all,i,TRAD_COMM)(all,r,REG) VOAREP(i,r,"dif")=VOA2(i,r)-VOA(i,r);
+
+Write VOAREP to file DIAG header "VOAR";
+
+! addition jmh jun 2008 !
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VPA(i,r) # Private household expenditure on i in r at agent's prices #;
+Formula (all,i,TRAD_COMM)(all,s,REG)
+    VPA(i,s) = VDPA(i,s) + VIPA(i,s);
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VSTT(i,r) #For check on tranport services and margines #;
+Formula (all,i,TRAD_COMM)(all,r,REG)
+    VSTT(i,r) = 0;
+Formula (all,i,MARG_COMM)(all,r,REG)
+    VSTT(i,r) = VST(i,r);
+
+Set PRDTAX (PTAX);
+Set MORECOLS (HOU,GOV,exp,lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+!Set FACT # factors # (Labour, capital,Land,prodtax);!
+
+Set SUMCOLS = PROD_COMM + MORECOLS;
+Set XXX = TRAD_COMM + ENDW_COMM;
+Set SUMROWS = XXX + PRDTAX;
+Subset DEMD_COMM is subset of XXX;
+
+Set ABSORP (CGDS,GOV,HOU);
+Subset ABSORP is subset of SUMCOLS;
+
+Coefficient
+(all,q,SUMROWS)(all,c,SUMCOLS)(all,r,REG) SUMMARY(q,c,r)
+ # Summary producer price flows table #;
+Formula
+(all,i,SUMROWS)(all,j,SUMCOLS)(all,r,REG) SUMMARY(i,j,r) = 0;
+(all,i,DEMD_COMM)(all,j,PROD_COMM)(all,r,REG) SUMMARY(i,j,r) = VFA(i,j,r);
+(all,i,PROD_COMM)(all,r,REG) SUMMARY("PTax",i,r) = VOM(i,r) - VOA(i,r);
+(all,i,TRAD_COMM)(all,r,REG) SUMMARY(i,"gov",r) = VDGA(i,r) + VIGA(i,r);
+(all,i,TRAD_COMM)(all,r,REG) SUMMARY(i,"hou",r) = VPA(i,r);
+(all,i,TRAD_COMM)(all,r,REG) SUMMARY(i,"exp",r)
+              = sum{s,REG, VXWD(i,r,s)} + VSTT(i,r);
+
+(all,i,TRAD_COMM)(all,r,REG) SUMMARY(i,"lessDomTax",r) =
+-  [VDPA(i,r) - VDPM(i,r)] ! dom hou !
+-  [VDGA(i,r) - VDGM(i,r)] ! dom gov !
+-  [sum{s,REG,        VXWD(i,r,s) - VXMD(i,r,s)}] ! exp tax !
+-  [sum{j,PROD_COMM,  VDFA(i,j,r) - VDFM(i,j,r)}]; ! dom ind+inv !
+
+(all,i,TRAD_COMM)(all,r,REG) SUMMARY(i,"lessImpTax",r) =
+-  [VIPA(i,r) - VIPM(i,r)] ! imp hou !
+-  [VIGA(i,r) - VIGM(i,r)] ! imp gov !
+-  [sum{j,PROD_COMM,  VIFA(i,j,r) - VIFM(i,j,r)}]; ! imp ind+inv !
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessTariff",r) =
+  - sum{s,REG, VIMS(i,s,r) - VIWS(i,s,r)};
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessImpCIF",r) =
+-  VIPM(i,r)  ! imp hou !
+-  VIGM(i,r)  ! imp gov !
+-  sum{j,PROD_COMM,  VIFM(i,j,r)} - SUMMARY(i,"lessTariff",r); ! imp ind+inv !
+Write SUMMARY to file DIAG    header "SMRY";
+
+Set SEC = COM intersect IND;
+Coefficient
+(all,s,SEC)(all,r,REG) SUMBAL(s,r) # Summary balance -- should be tiny #;
+Formula (all,s,SEC)(all,r,REG) SUMBAL(s,r) =
+         sum{q,SUMROWS, SUMMARY(q,s,r)} - sum{j,SUMCOLS, SUMMARY(s,j,r)};
+Write SUMBAL to file DIAG header "SBAL";
+
+Coefficient (all,q,SUMROWS)(all,c,SUMCOLS) SUMMARY_R(q,c)
+  # World Summary producer price flows table #;
+Formula (all,q,SUMROWS)(all,c,SUMCOLS)
+  SUMMARY_R(q,c) = sum{r,REG,SUMMARY(q,c,r)};
+Write SUMMARY_R to file DIAG header "WSUM";
+
+Set MOREWGT (Production, IntUse, Absorption, Exports, Imports);
+Coefficient
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r)
+ # Summary producer price weights #;
+ (all,s,SEC)(all,r,REG) WGTBAL(s,r)
+ #Summary weights check:[Production+Imports]-[IntUse+Absorption+Exports]#;
+Formula
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r) = 0;
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Production",r) =
+    sum{q,SUMROWS, SUMMARY(q,s,r)} - SUMMARY(s,"lessDomTax",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"IntUse",r) =
+                                    sum{i,IND, SUMMARY(s,i,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Absorption",r) =
+                                     sum{a,ABSORP, SUMMARY(s,a,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Exports",r) =   SUMMARY(s,"exp",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Imports",r) = -
+[SUMMARY(s,"lessImpCIF",r)+SUMMARY(s,"lessImpTax",r)+SUMMARY(s,"lessTariff",r)];
+ (all,s,SEC)(all,r,REG) WGTBAL(s,r) =
+   WEIGHTS(s,"Production",r) + WEIGHTS(s,"Imports",r)
+- [WEIGHTS(s,"IntUse",r) + WEIGHTS(s,"Absorption",r) + WEIGHTS(s,"Exports",r)];
+Write
+ WEIGHTS to file DIAG header "WGTS";
+ WGTBAL  to file DIAG header "WGTB";
+
+! transfer some dynamic GTAP data which may be present
+   - if not present it will be created with dummy values!
+Coefficient
+ (all,r,REG) YQHFIRM(r)
+         # dummy GDYN data:income of region r from local firms #;
+ (all,r,REG) YQHTRUST(r)
+         # dummy GDYN data:regional income from global trust #;
+ (all,r,REG) YQTFIRM(r)
+         # dummy GDYN data:income of global trust from firms in region r #;
+ (all,r,REG) RORGEXP(r)
+         # dummy GDYN data:expected gross rate of return #;
+ (all,r,REG) RORGTARG(r)
+         # dummy GDYN data:expected gross rate of return #;
+ (all,r,REG) KHAT(r)
+         # dummy GDYN data:price-neutral rate of growth in the capital stock #;
+ (all,r,REG) YHAT(r)
+         # dummy GDYN data:long run rate of growth of a region #;
+Formula 
+(initial) (all,r,REG) YQHFIRM(r)  = 0;
+(initial) (all,r,REG) YQHTRUST(r) = 0;
+(initial) (all,r,REG) YQTFIRM(r)  = 0;
+(initial) (all,r,REG) RORGEXP(r)  = 0.13; ! default value ! 
+(initial) (all,r,REG) RORGTARG(r) = 0.13; ! default value ! 
+(initial) (all,r,REG) KHAT(r)     = 0.08; ! default value ! 
+(initial) (all,r,REG) YHAT(r)     = 0.08; ! default value ! 
+Read 
+(ifheaderexists) YQHFIRM  from file InFile header "YQHF";
+(ifheaderexists) YQHTRUST from file InFile header "YQHT";
+(ifheaderexists) YQTFIRM  from file InFile header "YQTF";
+(ifheaderexists) RORGEXP from file Infile header "RRGE";
+(ifheaderexists) RORGTARG from file Infile header "RRGT";
+(ifheaderexists) KHAT from file Infile header "KHAT";
+(ifheaderexists) YHAT from file Infile header "YHAT";
+Write
+ YQHFIRM  to file OutFile header "YQHF";
+ YQHTRUST to file OutFile header "YQHT";
+ YQTFIRM  to file OutFile header "YQTF";
+ RORGEXP  to file OutFile header "RRGE";
+ RORGTARG to file OutFile header "RRGT";
+ KHAT     to file Outfile header "KHAT";
+ YHAT     to file Outfile header "YHAT";
+
+!end of file !
+
