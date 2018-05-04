@@ -1,0 +1,17 @@
+!   shocks.sti
+!   ========
+!
+!   TABLO sti file for Shocks
+!
+bat         ! Run in batch.
+
+shocks      ! name of TABLO input file
+shocks      ! name of information file
+a           ! Proceed to automatic code generation.
+pgs         ! Write a GEMPACK program.
+
+shock       ! name of GEMPACK program file
+!
+!
+!   end of stored input
+!   -------------------

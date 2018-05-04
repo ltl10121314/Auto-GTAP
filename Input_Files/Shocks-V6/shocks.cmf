@@ -1,0 +1,25 @@
+ !CMF Files for Shocks.tab
+ ! Created by Andre Barbe on 2018-5-4
+ ! Auxiliary files
+ !
+ AUXILIARY FILES = shocks ;
+ DISPLAY FILE    = shocks.DIS ;
+ LOG FILE        = shocks.LOG;
+ !
+ file gtapdata=baseData.har;
+ file gtapsets=sets.har;
+ 
+ !
+ ! text files with shocks for several wedges in the model follow
+ !
+ file TOHAT  = TOHAT.DAT ;
+ file TFHAT  = TFHAT.DAT ;
+ file TPIHAT = TPIHAT.DAT ;
+ file TPDHAT = TPDHAT.DAT ;
+ file TGIHAT = TGIHAT.DAT ;
+ file TGDHAT = TGDHAT.DAT ;
+ file TFIHAT = TFIHAT.DAT ;
+ file TFDHAT = TFDHAT.DAT;
+ file TXSHAT = TXSHAT.DAT ;
+ file TMSHAT = TMSHAT.DAT     ;
+!------------------------- end of Command file -------------------------------!

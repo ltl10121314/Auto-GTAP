@@ -1,0 +1,330 @@
+!_______________________________SHOCKS.TAB FILE ______________________________!
+!                                                                             !
+!                        Global Trade Analysis Project                        !
+!                         The GTAP Modeling Framework                         !
+!                              version 1997                                   !
+!_____________________________________________________________________________!
+!-----------------------------------------------------------------------------!
+! HISTORY of SHOCKS.TAB                                                       !
+!-----------------------------------------------------------------------------!
+! Version 1    July 1994   (Used in GTAP Short Course, July-August 1994)
+  Version 2    Nov. 1995   (Augments endowments to accommodate v.4 data.
+			    Display file is also eliminated, since this
+                            information can be accessed via GTAPVIEW)    
+               Feb, 2006    removed "max size" keywords,
+                            turned comments into # ... # text  !
+
+!-----------------------------------------------------------------------------!
+! This file reads in any of the GTAP data sets and associated set
+  specifications and computes the shocks needed to remove existing policies.
+  These shocks are written to text files which may then be edited in order to
+  achieve partial liberalization. Or, make your own version of this 
+  program to compute your special shocks !
+!-----------------------------------------------------------------------------!
+
+File GTAPSETS # File with set specification #;
+
+Set
+ REG # Regions # read elements from file GTAPSETS header "H1";
+ TRAD_COMM # Traded commodities # read elements from file GTAPSETS header "H2";
+ ENDW_COMM # Endowment commodities #
+   read elements from file GTAPSETS header "H6";
+ CGDS_COMM # Capital goods commodities #
+   read elements from file GTAPSETS header "H9";
+ ENDWC_COMM # Capital Endowment Commodity # (capital);
+ PROD_COMM # Produced commodities # = TRAD_COMM union CGDS_COMM;
+ DEMD_COMM # Demanded commodities # = ENDW_COMM union TRAD_COMM;
+ NSAV_COMM # Non-savings commodities # = DEMD_COMM union CGDS_COMM;
+ MARG_COMM # Margin commodities #
+   read elements from file GTAPSETS header "MARG";
+Subset
+ MARG_COMM is subset of TRAD_COMM;
+ PROD_COMM is subset of NSAV_COMM;
+ ENDWC_COMM is subset of NSAV_COMM;
+Set
+ NMRG_COMM # Non-margin commodities # = TRAD_COMM - MARG_COMM;
+
+!-----------------------------------------------------------------------------!
+! FILES                                                                       !
+!-----------------------------------------------------------------------------!
+
+File GTAPDATA # The file containing all base data. #;
+
+!-----------------------------------------------------------------------------!
+!              base revenues and expenditures at agent's prices               !
+!-----------------------------------------------------------------------------!
+
+Coefficient
+ (all,i,ENDW_COMM)(all,r,REG)                    EVOA(i,r)
+     # Value of commodity i output in region r. #;
+
+ (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)   EVFA(i,j,r)
+     # Producer expenditure on i by ind j in r, valued at agent's prices #;
+
+ (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)   VIFA(i,j,r)
+     # Purchases of imported i r for use in j in region r #;
+
+ (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)   VDFA(i,j,r)
+     # Purchases of domestic i r for use in j in region r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                    VIPA(i,r)
+     # Private household expenditure on imported i #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                    VDPA(i,r)
+     # Private household expenditure on domestic i in r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                    VIGA(i,r)
+     # Government household expenditure on imported i #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                    VDGA(i,r)
+     # Government household expenditure on domestic i in r #;
+
+!-----------------------------------------------------------------------------!
+!               base revenues and expenditures at market prices               !
+!-----------------------------------------------------------------------------!
+
+Coefficient
+ (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)            VXMD(i,r,s)
+     # Exports of i from r to s valued at market prices (tradeables only)  #;
+
+ (all,i,MARG_COMM)(all,r,REG)                       VST(i,r)
+     # Margin good i from r used for international transport (market prices) #;
+
+ (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)      VFM(i,j,r)
+     # Producer expenditure on i by industry j in r, valued at market prices #;
+
+ (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)      VIFM(i,j,r)
+     #  Purchases of imports i for use in j in region r #;
+
+ (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)      VDFM(i,j,r)
+     # Purchases of domestic i r for use in j in region r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                       VIPM(i,r)
+     # Private household expenditure on i in r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                       VDPM(i,r)
+     # Private household expenditure on domestic i in r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                       VIGM(i,r)
+     # Gov't household expenditure on i in r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)                       VDGM(i,r)
+     # Government household expenditure on domestic i in r #;
+
+ (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)             VIMS(i,r,s)
+     # Imports of commodity i from r to s, valued at domestic market prices #;
+
+!-----------------------------------------------------------------------------!
+!              base revenues and expenditures at world prices                 !
+!-----------------------------------------------------------------------------!
+
+Coefficient
+ (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)             VXWD(i,r,s)
+     # Exports of i from r to s valued fob (tradeables only) #;
+
+ (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)             VIWS(i,r,s)
+     # Imports of commodity i from r to s, valued cif (tradeables only)  #;
+
+!-----------------------------------------------------------------------------!
+!                   Reading basedata.                                         !
+!-----------------------------------------------------------------------------!
+
+Read
+ EVOA from file GTAPDATA header "EVOA";
+ EVFA from file GTAPDATA header "EVFA";
+ VIFA from file GTAPDATA header "VIFA";
+ VDFA from file GTAPDATA header "VDFA";
+ VIPA from file GTAPDATA header "VIPA";
+ VDPA from file GTAPDATA header "VDPA";
+ VIGA from file GTAPDATA header "VIGA";
+ VDGA from file GTAPDATA header "VDGA";
+ VXMD from file GTAPDATA header "VXMD";
+ VST  from file GTAPDATA header "VST";
+ VFM  from file GTAPDATA header "VFM";
+ VIFM from file GTAPDATA header "VIFM";
+ VDFM from file GTAPDATA header "VDFM";
+ VIPM from file GTAPDATA header "VIPM";
+ VDPM from file GTAPDATA header "VDPM";
+ VIGM from file GTAPDATA header "VIGM";
+ VDGM from file GTAPDATA header "VDGM";
+ VIMS from file GTAPDATA header "VIMS";
+ VXWD from file GTAPDATA header "VXWD";
+ VIWS from file GTAPDATA header "VIWS";
+
+!-----------------------------------------------------------------------------!
+!                   DERIVATIVES OF THE BASE DATA                              !
+!-----------------------------------------------------------------------------!
+
+Zerodivide (zero_by_zero) default 0;
+Zerodivide (NONZERO_BY_ZERO) default 0;
+
+Coefficient (all,i,DEMD_COMM)(all,j,PROD_COMM)(all,r,REG)        VFA(i,j,r)
+ # Producer expenditure on i by ind j in r, valued at agent's prices #;
+
+Formula (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+        VFA(i,j,r) = EVFA(i,j,r);
+
+Formula (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,s,REG)
+        VFA(i,j,s) = VDFA(i,j,s) + VIFA(i,j,s);
+
+Coefficient (all,i,NSAV_COMM)(all,r,REG)                         VOA(i,r)
+ # Value of commodity i output in region r #;
+
+Formula (all,i,ENDW_COMM)(all,r,REG) VOA(i,r) = EVOA(i,r);
+
+Formula (all,i,PROD_COMM)(all,r,REG)
+        VOA(i,r) = sum{j,DEMD_COMM, VFA(j,i,r)};
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)                         VDM(i,r)
+ # Domestic sales of com i in r valued at market prices (tradeables only) #;
+
+Formula (all,i,TRAD_COMM)(all,r,REG)
+        VDM(i,r) = VDPM(i,r) + VDGM(i,r)
+                 + sum{j,PROD_COMM, VDFM(i,j,r)};
+
+Coefficient (all,i,NSAV_COMM)(all,r,REG)
+    VOM(i,r) # Value of commodity i output in region r at market prices #;
+Formula (all,i,ENDW_COMM)(all,r,REG)
+    VOM(i,r) = sum{j,PROD_COMM, VFM(i,j,r)};
+Formula (all,i,MARG_COMM)(all,r,REG)
+    VOM(i,r) = VDM(i,r) + sum{s,REG, VXMD(i,r,s)} + VST(i,r);
+Formula (all,i,NMRG_COMM)(all,r,REG)
+    VOM(i,r) = VDM(i,r) + sum{s,REG, VXMD(i,r,s)};
+Formula (all,h,CGDS_COMM)(all,r,REG)
+    VOM(h,r) = VOA(h,r);
+
+Zerodivide default 1;
+
+! GTAP's tax variables are defined as [% changes in] POWERS
+  (the power is the ratio of the taxed to untaxed flows).
+  Here we calculate:
+    the original value of the power:  "_L" coefficients 
+    the % change in the power needed to eliminate the tax :  "_HAT" coefficients
+       ie, to make the power=1          !
+
+Coefficient  (all,i,NSAV_COMM)(all,r,REG)  TO_L(i,r)
+ # benchmark power: output (or income) tax in region r #;
+Formula (all,i,NSAV_COMM)(all,r,REG)
+     TO_L(i,r) = VOA(i,r)/VOM(i,r);
+Coefficient  (all,i,NSAV_COMM)(all,r,REG)  TO_HAT(i,r)
+ # shock to remove all output (or income) tax in region r #;
+Formula  (all,i,NSAV_COMM)(all,r,REG)
+     TO_HAT(i,r) = 100*[1-TO_L(i,r)] / TO_L(i,r);
+! above formula is formula for % change:  100*[New-Old]/Old
+  In this case we want New=1. Suppose you wanted 20% tax, you might write:
+     TO_HAT(i,r) = {[1.2-TO_L(i,r)] / TO_L(i,r)} * 100;    !
+
+Coefficient  (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)  TF_L(i,j,r)
+ # benchmark power: tax on primary factor i used by j in region r #;
+Formula (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+     TF_L(i,j,r) = VFA(i,j,r)/VFM(i,j,r);
+Coefficient  (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)  TF_HAT(i,j,r)
+ # shock to remove all tax on primary factor i used by j in region r #;
+Formula  (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+     TF_HAT(i,j,r) = 100*[1-TF_L(i,j,r)] / TF_L(i,j,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)  TPD_L(i,r)
+ # benchmark power: tax on private cons. of dom. #;
+Formula (all,i,TRAD_COMM)(all,r,REG)
+     TPD_L(i,r) = VDPA(i,r)/VDPM(i,r);
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)  TPD_HAT(i,r)
+ # shock to remove all tax on private cons. of dom. #;
+Formula  (all,i,TRAD_COMM)(all,r,REG)
+     TPD_HAT(i,r) = 100*[1-TPD_L(i,r)] / TPD_L(i,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,r,REG) TPI_L(i,r)
+ # benchmark power: tax on private cons. of imp. [tpm] #;
+Formula (all,i,TRAD_COMM)(all,r,REG)
+     TPI_L(i,r) = VIPA(i,r)/VIPM(i,r);
+Coefficient  (all,i,TRAD_COMM)(all,r,REG) TPI_HAT(i,r)
+ # shock to remove all tax on private cons. of imp. [tpm] #;
+Formula  (all,i,TRAD_COMM)(all,r,REG)
+     TPI_HAT(i,r) = 100*[1-TPI_L(i,r)] / TPI_L(i,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)  TGD_L(i,r)
+ # benchmark power: tax on gov cons. of dom. #;
+Formula (all,i,TRAD_COMM)(all,r,REG)
+     TGD_L(i,r) = VDGA(i,r)/VDGM(i,r);
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)  TGD_HAT(i,r)
+ # shock to remove all tax on gov cons. of dom. #;
+Formula  (all,i,TRAD_COMM)(all,r,REG)
+     TGD_HAT(i,r) = 100*[1-TGD_L(i,r)] / TGD_L(i,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,r,REG) TGI_L(i,r)
+ # benchmark power: tax on gov cons. of dom. [tgm] #;
+Formula (all,i,TRAD_COMM)(all,r,REG)
+     TGI_L(i,r) = VIGA(i,r)/VIGM(i,r);
+Coefficient  (all,i,TRAD_COMM)(all,r,REG) TGI_HAT(i,r)
+ # shock to remove all tax on gov cons. of dom. [tgm] #;
+Formula  (all,i,TRAD_COMM)(all,r,REG)
+     TGI_HAT(i,r) = 100*[1-TGI_L(i,r)] / TGI_L(i,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)  TFD_L(i,j,r)
+ # benchmark power: tax on domestic i purchased by firm j in r #;
+Formula (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+     TFD_L(i,j,r) = VDFA(i,j,r)/VDFM(i,j,r);
+Coefficient  (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)  TFD_HAT(i,j,r)
+ # shock to remove all tax on domestic i purchased by firm j in r #;
+Formula  (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+     TFD_HAT(i,j,r) = 100*[1-TFD_L(i,j,r)] / TFD_L(i,j,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)  TFI_L(i,j,r)
+ # benchmark power: tax on imported i purchased by firm j in r [tfm] #;
+Formula (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+     TFI_L(i,j,r) = VIFA(i,j,r)/VIFM(i,j,r);
+Coefficient  (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)  TFI_HAT(i,j,r)
+ # shock to remove all tax on imported i purchased by firm j in r [tfm] #;
+Formula  (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+     TFI_HAT(i,j,r) = 100*[1-TFI_L(i,j,r)] / TFI_L(i,j,r);
+
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)  TXS_L(i,r,s)
+ # benchmark rate: subsidy on exports of i from r to s #;
+Formula (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+     TXS_L(i,r,s) = VXMD(i,r,s)/VXWD(i,r,s);
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)  TXS_HAT(i,r,s)
+ # shock to remove subsidy on exports of i from r to s  #;
+Formula  (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+     TXS_HAT(i,r,s) = 100*[1-TXS_L(i,r,s)] / TXS_L(i,r,s);
+
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)  TMS_L(i,r,s)
+ # benchmark power: tax on imports of i from r into s #;
+Formula (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+     TMS_L(i,r,s) = VIMS(i,r,s)/VIWS(i,r,s);
+Coefficient  (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)  TMS_HAT(i,r,s)
+ # shock to remove tax on imports of i from r into s #;
+Formula  (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+     TMS_HAT(i,r,s) = 100*[1-TMS_L(i,r,s)] / TMS_L(i,r,s);
+
+File (new,text) TOHAT  # The file with shocks to obtain TO = 1  #;
+File (new,text) TFHAT  # The file with shocks to obtain TF = 1  #;
+File (new,text) TPIHAT # The file with shocks to obtain TPI = 1 #;
+File (new,text) TPDHAT # The file with shocks to obtain TPD = 1 #;
+File (new,text) TGIHAT # The file with shocks to obtain TGI = 1 #;
+File (new,text) TGDHAT # The file with shocks to obtain TGD = 1 #;
+File (new,text) TFIHAT # The file with shocks to obtain TFI = 1 #;
+File (new,text) TFDHAT # The file with shocks to obtain TFD = 1 #;
+File (new,text) TXSHAT # The file with shocks to obtain TXS = 1 #;
+File (new,text) TMSHAT # The file with shocks to obtain TMS = 1 #;
+! nb, RunGTAP requires the logical file names above !  
+
+Write TO_HAT to file TOHAT;
+Write TF_HAT to file TFHAT;
+Write TPD_HAT to file TPDHAT;
+Write TPI_HAT to file TPIHAT;
+Write TGD_HAT to file TGDHAT;
+Write TGI_HAT to file TGIHAT;
+Write TFD_HAT to file TFDHAT;
+Write TFI_HAT to file TFIHAT;
+Write TXS_HAT to file TXSHAT;
+Write TMS_HAT to file TMSHAT;
+
+! Example to write shocks to a HAR file 
+File (new) HARSHK # file with various shocks #;
+Write TO_HAT  to file HARSHK header "TO" longname "shocks to make TO = 1";
+Write TMS_HAT to file HARSHK header "TMS" longname "shocks to make TMS = 1";
+... and so on
+!
+
+!_____________________________________________________________________________!
+!                                                                             !
+!_______________________End of TABLO File SHOCKS.TAB__________________________!
