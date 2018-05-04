@@ -18,11 +18,14 @@ simulations:
         input_folder: MSplitCom-Exe
         work_folder: MSplitCom-Exe
       3:
-        type: Shocks-V6
-        input_folder: Shocks-V6
-        work_folder: shocks1
-        model_file_name: shocks
-        cmf_file_name: shocks
+        type: GTAP-V6
+        input_folder: GTAP-V6-tax-levels
+        work_folder: alter
+        model_file_name: gtap
+        solution_method: j
+        shock: altertms3final
+        map:
+          - 'pxwreg("EU_28")'
       4:
         type: GTAP-V6
         input_folder: GTAP-V6
@@ -33,21 +36,12 @@ simulations:
         map:
           - 'pxwreg("EU_28")'
       5:
-        type: GTAP-V6
-        input_folder: GTAP-V6-tax-levels
-        work_folder: alter
-        model_file_name: gtap
-        solution_method: g
-        shock: altertms3final
-        map:
-          - 'pxwreg("EU_28")'
-      6:
         type: GTPVEW-V6
         input_folder: GTPVEW-V6
         work_folder: gtpvew
         model_file_name: gtpvew
         cmf_file_name: GTAPVu2
-      7:
+      6:
         type: GTAP-V6
         input_folder: GTAP-V6
         work_folder: gtap2
