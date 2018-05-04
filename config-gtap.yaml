@@ -34,11 +34,11 @@ simulations:
           - 'pxwreg("EU_28")'
       5:
         type: GTAP-V6
-        input_folder: GTAP-V6
+        input_folder: GTAP-V6-tax-levels
         work_folder: alter
         model_file_name: gtap
-        solution_method: j
-        shock: alterto5
+        solution_method: g
+        shock: altertms3final
         map:
           - 'pxwreg("EU_28")'
       6:
