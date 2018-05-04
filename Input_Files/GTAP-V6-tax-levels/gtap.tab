@@ -4079,11 +4079,69 @@ BackSolve delMTAX using E_delMTAX;
 >!
 
 !<=====Additions for Auto-GTAP=======>!
+VARIABLE (Levels, Linear_var=to)
+    (all,i,NSAV_COMM)(all,r,REG)                   TO_L(i,r)
+    ##;
+VARIABLE (Levels, Linear_var=tf)
+    (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)  TF_L(i,j,r)
+    ##;
+!<
+VARIABLE (Levels, Linear_var=tpd)
+    (all,i,TRAD_COMM)(all,r,REG)                  TPD_L(i,r)
+    ##;
+>!
+!<VARIABLE (Levels, Linear_name=tpi)
+    (all,i,TRAD_COMM)(all,r,REG)                  TPI_L(i,r)
+    ##;>!
+VARIABLE (Levels, Linear_var=tgd)
+    (all,i,TRAD_COMM)(all,r,REG)                  TGD_L(i,r)
+    ##;
+!<VARIABLE (Levels, Linear_name=tgi)
+    (all,i,TRAD_COMM)(all,r,REG)                  TGI_L(i,r)
+    ##;>!
+VARIABLE (Levels, Linear_var=tfd)
+    (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG) TFD_L(i,j,r)
+    ##;
+!<VARIABLE (Levels, Linear_name=tfi)
+    (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG) TFI_L(i,j,r)
+    ##;>!
+VARIABLE (Levels, Linear_var=txs)
+    (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)       TXS_L(i,r,s)
+    ##;
 VARIABLE (Levels, Linear_var=tms)
-(all,i,TRAD_COMM)(all,r,REG)(all,s,REG)      TMS_L(i,r,s)
-# import tax in s on good i imported from region r (levels value) # ;
+    (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)       TMS_L(i,r,s)
+    # import tax in s on good i imported from region r (levels value) (100 = no tax or subsidy)# ;
 
-Zerodivide Default 1.0 ;
-Formula (initial) (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
-        TMS_L(i,r,s) = VIMS(i,r,s)/VIWS(i,r,s) ;
-Zerodivide Off ;
+Zerodivide default 1;
+Formula (initial)
+    (all,i,NSAV_COMM)(all,r,REG)
+    TO_L(i,r)    = 100*{[VOA(i,r)/VOM(i,r)]};
+Formula (initial)
+    (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+    TF_L(i,j,r)  = 100*{[VFA(i,j,r)/VFM(i,j,r)]};
+!<
+Formula (initial)
+    (all,i,TRAD_COMM)(all,r,REG)
+    TPD_L(i,r)   =  100*{[VDPA(i,r)/VDPM(i,r)]};
+>!
+!<Formula (initial)
+    (all,i,TRAD_COMM)(all,r,REG)
+    TPI_L(i,r)   = 100*{[VIPA(i,r)/VIPM(i,r)]};>!
+Formula (initial)
+    (all,i,TRAD_COMM)(all,r,REG)
+    TGD_L(i,r)   = 100*{[VDGA(i,r)/VDGM(i,r)]};
+!<Formula (initial)
+    (all,i,TRAD_COMM)(all,r,REG)
+    TGI_L(i,r)   = 100*{[VIGA(i,r)/VIGM(i,r)]};>!
+Formula (initial)
+    (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+    TFD_L(i,j,r) = 100*{[VDFA(i,j,r)/VDFM(i,j,r)]};
+!<Formula (initial)
+    (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+    TFI_L(i,j,r) = 100*{[VIFA(i,j,r)/VIFM(i,j,r)]};>!
+Formula (initial)
+    (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+    TXS_L(i,r,s) = 100*{[VXMD(i,r,s)/VXWD(i,r,s)]};
+Formula (initial)
+    (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+    TMS_L(i,r,s) = 100*{[VIMS(i,r,s)/VIWS(i,r,s)]};
