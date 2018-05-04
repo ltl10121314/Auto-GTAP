@@ -30,6 +30,7 @@ simulations:
         type: GTAP-Adjust
         input_folder: GTAP-Adjust
         work_folder: adjust
+        shock: OceanGrains
       5:
         type: GTAP-V6
         input_folder: GTAP-V6

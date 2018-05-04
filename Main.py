@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-5-2"
+__altered__ = "2018-5-4"
 
 # Import methods
 import os, subprocess  # External methods
@@ -79,7 +79,7 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
 
         if part_type == "GTAP-Adjust":
-            part_shock = "placeholder"
+            part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
 
             GTAPAdjustCMF(simulation_name, part_solution_method, part_work_folder, part_shock)
 

@@ -3,7 +3,7 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-5-4"
 __altered__ = "2018-5-4"
 
-from SimulationShocks import SimulationShocks
+from GTAPAdjustShocks import GTAPAdjustShocks
 
 
 class GTAPAdjustCMF(object):
@@ -111,13 +111,7 @@ class GTAPAdjustCMF(object):
             'Verbal Description = Adjust GTAP database  ;\n'
         ]
 
-        line_list_shocks = [
-            '\n',
-            '!    old exog                new exog   !   \n',
-            'swap qdem("GrainsCropsA","Oceania")=vCOSTS("GrainsCropsA","Oceania");\n',
-            'final_level  vCOSTS("GrainsCropsA","Oceania")= 50000; \n',
-            'Verbal Description = Adjust GTAP database  ;\n'
-        ]
+        line_list_shocks = GTAPAdjustShocks(self.shock_type).create()
 
         # Combine line lists
         line_list_total = line_list_main + line_list_shocks
