@@ -47,7 +47,7 @@ class SimulationShocks(object):
                 "xSubset REG1 is subset of REG;\n",
                 "xSet XREG = REG - REG1;\n",
                 'swap dtbalr(XREG) = cgdslack(XREG);\n'
-                'final_level tms(TRAD_COMM,REG,REG) = uniform 1.03;\n'
+                'final_level tms(TRAD_COMM,REG,REG) = uniform 103;\n'
             ]
 
         if self.shock_type == "pfactorworld":
