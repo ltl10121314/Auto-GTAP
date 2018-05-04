@@ -4077,3 +4077,13 @@ BackSolve delMTAX using E_delMTAX;
     END OF GTAP.TAB FILE
     ====================
 >!
+
+!<=====Additions for Auto-GTAP=======>!
+VARIABLE (Levels, Linear_var=tms)
+(all,i,TRAD_COMM)(all,r,REG)(all,s,REG)      TMS_L(i,r,s)
+# import tax in s on good i imported from region r (levels value) # ;
+
+Zerodivide Default 1.0 ;
+Formula (initial) (all,i,TRAD_COMM)(all,r,REG)(all,s,REG)
+        TMS_L(i,r,s) = VIMS(i,r,s)/VIWS(i,r,s) ;
+Zerodivide Off ;
