@@ -64,7 +64,7 @@ for simulation_name in config.simulation_list:
                       config.yaml_file["parameter_modifications"][
                           config.sim_property(simulation_name, "parameter_modifications")])
 
-        if part_type == "GTPVEW-V6":
+        if part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
             cmf_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["cmf_file_name"]
 
