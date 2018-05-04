@@ -31,6 +31,25 @@ class SimulationShocks(object):
                 'Shock to(NSAV_COMM,REG) = uniform 5;\n'
             ]
 
+        # This shock doesn't actually work
+        if self.shock_type == "alterto7target":
+            line_list_shocks = [
+                "xSet REG1 (RestofWorld);\n",
+                "xSubset REG1 is subset of REG;\n",
+                "xSet XREG = REG - REG1;\n",
+                'swap dtbalr(XREG) = cgdslack(XREG);\n'
+                'Shock to(NSAV_COMM,REG) = target% 7 from file to.shk;\n'
+            ]
+
+        if self.shock_type == "altertms3final":
+            line_list_shocks = [
+                "xSet REG1 (RestofWorld);\n",
+                "xSubset REG1 is subset of REG;\n",
+                "xSet XREG = REG - REG1;\n",
+                'swap dtbalr(XREG) = cgdslack(XREG);\n'
+                'final_level tms(TRAD_COMM,REG,REG) = uniform 1.03;\n'
+            ]
+
         if self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;\n']
 
