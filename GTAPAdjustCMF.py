@@ -24,7 +24,7 @@ class GTAPAdjustCMF(object):
             '!check-on-read elements = warn; ! Optional: very often needed\n',
             'cpu=yes ; ! Optional: Reports CPU times for various stages\n',
             'log file = GtapAdjust.log;  ! Optional\n',
-            '! Input files:\n',
+            '! input files:\n',
             'File INFILE = work\orig.har; ! Normalized GTAP data - containing flows and sets\n',
             '! Output files:\n',
             'File Initial = work\InitialRpt.har; ! Diagnostic output for pre-adjustment data\n',

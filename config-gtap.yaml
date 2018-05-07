@@ -19,6 +19,8 @@ simulations:
         type: MSplitCom-Exe
         input_folder: MSplitCom-Exe
         work_folder: MSplitCom-Exe
+        additional_input_folders:
+          - HarForSplit
       3:
         type: GTAP-V6
         input_folder: GTAP-V6-tax-levels
