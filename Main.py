@@ -4,7 +4,7 @@ __created__ = "2018-3-9"
 __altered__ = "2018-5-4"
 
 # Import methods
-import os, subprocess, shutil, distutils  # External methods
+import os, subprocess, shutil, distutils.dir_util  # External methods
 # Import My Methods
 from CleanWorkFiles import CleanWorkFiles
 from CopyInputFiles import CopyInputFiles
@@ -44,7 +44,9 @@ for simulation_name in config.simulation_list:
         CopyInputFiles(simulation_name, part_input_folder, part_work_folder).copy()
 
         for additional_input_folder in config.part_additional_input_folders(simulation_name,part_num):
-            distutils.dir_util.copytree("Input_Files\{0}".format(additional_input_folder),"Work_Files\{0}\{1}".format(simulation_name,part_work_folder))
+            # need to use this copy method to overwrite files/folders (or copy files to folders taht already exist)
+            distutils.dir_util.copy_tree("Input_Files\{0}".format(additional_input_folder),
+                                         "Work_Files\{0}\{1}".format(simulation_name, part_work_folder))
 
         # Copy Work files from the previous part to the work directory for this part, unless this is the first part
         if part_num != 1:
