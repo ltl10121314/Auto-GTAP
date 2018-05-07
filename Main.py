@@ -53,7 +53,11 @@ for simulation_name in config.simulation_list:
 
         # Run the actual work for this part, depending on which type of part it is
         if part_type == "GTPAg2":
-            AggregateModelData(simulation_name, part_work_folder)
+            agg_scheme_file=config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+                "agg_scheme_file"]
+            data_subfolder=config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+                "data_subfolder"]
+            AggregateModelData(simulation_name, part_work_folder,agg_scheme_file,data_subfolder)
 
         if part_type == "MSplitCom-Exe":
             SplitCommodities(simulation_name)

@@ -13,6 +13,8 @@ simulations:
         type: GTPAg2
         input_folder: GTPAg2
         work_folder: GTPAg2
+        data_subfolder: 2014
+        agg_scheme_file: default.txt
       2:
         type: MSplitCom-Exe
         input_folder: MSplitCom-Exe
