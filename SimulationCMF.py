@@ -3,7 +3,7 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-3-13"
 __altered__ = "2018-5-3"
 
-from SimulationShocks import SimulationShocks
+from Shocks import Shocks
 
 
 class SimulationCMF(object):
@@ -111,7 +111,7 @@ class SimulationCMF(object):
                 "Rest Endogenous ;"
             ]
 
-            line_list_shocks = SimulationShocks(self.shock_type).create()
+            line_list_shocks = Shocks(self.shock_type).create()
 
         if self.model_type == "GTAP-V6":
             line_list_header = [
@@ -146,7 +146,7 @@ class SimulationCMF(object):
                 "Rest Endogenous ;"
             ]
 
-            line_list_shocks = SimulationShocks(self.shock_type).create()
+            line_list_shocks = Shocks(self.shock_type).create()
 
         if self.model_type == "gtap-v7":
             line_list_header = [
@@ -198,7 +198,7 @@ class SimulationCMF(object):
                 "Rest endogenous;\n"
             ]
 
-            line_list_shocks = SimulationShocks(self.shock_type).create()
+            line_list_shocks = Shocks(self.shock_type).create()
 
         # Combine line lists
         line_list_total = line_list_header + line_list_method + line_list_exogendo \

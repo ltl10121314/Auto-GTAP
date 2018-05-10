@@ -1,11 +1,11 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-4-18"
-__altered__ = "2018-5-3"
+__altered__ = "2018-5-10"
 
 
-class SimulationShocks(object):
-    """Creates a line list of shocks for insertion into the simulation's CMF file"""
+class Shocks(object):
+    """Creates a line list of shocks for insertion into the GTAP CMF file"""
 
     def __init__(self, shock_type: str) -> None:
         self.shock_type = shock_type
@@ -52,5 +52,16 @@ class SimulationShocks(object):
 
         if self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;\n']
+
+
+        """Creates a line list of shocks for insertion into the GTAP-Adjust's CMF file"""
+        if self.shock_type == "OceanGrains":
+            line_list_shocks = [
+                '\n',
+                '!    old exog                new exog   !   \n',
+                'swap qdem("GrainsCropsA","Oceania")=vCOSTS("GrainsCropsA","Oceania");\n',
+                'final_level  vCOSTS("GrainsCropsA","Oceania")= 50000; \n',
+                'Verbal Description = Adjust GTAP database  ;\n'
+            ]
 
         return line_list_shocks

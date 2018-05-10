@@ -1,7 +1,7 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-5-4"
+__altered__ = "2018-5-10"
 
 # Import methods
 import os, subprocess, shutil, distutils.dir_util  # External methods

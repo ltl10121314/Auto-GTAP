@@ -3,7 +3,7 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-5-4"
 __altered__ = "2018-5-4"
 
-from GTAPAdjustShocks import GTAPAdjustShocks
+from Shocks import Shocks
 
 
 class GTAPAdjustCMF(object):
@@ -111,7 +111,7 @@ class GTAPAdjustCMF(object):
             'Verbal Description = Adjust GTAP database  ;\n'
         ]
 
-        line_list_shocks = GTAPAdjustShocks(self.shock_type).create()
+        line_list_shocks = Shocks(self.shock_type).create()
 
         # Combine line lists
         line_list_total = line_list_main + line_list_shocks
