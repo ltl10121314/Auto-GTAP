@@ -57,11 +57,11 @@ class Shocks(object):
         """Creates a line list of shocks for insertion into the GTAP-Adjust's CMF file"""
         if self.shock_type == "OceanGrains":
             line_list_shocks = [
-                '\n',
-                '!    old exog                new exog   !   \n',
-                'swap qdem("GrainsCropsA","Oceania")=vCOSTS("GrainsCropsA","Oceania");\n',
-                'final_level  vCOSTS("GrainsCropsA","Oceania")= 50000; \n',
-                'Verbal Description = Adjust GTAP database  ;\n'
+                '',
+                '!    old exog                new exog   !   ',
+                'swap qdem("GrainsCropsA","Oceania")=vCOSTS("GrainsCropsA","Oceania");',
+                'final_level  vCOSTS("GrainsCropsA","Oceania")= 50000; ',
+                'Verbal Description = Adjust GTAP database  ;'
             ]
 
         return line_list_shocks
