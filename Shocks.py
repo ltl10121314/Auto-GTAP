@@ -14,44 +14,44 @@ class Shocks(object):
         # Create lines for shocks
 
         if self.shock_type == "pop5":
-            line_list_shocks = ['Shock pop(REG) = uniform 5;\n']
+            line_list_shocks = ['Shock pop(REG) = uniform 5;']
 
         if self.shock_type == "gdp5":
             line_list_shocks = [
-                'Swap qgdp(REG) = aoreg(REG);\n',
-                'Shock qgdp(REG) = uniform 5;\n'
+                'Swap qgdp(REG) = aoreg(REG);',
+                'Shock qgdp(REG) = uniform 5;'
             ]
 
         if self.shock_type == "alterto5":
             line_list_shocks = [
-                "xSet REG1 (RestofWorld);\n",
-                "xSubset REG1 is subset of REG;\n",
-                "xSet XREG = REG - REG1;\n",
-                'swap dtbalr(XREG) = cgdslack(XREG);\n'
-                'Shock to(NSAV_COMM,REG) = uniform 5;\n'
+                "xSet REG1 (RestofWorld);",
+                "xSubset REG1 is subset of REG;",
+                "xSet XREG = REG - REG1;",
+                'swap dtbalr(XREG) = cgdslack(XREG);'
+                'Shock to(NSAV_COMM,REG) = uniform 5;'
             ]
 
         # This shock doesn't actually work
         if self.shock_type == "alterto7target":
             line_list_shocks = [
-                "xSet REG1 (RestofWorld);\n",
-                "xSubset REG1 is subset of REG;\n",
-                "xSet XREG = REG - REG1;\n",
-                'swap dtbalr(XREG) = cgdslack(XREG);\n'
-                'Shock to(NSAV_COMM,REG) = target% 7 from file to.shk;\n'
+                "xSet REG1 (RestofWorld);",
+                "xSubset REG1 is subset of REG;",
+                "xSet XREG = REG - REG1;",
+                'swap dtbalr(XREG) = cgdslack(XREG);'
+                'Shock to(NSAV_COMM,REG) = target% 7 from file to.shk;'
             ]
 
         if self.shock_type == "altertms3final":
             line_list_shocks = [
-                "xSet REG1 (RestofWorld);\n",
-                "xSubset REG1 is subset of REG;\n",
-                "xSet XREG = REG - REG1;\n",
-                'swap dtbalr(XREG) = cgdslack(XREG);\n'
-                'final_level tms(TRAD_COMM,REG,REG) = uniform 103;\n'
+                "xSet REG1 (RestofWorld);",
+                "xSubset REG1 is subset of REG;",
+                "xSet XREG = REG - REG1;",
+                'swap dtbalr(XREG) = cgdslack(XREG);'
+                'final_level tms(TRAD_COMM,REG,REG) = uniform 103;'
             ]
 
         if self.shock_type == "pfactorworld":
-            line_list_shocks = ['Shock pfactwld = uniform 10;\n']
+            line_list_shocks = ['Shock pfactwld = uniform 10;']
 
 
         """Creates a line list of shocks for insertion into the GTAP-Adjust's CMF file"""

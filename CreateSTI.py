@@ -22,18 +22,18 @@ class CreateSTI(object):
         if self.sti_type == "sltoht":
             line_list = [
                 # First, select general options
-                "bat         		! Run in batch. \n",
-                "log		        ! Start a log file \n",
-                "b		        	! Output to both terminal and log file \n",
-                "{0}_sltoth.log	    	! Name of log file\n".format(self.input_file_name),
-                "ses                ! Output to spreadsheet with element labels \n",
-                ",                  ! Character to use for data separation \n",
-                "shl                ! Show level results, if available \n",
-                "                   ! Done selecting general options \n",
-                "{0}.sl4            ! Location of sl4 file to convert to csv \n".format(self.input_file_name),
-                "c                  ! Want both levels and cumulative from solution file \n",
-                "y                  ! Use file to choose which variables and components to ouptut \n",
-                "{0}.map            ! Name of file to use choosing which variables and components to output \n".format(
+                "bat         		! Run in batch. ",
+                "log		        ! Start a log file ",
+                "b		        	! Output to both terminal and log file ",
+                "{0}_sltoth.log	    	! Name of log file".format(self.input_file_name),
+                "ses                ! Output to spreadsheet with element labels ",
+                ",                  ! Character to use for data separation ",
+                "shl                ! Show level results, if available ",
+                "                   ! Done selecting general options ",
+                "{0}.sl4            ! Location of sl4 file to convert to csv ".format(self.input_file_name),
+                "c                  ! Want both levels and cumulative from solution file ",
+                "y                  ! Use file to choose which variables and components to ouptut ",
+                "{0}.map            ! Name of file to use choosing which variables and components to output ".format(
                     self.input_file_name),
                 "{0}.csv            ! Name of file to output to".format(self.input_file_name)
             ]
@@ -41,4 +41,4 @@ class CreateSTI(object):
 
         # Create final file
         with open("{0}.sti".format(output_file_name), "w+") as writer:  # Create the empty file
-            writer.writelines(line_list)  # write the line list to the file
+            writer.writelines(line + '\n' for line in line_list)  # write the line list to the file
