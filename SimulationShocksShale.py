@@ -24,8 +24,8 @@ class SimulationShocks(object):
         cpi_2016 = 240.0
         gas_price_shock = 100 * (gas_price_2016 / cpi_2016) / (gas_price_2005 / cpi_2005) - 100
         line_list_gas_price_shocks = [
-            ' Swap aoall("Gas", "USA") = pm("Gas", "USA");\n',
-            ' Shock pm("Gas","USA") = uniform {0};\n'.format(gas_price_shock)
+            ' Swap aoall("Gas", "USA") = pm("Gas", "USA");',
+            ' Shock pm("Gas","USA") = uniform {0};'.format(gas_price_shock)
         ]
 
         us_gdp_2005 = 14.706  # https://data.worldbank.org/indicator/NY.GDP.MKTP.PP.KD?contextual=default&locations=US-1W
@@ -37,12 +37,12 @@ class SimulationShocks(object):
         us_gdp_shock = 100 * us_gdp_2016 / us_gdp_2005 - 100
         non_us_gdp_shock = 100 * non_us_gdp_2016 / non_us_gdp_2005 - 100
         line_list_gdp_shocks = [
-            ' Swap aoreg = qgdp;\n',
-            ' Shock qgdp("USA") = uniform {0};\n'.format(us_gdp_shock),
-            ' XSET USset ## (USA);\n',
-            ' XSUBSET USset is subset of REG;\n',
-            ' XSET non_US = REG - USset;\n',
-            ' Shock qgdp(non_US) = uniform {0};\n'.format(non_us_gdp_shock)
+            ' Swap aoreg = qgdp;',
+            ' Shock qgdp("USA") = uniform {0};'.format(us_gdp_shock),
+            ' XSET USset ## (USA);',
+            ' XSUBSET USset is subset of REG;',
+            ' XSET non_US = REG - USset;',
+            ' Shock qgdp(non_US) = uniform {0};'.format(non_us_gdp_shock)
         ]
 
         us_gas_production_2005 = 18050598  # Source: EIA Series N9070US2
@@ -58,14 +58,14 @@ class SimulationShocks(object):
         us_gas_export_shock = 100 * (us_gas_exports_2016 / us_gas_exports_2005) - 100
 
         line_list_gas_shocks_actual = [
-            ' Swap pm("Gas", "USA") = to("Gas", "USA");\n',
-            ' Swap qo("Gas","USA") = aoall("Gas", "USA");\n',
-            ' Swap qiw("Gas","USA") = tm("Gas", "USA");\n',
-            ' Swap qxw("Gas","USA") = tx("Gas", "USA");\n',
-            ' Shock pm("Gas","USA") = uniform {0};\n'.format(gas_price_shock),
-            ' Shock qo("Gas","USA") = uniform {0};\n'.format(us_gas_production_shock),
-            ' Shock qiw("Gas","USA") = uniform {0};\n'.format(us_gas_import_shock),
-            ' Shock qxw("Gas","USA") = uniform {0};\n'.format(us_gas_export_shock)
+            ' Swap pm("Gas", "USA") = to("Gas", "USA");',
+            ' Swap qo("Gas","USA") = aoall("Gas", "USA");',
+            ' Swap qiw("Gas","USA") = tm("Gas", "USA");',
+            ' Swap qxw("Gas","USA") = tx("Gas", "USA");',
+            ' Shock pm("Gas","USA") = uniform {0};'.format(gas_price_shock),
+            ' Shock qo("Gas","USA") = uniform {0};'.format(us_gas_production_shock),
+            ' Shock qiw("Gas","USA") = uniform {0};'.format(us_gas_import_shock),
+            ' Shock qxw("Gas","USA") = uniform {0};'.format(us_gas_export_shock)
         ]
 
         # NB: Oil data available at https://www.eia.gov/dnav/pet/pet_sum_crdsnd_k_a.htm
@@ -88,14 +88,14 @@ class SimulationShocks(object):
         us_oil_export_shock = 100 * (us_oil_exports_2016 / us_oil_exports_2005) - 100
 
         line_list_oil_shocks_actual = [
-            ' Swap pm("Oil", "USA") = to("Oil", "USA");\n',
-            ' Swap qo("Oil","USA") = aoall("Oil", "USA");\n',
-            ' Swap qiw("Oil","USA") = tm("Oil", "USA");\n',
-            ' Swap qxw("Oil","USA") = tx("Oil", "USA");\n',
-            ' Shock pm("Oil","USA") = uniform {0};\n'.format(oil_price_shock),
-            ' Shock qo("Oil","USA") = uniform {0};\n'.format(us_oil_production_shock),
-            ' Shock qiw("Oil","USA") = uniform {0};\n'.format(us_oil_import_shock),
-            ' Shock qxw("Oil","USA") = uniform {0};\n'.format(us_oil_export_shock)
+            ' Swap pm("Oil", "USA") = to("Oil", "USA");',
+            ' Swap qo("Oil","USA") = aoall("Oil", "USA");',
+            ' Swap qiw("Oil","USA") = tm("Oil", "USA");',
+            ' Swap qxw("Oil","USA") = tx("Oil", "USA");',
+            ' Shock pm("Oil","USA") = uniform {0};'.format(oil_price_shock),
+            ' Shock qo("Oil","USA") = uniform {0};'.format(us_oil_production_shock),
+            ' Shock qiw("Oil","USA") = uniform {0};'.format(us_oil_import_shock),
+            ' Shock qxw("Oil","USA") = uniform {0};'.format(us_oil_export_shock)
         ]
 
         if self.shock_type == "experiment":
@@ -107,9 +107,9 @@ class SimulationShocks(object):
                                + line_list_oil_shocks_actual
 
         if self.shock_type == "pop5":
-            line_list_shocks = ['Shock pop(REG) = uniform 5;\n']
+            line_list_shocks = ['Shock pop(REG) = uniform 5;']
 
         if self.shock_type == "pfactorworld":
-            line_list_shocks = ['Shock pfactwld = uniform 10;\n']
+            line_list_shocks = ['Shock pfactwld = uniform 10;']
 
         return line_list_shocks
