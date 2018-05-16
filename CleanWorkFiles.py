@@ -1,7 +1,6 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-13"
-__altered__ = "2018-4-24"
 
 import os, shutil
 

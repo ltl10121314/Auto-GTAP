@@ -1,7 +1,6 @@
 __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
-__altered__ = "2018-5-10"
 
 # Import methods
 import os, subprocess, shutil, distutils.dir_util  # External methods
@@ -43,7 +42,7 @@ for simulation_name in config.simulation_list:
         # Copy input files for this part to the appropriate work directory
         CopyInputFiles(simulation_name, part_input_folder, part_work_folder).copy()
 
-        for additional_input_folder in config.part_additional_input_folders(simulation_name,part_num):
+        for additional_input_folder in config.part_additional_input_folders(simulation_name, part_num):
             # need to use this copy method to overwrite files/folders (or copy files to folders taht already exist)
             distutils.dir_util.copy_tree("Input_Files\{0}".format(additional_input_folder),
                                          "Work_Files\{0}\{1}".format(simulation_name, part_work_folder))
@@ -58,11 +57,11 @@ for simulation_name in config.simulation_list:
 
         # Run the actual work for this part, depending on which type of part it is
         if part_type == "GTPAg2":
-            agg_scheme_file=config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+            agg_scheme_file = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "agg_scheme_file"]
-            data_subfolder=config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+            data_subfolder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "data_subfolder"]
-            AggregateModelData(simulation_name, part_work_folder,agg_scheme_file,data_subfolder)
+            AggregateModelData(simulation_name, part_work_folder, agg_scheme_file, data_subfolder)
 
         if part_type == "MSplitCom-Exe":
             SplitCommodities(simulation_name)
