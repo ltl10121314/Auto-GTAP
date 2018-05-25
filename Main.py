@@ -3,8 +3,12 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-3-9"
 
 # Import methods
-import os, subprocess, shutil, distutils.dir_util  # External methods
-# Import My Methods
+# Methods from other sources
+import os
+import subprocess
+import shutil
+import distutils.dir_util
+# Methods defined in this program
 from CleanWorkFiles import CleanWorkFiles
 from CopyInputFiles import CopyInputFiles
 from CreateSTI import CreateSTI
@@ -22,12 +26,10 @@ from AggregateModelData import AggregateModelData
 from GTAPAdjustCMF import GTAPAdjustCMF
 
 # Call Methods
-
 # Load config files that will control program
 config = CreateConfig("config-gtap.yaml")
 # Delete working files directory
 CleanWorkFiles()
-
 # For each simulation, perform the different subparts (data aggregation, splitting,
 # experiment simulation, etc) that make up that simulation
 for simulation_name in config.simulation_list:
