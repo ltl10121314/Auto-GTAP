@@ -6,12 +6,12 @@ import os, shutil
 
 
 class CleanWorkFiles(object):
-    """Deletes contents of Work_Files"""
+    """Deletes contents of WorkFiles"""
 
     def __init__(self) -> None:
         # From https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
-        for the_file in os.listdir('Work_Files'):  # for all entries in Work_Files
-            file_path = os.path.join('Work_Files', the_file)
+        for the_file in os.listdir('WorkFiles'):  # for all entries in WorkFiles
+            file_path = os.path.join('WorkFiles', the_file)
             try:
                 # deletes entry if it is a file
                 if os.path.isfile(file_path):

@@ -46,8 +46,8 @@ for simulation_name in config.simulation_list:
 
         for additional_input_folder in config.part_additional_input_folders(simulation_name, part_num):
             # need to use this copy method to overwrite files/folders (or copy files to folders taht already exist)
-            distutils.dir_util.copy_tree("Input_Files\{0}".format(additional_input_folder),
-                                         "Work_Files\{0}\{1}".format(simulation_name, part_work_folder))
+            distutils.dir_util.copy_tree("InputFiles\{0}".format(additional_input_folder),
+                                         "WorkFiles\{0}\{1}".format(simulation_name, part_work_folder))
 
         # Copy Work files from the previous part to the work directory for this part, unless this is the first part
         if part_num != 1:
@@ -71,7 +71,7 @@ for simulation_name in config.simulation_list:
         if part_type == "modify_har":
             # Modify_HAR directly modifies a HAR file
             # This module should be rarely used
-            ModifyHAR("Work_Files\\" + simulation_name, "olddefault", "default",
+            ModifyHAR("WorkFiles\\" + simulation_name, "olddefault", "default",
                       config.yaml_file["parameter_modifications"][
                           config.sim_property(simulation_name, "parameter_modifications")])
 
@@ -79,8 +79,8 @@ for simulation_name in config.simulation_list:
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
             cmf_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["cmf_file_name"]
 
-            # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
-            os.chdir("Work_Files\\{0}\\{1}".format(simulation_name, part_work_folder))
+            # Change working directory to WorkFiles so all output (and logs) will go there when gemsim or sltoht is called
+            os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
             # Create GSS and GST files for shocks and model gemsim
             subprocess.call("tablo -sti {0}.sti".format(model_file_name))
             subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name))
@@ -93,8 +93,8 @@ for simulation_name in config.simulation_list:
 
             GTAPAdjustCMF(simulation_name, part_solution_method, part_work_folder, part_shock)
 
-            # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
-            os.chdir("Work_Files\\{0}\\{1}".format(simulation_name, part_work_folder))
+            # Change working directory to WorkFiles so all output (and logs) will go there when gemsim or sltoht is called
+            os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
             subprocess.call("adjust.bat")
             os.chdir("..")
             os.chdir("..")
@@ -109,8 +109,8 @@ for simulation_name in config.simulation_list:
             map = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["map"]
 
             SimulationCMF(simulation_name, part_solution_method, part_work_folder, part_shock, part_type)
-            # Change working directory to Work_Files so all output (and logs) will go there when gemsim or sltoht is called
-            os.chdir("Work_Files\\{0}\\{1}".format(simulation_name, part_work_folder))
+            # Change working directory to WorkFiles so all output (and logs) will go there when gemsim or sltoht is called
+            os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
             # Create GSS and GST files for shocks and model gemsim
             subprocess.call("tablo -sti {0}.sti".format(model_file_name))
             subprocess.call("gemsim -cmf {0}.cmf".format(model_file_name))
@@ -120,19 +120,19 @@ for simulation_name in config.simulation_list:
             CreateSTI(model_file_name, simulation_name, "sltoht")  # STI file controls running of sltoht
             subprocess.call("sltoht -sti {0}_sltoht.sti".format(model_file_name))
 
-            # Change directory back to Work_Files
+            # Change directory back to WorkFiles
             os.chdir("..")
             os.chdir("..")
             os.chdir("..")
 
 # Import simulation results into a single database
-os.chdir("Work_Files")
+os.chdir("WorkFiles")
 # load the various CSV files created by the experiment simulation into a database
 databaseSL4 = ImportCSV_SL4(config.csv_paths()).create()
 # Modify the database to make it more readable
 databaseMod = ModifyDatabase(databaseSL4).create()
 # Export the database to a results csv file
 ExportDictionary("Results.csv", databaseMod)
-# Copy results.csv to the Output_Files directory, and rename it with a timestamp
+# Copy results.csv to the OutputFiles directory, and rename it with a timestamp
 os.chdir("..")
 CreateOutput()

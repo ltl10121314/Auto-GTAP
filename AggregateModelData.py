@@ -16,7 +16,7 @@ class AggregateModelData(object):
         self.agg_scheme_file=agg_scheme_files
         self.data_subfolder=data_subfolder
 
-        work_directory = "Work_Files\\" + self.simulation_name + "\\" + self.part_work_folder + "\\GTAP10p2\\GTAP"
+        work_directory = "WorkFiles\\" + self.simulation_name + "\\" + self.part_work_folder + "\\GTAP10p2\\GTAP"
         os.chdir(work_directory)
         subprocess.call("runagg.bat {0} {1}".format(data_subfolder,agg_scheme_files))
 

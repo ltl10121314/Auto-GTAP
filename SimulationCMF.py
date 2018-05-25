@@ -204,6 +204,6 @@ class SimulationCMF(object):
                           + line_list_shocks
 
         # Create final file
-        cmf_file_name_with_path = "Work_Files\\" + self.simulation_name + "\\" + self.model_folder + "\\" + cmf_file_name
+        cmf_file_name_with_path = "WorkFiles\\" + self.simulation_name + "\\" + self.model_folder + "\\" + cmf_file_name
         with open(cmf_file_name_with_path, "w+") as writer:  # Create the empty file
             writer.writelines(line + '\n' for line in line_list_total)  # write the line list to the file

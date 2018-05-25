@@ -13,7 +13,7 @@ class SplitCommodities(object):
     def __init__(self, simulation_name: str) -> None:
         self.simulation_name = simulation_name
 
-        work_directory = "Work_Files\\" + self.simulation_name + "\\MSplitCom-Exe"
+        work_directory = "WorkFiles\\" + self.simulation_name + "\\MSplitCom-Exe"
         os.chdir(work_directory)
         subprocess.call("msplitbat.bat")
         os.chdir("..")

@@ -19,8 +19,8 @@ class MoveDatabaseFiles(object):
         self.source_part_folder = source_part_folder
         self.destination_part_folder = destination_part_folder
 
-        source_part_folder = "Work_Files\\" + self.simulation_name + "\\" + self.source_part_folder + "\\"
-        destination_part_folder = "Work_Files\\" + self.simulation_name + "\\" + self.destination_part_folder + "\\"
+        source_part_folder = "WorkFiles\\" + self.simulation_name + "\\" + self.source_part_folder + "\\"
+        destination_part_folder = "WorkFiles\\" + self.simulation_name + "\\" + self.destination_part_folder + "\\"
 
         if self.source_type == "GTPAg2":
             flexagg_output_folder = source_part_folder + "GTAP10p2\\GTAP\\output\\"
