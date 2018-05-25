@@ -18,6 +18,6 @@ class CreateOutput(object):
 
         # loop to copy and rename output files
         for file_name in self.list_of_files_to_copy:
-            # copy files with file_name from Input_Files to Work_Files, also appends current_time
+            # copy files with file_name from Work_Files to Output_Files, also appends current_time
             shutil.copy('Work_Files\\{0}'.format(file_name),
                         'Output_Files\\{1} {0}'.format(file_name, current_time))
