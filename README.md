@@ -1,14 +1,16 @@
 # Auto-GTAP Read Me #
 Andre Barbe  
-Read Me Last Updated: 2018-6-25  
+Last Updated: 2018-6-25  
 
 ## Abstract ##
-In principle, running a GTAP simulation is in a single DOS command that specifies the model and command file. 
-However, a typical GTAP-based research project includes not just the simulation, but a large amount of customization for building the simulation’s database, calculating shocks, and exporting results. 
-Auto-GTAP provides a unified framework for automating all these tasks.
+In principle, a GTAP simulation can be run with a single DOS command that specifies the model and command file. 
+However, in reality the process is typically much more cumbersome.
+A typical GTAP-based research project includes not just the simulation, but building the simulation’s database, calculating shocks, moving files between each step, and finally exporting results.
+These steps are typically be done "by hand" each time a simulation is run.
+Auto-GTAP provides a unified framework for automating these tasks, increasing the speed at which GTAP models can be revised and reducing the chance of user error.
 
 ## Introduction ##
-[Put pointers to where GTAP stuff is in Python]
+[Placeholder]
 
 ## Components of Auto-GTAP ##
 Files and folders in Auto-GTAP are organized into several groups based on their function. 
