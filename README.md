@@ -1,16 +1,33 @@
 # Auto-GTAP Read Me #
 Andre Barbe  
-Last Updated: 2018-6-25  
+Last Updated: 2018-6-26  
 
 ## Abstract ##
-In principle, a GTAP simulation can be run with a single DOS command that specifies the model and command file. 
-However, in reality the process is typically much more cumbersome.
-A typical GTAP-based research project includes not just the simulation, but building the simulation’s database, calculating shocks, moving files between each step, and finally exporting results.
-These steps are typically be done "by hand" each time a simulation is run.
-Auto-GTAP provides a unified framework for automating these tasks, increasing the speed at which GTAP models can be revised and reducing the chance of user error.
+In principle, a GTAP simulation can be run with a single DOS command, but in reality, the process ends up being much more compicated.
+This is because a typical GTAP-based research project includes not just the simulation, but building the simulation’s database, 
+calculating shocks, moving files between each step, and finally exporting results.
+While the simulation itself is automated, these other steps are typically done manually by the user.
+Auto-GTAP provides a unified framework for automating these tasks, 
+increasing the speed at which GTAP models can be revised and reducing the chance of user error.
 
-## Introduction ##
-[Placeholder]
+## Why use Auto-GTAP? ##
+The Global Trade Analysis Project (GTAP) model was developed in [citation] and 
+has frequently been used since to estimate the effect of government policies on international trade.
+However, the biggest advantage of the GTAP model is not the original model itself, but the ecosystem around it. 
+The canonical version introduced in [citation] has been updated to version 7 in [citation] 
+and contributors have developed other versions of it focusing on topics such as 
+energy [citation], biofuels [citation], and electricity [citation].
+Developers have also created a number of other software tools for dealing with the anciliary issues that crop up in these research projects,
+especially with databases.
+There are tools automating the process of data aggregation (GTAPAG2), disaggregation (SplitCom), revision (GTAPAdjust and AlterTax). 
+The existence of these tools makes it easy for developers to customize the model for their specific project, 
+as they do not have to reinvent the wheel.
+
+However, some parts of a GTAP-based research have not been automated. 
+In particular, there is no overarching framework controlling both the model and all these tools: 
+the process of running the tools, specifiying their settings, and moving the output to the input of other tools must all be done manually.
+
+Until now. Auto-GTAP provides a unified framework for running all parts of a GTAP-based research project.
 
 ## Components of Auto-GTAP ##
 Files and folders in Auto-GTAP are organized into several groups based on their function. 
