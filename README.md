@@ -1,76 +1,79 @@
 # Auto-GTAP Read Me
 
-Auto-GTAP project is a project to create a modern project format for CGE analysis. 
+Auto-GTAP project is a project to create a modern cross-platform project format for CGE research.
 
 ## Overview
 
-In principle, a GTAP simulation can be run with a single command. However, the reality is that the 
-process tends to be much more complicated. A typical GTAP-based research project will need to build 
+In principle, a GTAP simulation can be run with a single command. However, the reality is that the
+process tends to be much more complicated. A typical GTAP-based research project will need to build
 balance a database, calculate shocks, and shuffle around various files at each stage, in addition
 to running the simulation itself, all before finally exporting simulation results.
 
 While the simulation is an automated process, these ambient task require require user interaction.
-Auto-GTAP aims to provide a unified framework to lift these ambient tasks into the build toolchain.  
+Auto-GTAP aims to provide a unified framework to lift these ambient tasks into the build toolchain.
 The goal is to increase the speed and replicability of GTAP-based analyses, by reducing the amount
 of manual orchestration required historically.
 
 ## Why Auto-GTAP?
 
-The Global Trade Analysis Project (GTAP) model was developed in [citation] and 
-has frequently been used since to estimate the effect of government policies on international trade.
-However, the biggest advantage of the GTAP model is not the original model itself, but the ecosystem around it. 
-The canonical version introduced in [citation] has been updated to version 7 in [citation] 
-and contributors have developed other versions of it focusing on topics such as 
-energy [citation], biofuels [citation], and electricity [citation].
-Developers have also created a number of other software tools for dealing with the 
-anciliary issues that crop up in these research projects, especially with databases.
-There are tools automating the process of data aggregation (GTAPAG2), disaggregation (SplitCom), 
-revision (GTAPAdjust and AlterTax). 
-The existence of these tools makes it easy for developers to customize the model for their specific project, 
-as they do not have to reinvent the wheel.
+The Global Trade Analysis Project (GTAP) model was developed in [19XX]() to estimate the effect
+of government policies on international trade.
 
-However, some parts of a GTAP-based research have not been automated. 
-In particular, there is no overarching framework controlling both the model and all these tools: 
-the process of running the tools, specifiying their settings, 
-and moving the output to the input of other tools must all be done manually.
+The popularity of the GTAP modeling framework is due in large part to the ecosystem of tools and 
+model extensions developed and contributed by researchers over years.
 
-Until now. Auto-GTAP provides a unified framework for running all parts of a GTAP-based research project.
+Alongside the canonical model, contributors have developed numerous extensions to focus on a variety
+of topics such as [energy](), [biofuels](), and [electricity](). 
 
-## Components of Auto-GTAP
+Developers have also created a number of other software tools for dealing with the anciliary issues 
+that crop up in these research projects, especially with databases. There are tools automating the 
+process of data [aggregation](https://www.gtap.agecon.purdue.edu/products/packages.asp), 
+[disaggregation](https://www.gtap.agecon.purdue.edu/resources/splitcom.asp), 
+[other](https://www.copsmodels.com/archivep.htm) types of 
+[revisions](https://www.copsmodels.com/webhelp/rungtap/index.html?hc_altertax.htm). The existence 
+of these tools makes it possible for developers to tailor the model for their specific project.
 
-Files and directories in Auto-GTAP are organized into several groups based on their function. 
-These groups are `InputFiles`, `WorkFiles`, `OutputFiles`, Python files, and configuration files.
+However, some parts of a GTAP-based research have not been automated. In particular, there is no 
+overarching framework controlling both the model and all these tools: the process of running the 
+tools, specifying their settings, and moving the output to the input of other tools must all be 
+done manually.
 
-The `InputFiles` directory and subdirectories contain the external inputs into the model. 
-The raw data or code is taken directly from other sources with no modification whatsoever. 
-This directory includes GTAP models, data, and external programs (like SplitCom). 
-Currently, several standard models are included but the intent is for researchers to add new 
-subdirectories containing the data and models they are using for their project. 
-For example, if a developer is using GTAP-BIO to look at sugarcane trade, the might add an additional 
-subdirectory for GTAP-BIO and one for sugarcane data. 
+Auto-GTAP provides a framework to define a proper toolchain in GTAP-based research projects.
 
-Note that the disaggregated GTAP database is not included here in the public version of the program, as that data is licensed. 
-However, it is recommended that researchers with access to that database include it in their version.
+## Getting started
 
-The `OutputFiles` directory contains the final results of various simulations run by Auto-GTAP. 
-This directory does not contain all results generation by the simulation. 
-As part of the Auto-GTAP configuration file, researchers can configure which results they wish to export, 
-and only those results are exported.
+### Prerequisites
 
-The `WorkFiles` directory contains temporary files used by Auto-GTAP as it is in the process of running the 
-different parts of a GTAP project. 
+TODO: describe the environment
+ 
+ 
+### Clone the repository 
+ 
+ ```powershell
+cd your_project_directory
 
-It contains all files generated by the various programs and simulations run by Auto-GTAP and thus will 
-have all results of the most recently run Auto-GTAP run (`OutputFiles` only has a subset of these results). 
-All contents of this directory are deleted at the beginning of each Auto-GTAP run.
+git clone https://github.com/andre-barbe/Auto-GTAP.git
+```
 
-The python files preform the actual work of Auto-GTAP: moving files between directories, editing files, and executing programs. 
-The python files are grouped into a number of different modules based on their purpose. The primary python file is `Main` 
-and it calls all the other modules. 
+### Create a Python virtual environment
+ 
+ ```powershell
+python -m venv venv 
+```
 
-These other modules all relate to a particular task in Auto-GTAP: 
-deleting temporary files, moving files from `InputFiles` to `WorkFiles`, generating GEMSIM programs, running simulations, etc.
+### Initialize the workspace
 
-The final component of Auto-GTAP is the configuration file. 
-This file gives the specifics to the Python files about which steps to run, in which order, with which models and data, etc. 
-The intent is to keep the Python files generic and put details relevant to particular model applications in the configuration file.
+```powershell
+./setup.ps1
+```
+
+## Example projects
+
+TODO
+
+- [Hello World!](examples/hello_world_example)
+- [Free Trade Agreement](examples/free_trade_agreement_example)
+
+## Documentation
+
+- [Components of Auto-GTAP](docs/components-of-auto-gtap.md)
