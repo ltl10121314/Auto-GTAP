@@ -13,16 +13,20 @@ Auto-GTAP provides a unified framework for automating these tasks,
 increasing the speed at which GTAP models can be revised and reducing the chance of user error.
 
 ## Why use Auto-GTAP? ##
-The Global Trade Analysis Project (GTAP) model was developed in [citation] and 
-has frequently been used since to estimate the effect of government policies on international trade.
+The Global Trade Analysis Project (GTAP) model is frequently used to estimate the effect of government policies on international trade.
 However, the biggest advantage of the GTAP model is not the original model itself, but the ecosystem around it. 
-The canonical version introduced in [citation] has been updated to version 7 in [citation] 
+The original version introduced in 1995 has been updated to version 7 in Corong et al. (2017) 
 and contributors have developed other versions of it focusing on topics such as 
-energy [citation], biofuels [citation], and electricity [citation].
-Developers have also created a number of other software tools for dealing with the 
+energy (GTAP-E), biofuels (GTAP-BIO), and land use (GTAP-AEZ).
+Perhaps the greatest advantage of the GTAP model is data availability.
+GTAP (the orginization behidn the GTAP model) also provides detailed and regularly updated databases of the world economy.
+As a result of these tools and data, many non-GTAP models are built using the GTAP database (https://www.gtap.agecon.purdue.edu/about/data_models.asp).
+
+As a result of the popularity of the GTAP model and database,
+developers have  created a number of software tools for dealing with the 
 anciliary issues that crop up in these research projects, especially with databases.
-There are tools automating the process of data aggregation (GTAPAG2), disaggregation (SplitCom), 
-revision (GTAPAdjust and AlterTax). 
+There are tools automating the process of data aggregation (GTPAg2), disaggregation (SplitCom), 
+revision (GTAP-Adjust and AlterTax). 
 The existence of these tools makes it easy for developers to customize the model for their specific project, 
 as they do not have to reinvent the wheel.
 
@@ -67,3 +71,6 @@ deleting temporary files, moving files from InputFiles to WorkFiles, generating 
 The final component of Auto-GTAP is the configuration file. 
 This file gives the specifics to the Python files about which steps to run, in which order, with which models and data, etc. 
 The intent is to keep the Python files generic and put details relevant to particular model applications in the configuration file.
+
+## References ##
+Corong et al. 2017: https://jgea.org/resources/jgea/ojs/index.php/jgea/article/view/47
