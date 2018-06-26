@@ -69,11 +69,12 @@ python -m venv venv
 
 ## Example projects
 
-TODO
-
 - [Hello World!](examples/hello_world_example)
 - [Free Trade Agreement](examples/free_trade_agreement_example)
 
 ## Documentation
 
 - [Components of Auto-GTAP](docs/components-of-auto-gtap.md)
+
+## References
+- Corong et al. 2017: https://jgea.org/resources/jgea/ojs/index.php/jgea/article/view/47
