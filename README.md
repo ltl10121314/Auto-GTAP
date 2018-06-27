@@ -23,6 +23,10 @@ Until now. Auto-GTAP provides a unified framework for running all parts of a GTA
 ### Prerequisites
 
 TODO: describe the environment
+
+-Python
+-pyyaml
+-GEMPACK
  
  
 ### Clone the repository 
