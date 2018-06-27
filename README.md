@@ -4,15 +4,9 @@ Auto-GTAP project is a project to create a modern cross-platform project format 
 
 ## Overview
 
-In principle, a GTAP simulation can be run with a single command. However, the reality is that the
-process tends to be much more complicated. A typical GTAP-based research project will need to build
-balance a database, calculate shocks, and shuffle around various files at each stage, in addition
-to running the simulation itself, all before finally exporting simulation results.
+In principle, a GTAP simulation can be run with a single command. However, the reality is that the process tends to be much more complicated. A typical GTAP-based research project will need to build balance a database, calculate shocks, and shuffle around various files at each stage, in addition to running the simulation itself, all before finally exporting simulation results.
 
-While the simulation is an automated process, these ambient task require require user interaction.
-Auto-GTAP aims to provide a unified framework to lift these ambient tasks into the build toolchain.
-The goal is to increase the speed and replicability of GTAP-based analyses, by reducing the amount
-of manual orchestration required historically.
+While the simulation is an automated process, these ambient task require require user interaction. Auto-GTAP aims to provide a unified framework to lift these ambient tasks into the build toolchain. The goal is to increase the speed and replicability of GTAP-based analyses, by reducing the amount of manual orchestration required historically.
 
 ## Why Auto-GTAP?
 
