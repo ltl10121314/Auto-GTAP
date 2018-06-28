@@ -2,7 +2,7 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-13"
 
-from Shocks import Shocks
+from AutoGTAP.Shocks import Shocks
 
 
 class SimulationCMF(object):
