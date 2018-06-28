@@ -3,7 +3,6 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-3-12"
 
 import shutil
-from CreateConfig import CreateConfig
 
 
 class CopyInputFiles(object):
