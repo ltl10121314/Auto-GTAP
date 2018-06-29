@@ -14,7 +14,8 @@ simulations:
     subparts:
       # Each simulation consists of several numbered subparts. The subparts each correspond to a single activity, such
       # as aggregating data, splitting data, running GTAP adjust, etc. The number of each subpart tells Auto-GTAP
-      # the order to run the subparts in, and which subpart's output to use as input data for the next subpart
+      # the order to run the subparts in, and which subpart's output to use as input data for the next subpart. Subparts
+      # must be numbered sequentially starting with 1.
       1:
         type: GTPAg2 #the type of activity done in the subpart. In this case, GTAPAg2 will be run
         input_folder: GTPAg2 #the subfolder of InputFiles where this part's input files are located. Note that for
@@ -86,6 +87,7 @@ simulations:
           # This property is specific to this type of subpart. It defines the cmf file to use when running GTPVEW-V6
           # with GEMSIM
       7:
+        # This is the final subpart. Results of this simulation are automatically exported to OutputFiles.
         type: GTAP-V6
         input_folder: GTAP-V6
         work_folder: gtap2
@@ -94,4 +96,3 @@ simulations:
         shock: pfactorworld
         map:
           - 'pxwreg("EU_28")'
-        # This is the final subpart. Results of this simulation are automatically exported to OutputFiles.
