@@ -24,7 +24,7 @@ for simulation_name in config.simulation_list:
         ag.CopyInputFiles(simulation_name, part_input_folder, part_work_folder).copy()
 
         for additional_input_folder in config.part_additional_input_folders(simulation_name, part_num):
-            # need to use this copy method to overwrite files/folders (or copy files to folders taht already exist)
+            # need to use this copy method to overwrite files/folders (or copy files to folders that already exist)
             distutils.dir_util.copy_tree("InputFiles\{0}".format(additional_input_folder),
                                          "WorkFiles\{0}\{1}".format(simulation_name, part_work_folder))
 

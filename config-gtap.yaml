@@ -6,7 +6,7 @@
 simulations_to_run:
    - GTAP-V6
    # This section lists the simulations scenarios to actually be run. For example, you might want to only run one
-   # scenairo with low accuracy when debugging the model, but run many scenarios with high accuracy when generating
+   # scenario with low accuracy when debugging the model, but run many scenarios with high accuracy when generating
    # your final results.
    # The name of the simulation to run is user defined and comes from the simulation list in the simulations section.
 simulations:
