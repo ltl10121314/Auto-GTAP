@@ -1,5 +1,0 @@
-simulation name,commodities shocked,Commodity Description,variable,variable property,variable description,value
-GTAP-V6//gtap2//sim_GTAP-V6.csv,GTAP-V6//gtap2//sim_GTAP-V6.csv,Unknown Sector,"pxwreg(""EU_28"")",Percent Change,No Variable Description Available,9.9999981
-GTAP-V6//gtap2//sim_GTAP-V6.csv,GTAP-V6//gtap2//sim_GTAP-V6.csv,Unknown Sector,"pxwreg(""EU_28"")",PreLevel,No Variable Description Available,1.0000000
-GTAP-V6//gtap2//sim_GTAP-V6.csv,GTAP-V6//gtap2//sim_GTAP-V6.csv,Unknown Sector,"pxwreg(""EU_28"")",PostLevel,No Variable Description Available,1.1000000
-GTAP-V6//gtap2//sim_GTAP-V6.csv,GTAP-V6//gtap2//sim_GTAP-V6.csv,Unknown Sector,"pxwreg(""EU_28"")",Absolute Change,No Variable Description Available,0.10000002

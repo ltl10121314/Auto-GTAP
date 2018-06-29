@@ -20,4 +20,4 @@ class CreateOutput(object):
         for file_name in self.list_of_files_to_copy:
             # copy files with file_name from WorkFiles to OutputFiles, also appends current_time
             shutil.copy('WorkFiles\\{0}'.format(file_name),
-                        'OutputFiles\\{1} {0}'.format(file_name, current_time))
+                        'OutputFiles\\{0}'.format(file_name))
