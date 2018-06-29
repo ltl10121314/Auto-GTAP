@@ -26,7 +26,8 @@ TODO: describe the environment
 
 -Python
 -pyyaml
--GEMPACK
+-GEMPACK (and license)
+-Raw GTAP Data
  
  
 ### Clone the repository 
@@ -48,6 +49,8 @@ python -m venv venv
 ```powershell
 ./setup.ps1
 ```
+
+-Create WorkFiles folder
 
 ## Example projects
 
