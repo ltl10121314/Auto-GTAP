@@ -2,7 +2,7 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-5-4"
 
-from AutoGTAP.Shocks import Shocks
+from AutoGTAP.Shocks.Shocks import Shocks
 
 
 class GTAPAdjustCMF(object):

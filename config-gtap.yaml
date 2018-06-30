@@ -5,30 +5,59 @@
 # Simulations
 simulations_to_run:
    - GTAP-V6
+   # This section lists the simulations scenarios to actually be run. For example, you might want to only run one
+   # scenario with low accuracy when debugging the model, but run many scenarios with high accuracy when generating
+   # your final results.
+   # The name of the simulation to run is user defined and comes from the simulation list in the simulations section.
 simulations:
   GTAP-V6:
     subparts:
+      # Each simulation consists of several numbered subparts. The subparts each correspond to a single activity, such
+      # as aggregating data, splitting data, running GTAP adjust, etc. The number of each subpart tells Auto-GTAP
+      # the order to run the subparts in, and which subpart's output to use as input data for the next subpart. Subparts
+      # must be numbered sequentially starting with 1.
       1:
-        type: GTPAg2
-        input_folder: GTPAg2
+        type: GTPAg2 #the type of activity done in the subpart. In this case, GTAPAg2 will be run
+        input_folder: GTPAg2 #the subfolder of InputFiles where this part's input files are located. Note that for
+        # parts after this first, files come from the input folder, but also from the output of the previous part.
+        # The output or work folder of the previous step does not have to be specified.
         work_folder: GTPAg2
+          #creates a folder of this name in WorkFiles where this subpart will be run.
+          # Warning: do not use the same work_folder name for two different subparts.
         data_subfolder: 2014
+          # This property is specific to the type "GTAPAg2". GTAPAg2 may contain several GTAP data sets, typically for
+          # different years. This property tells which of those data sets to use, by specifying the subfolder within
+          # the GTAP subfolder that has the data
         agg_scheme_file: default.txt
+          # This property is specific to the type "GTAPAg2". It specifies the file that contains the aggregation scheme
+          # to use
       2:
-        type: MSplitCom-Exe
+        type: MSplitCom-Exe # This subpart runs MSplitCom
         input_folder: MSplitCom-Exe
         work_folder: MSplitCom-Exe
         additional_input_folders:
+          #This property says that this part has more than one input_folder, and lists the extra input_folders
           - HarForSplit
+          #This directory contains the Har file that describes which sectors to split and with which weights
       3:
-        type: GTAP-V6
+        type: GTAP-V6 # This subpart runs a GEMSIM on GTAP-V6
         input_folder: GTAP-V6-tax-levels
+          # For a GEMSIM GTAP-V6 part, the input_folder only needs to contain a .tab and .sti file
         work_folder: alter
         model_file_name: gtap
+          # Property specific to this type. It defines the model file name. This much match the names of the .tab
+          # and .sti files in the input folder.
         solution_method: j
+          # This property is specific to this type of subpart. It defines the solution method used by GEMSIM. j is for
+          # Johanson and g is for Gragg.
         shock: altertms3final
+          # This property is specific to this type of subpart. It defines the shock to use in the simulation, picked
+          # from a list of hardcoded shocks in the shock module of Auto-GTAP.
         map:
           - 'pxwreg("EU_28")'
+          # This property is specific to this type of subpart. It defines the map of which results to export to CSV.
+          # This property must always be defined for this type, but it is only relevant for the last subpart, as those
+          # are the only results actually exported to the results folder.
       4:
         type: GTAP-Adjust
         input_folder: GTAP-Adjust
@@ -45,11 +74,20 @@ simulations:
           - 'pxwreg("EU_28")'
       6:
         type: GTPVEW-V6
+          # Running GEMSIM on GTAP does not produce an output file for every corresponding input file. Some are lost,
+          # most notably those related to welfare. This means a subsequent GEMSIM run will not be able to report
+          # welfare results.
+          # Running the GTPVEW-V6 subpart regenerates these files, so that welfare results can be reported. Note that
+          # GTPVEW-6 does not have to be run after every run of GTAP. This is because although welfare results can't be
+          # reported, all reportable results are calculated the same whether GTPVEW was run or not.
         input_folder: GTPVEW-V6
         work_folder: gtpvew
         model_file_name: gtpvew
         cmf_file_name: GTAPVu2
+          # This property is specific to this type of subpart. It defines the cmf file to use when running GTPVEW-V6
+          # with GEMSIM
       7:
+        # This is the final subpart. Results of this simulation are automatically exported to OutputFiles.
         type: GTAP-V6
         input_folder: GTAP-V6
         work_folder: gtap2
