@@ -58,8 +58,7 @@ python -m venv venv
 
 ## Example projects
 
-- [Hello World!](examples/hello_world_example)
-- [Free Trade Agreement](examples/free_trade_agreement_example)
+- [Productivity Increase](examples/productivity_increase)
 
 ## Documentation
 
