@@ -6,7 +6,7 @@ import AutoGTAP as ag
 
 # Call Methods
 # Load config files that will control program
-config = ag.CreateConfig("config-gtap.yaml")
+config = ag.CreateConfig("config.yaml")
 # Delete working files directory
 ag.CleanWorkFiles()
 # For each simulation, perform the different subparts (data aggregation, splitting,
