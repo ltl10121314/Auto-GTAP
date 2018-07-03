@@ -5,7 +5,7 @@
 # Simulations
 simulations_to_run:
   - Actual
-#  - GTAP-E-Gragg
+  - GTAP-E-Gragg
 #  - GTAP-E-Custom-G
 parameter_modifications:
   low-elasticity:
@@ -81,10 +81,51 @@ simulations:
       1:
         type: GTAP-E
         input_folder: GTAP-E
-        work_folder: GTAP-E
+        work_folder: Actual
         model_file_name: gtap
         solution_method: j
         shock: actual
+        map:
+          - 'pm("Gas","USA")'
+          - 'aoall("Gas","USA")'
+          - 'qo("Gas","USA")'
+          - 'qxw("Gas","USA")'
+          - 'qiw("Gas","USA")'
+          - 'pm("Oil","USA")'
+          - 'aoall("Oil","USA")'
+          - 'qo("Oil","USA")'
+          - 'qxw("Oil","USA")'
+          - 'qiw("Oil","USA")'
+  GTAP-E-Gragg:
+    subparts:
+      1:
+        type: GTAP-E
+        input_folder: GTAP-E
+        work_folder: GTAP-E
+        model_file_name: gtap
+        solution_method: j #should be g but ok for now as debugging
+        shock: actual #this shock is wrong but ok for now as debugging
+        map:
+          - 'pm("Gas","USA")'
+          - 'aoall("Gas","USA")'
+          - 'qo("Gas","USA")'
+          - 'qxw("Gas","USA")'
+          - 'qiw("Gas","USA")'
+          - 'pm("Oil","USA")'
+          - 'aoall("Oil","USA")'
+          - 'qo("Oil","USA")'
+          - 'qxw("Oil","USA")'
+          - 'qiw("Oil","USA")'
+  GTAP-E-Custom-G:
+    subparts:
+      1:
+        type: GTAP-E
+        input_folder: GTAP-E-Custom
+        work_folder: GTAP-E-Custom
+        model_file_name: gtap
+        solution_method: j #should be g but ok for now as debugging
+        shock: actual #this shock is wrong but ok for now as debugging
+        #need to add line for alternative parameter values
         map:
           - 'pm("Gas","USA")'
           - 'aoall("Gas","USA")'
