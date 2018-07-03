@@ -81,7 +81,7 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
             os.chdir("..")
 
-        if part_type == "GTAP-V6":
+        if part_type == "GTAP-V6" or part_type == "GTAP-E":
             # Load additional configuration information specific to GTAP simulations
             part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
             part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][

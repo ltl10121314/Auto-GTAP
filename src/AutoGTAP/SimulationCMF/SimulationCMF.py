@@ -3,6 +3,7 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-3-13"
 
 from AutoGTAP.Shocks.Shocks import Shocks
+from AutoGTAP.SimulationShocksShale import SimulationShocks
 
 
 class SimulationCMF(object):
@@ -20,6 +21,9 @@ class SimulationCMF(object):
         self.simulation_name = simulation_name
 
         if self.model_type == "GTAP-V6":
+            cmf_file_name = "gtap.cmf"
+
+        if self.model_type == "GTAP-E":
             cmf_file_name = "gtap.cmf"
 
         # Create list of lines to be added to CMF file
@@ -44,7 +48,7 @@ class SimulationCMF(object):
             raise ValueError('Unknown solution method in CMF')
 
         # Create lines for header that gives file locations
-        if self.model_type == "gtap-e":
+        if self.model_type == "GTAP-E":
             line_list_header = [
                 "CPU = yes; ! log show simulation times",
                 "NDS = no ; ! no displays",
@@ -110,7 +114,7 @@ class SimulationCMF(object):
                 "Rest Endogenous ;"
             ]
 
-            line_list_shocks = Shocks(self.shock_type).create()
+            line_list_shocks = SimulationShocks(self.shock_type).create()
 
         if self.model_type == "GTAP-V6":
             line_list_header = [
