@@ -1,7 +1,6 @@
 #__author__ = "Andre Barbe"
-#__project__ = "GTAP-E Validation"
+#__project__ = "Auto-GTAP"
 #__created__ = "2018-3-12"
-#__altered__ = "2018-4-13"
 
 # Simulations
 simulations_to_run:
