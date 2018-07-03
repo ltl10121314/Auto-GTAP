@@ -5,8 +5,8 @@
 # Simulations
 simulations_to_run:
   - Actual
-  - GTAP-E-Gragg
-  - GTAP-E-Custom-G
+#  - GTAP-E-Gragg
+#  - GTAP-E-Custom-G
 parameter_modifications:
   low-elasticity:
       -
@@ -77,9 +77,22 @@ simulations:
     modify_har: false
     shock: experiment
   Actual:
-    input_directory: GTAP-E
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: j
-    modify_har: false
-    shock: actual
+    subparts:
+      1:
+        type: GTAP-E
+        input_folder: GTAP-E
+        work_folder: GTAP-E
+        model_file_name: gtap
+        solution_method: j
+        shock: actual
+        map:
+          - 'pm("Gas","USA")'
+          - 'aoall("Gas","USA")'
+          - 'qo("Gas","USA")'
+          - 'qxw("Gas","USA")'
+          - 'qiw("Gas","USA")'
+          - 'pm("Oil","USA")'
+          - 'aoall("Oil","USA")'
+          - 'qo("Oil","USA")'
+          - 'qxw("Oil","USA")'
+          - 'qiw("Oil","USA")'
