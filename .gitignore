@@ -1,5 +1,5 @@
 .idea/
 venv/
-WorkFiles/
+**/WorkFiles/
 **/__pycache__
 **/2014/
