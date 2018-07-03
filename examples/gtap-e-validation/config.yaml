@@ -4,9 +4,9 @@
 
 # Simulations
 simulations_to_run:
-  - Actual
-  - GTAP-E-Gragg
-#  - GTAP-E-Custom-G
+#  - Actual
+#  - GTAP-E-Gragg
+  - GTAP-E-Custom-G
 parameter_modifications:
   low-elasticity:
       -
@@ -119,9 +119,14 @@ simulations:
   GTAP-E-Custom-G:
     subparts:
       1:
+        type: modify_har
+        input_folder: GTAP-E-Custom
+        work_folder: modify_parameters
+        parameter_mod_description: low-elasticity
+      2:
         type: GTAP-E
         input_folder: GTAP-E-Custom
-        work_folder: GTAP-E-Custom
+        work_folder: simulation
         model_file_name: gtap
         solution_method: j #should be g but ok for now as debugging
         shock: actual #this shock is wrong but ok for now as debugging

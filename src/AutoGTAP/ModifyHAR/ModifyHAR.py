@@ -17,7 +17,7 @@ class ModifyHAR(object):
         self.sti_file = directory + "\\cmd_modify_har.sti"
         self.modifications = modifications
         self.CreateSTI()
-        subprocess.call("modhar -sti {0}".format(self.sti_file))
+
 
     def CreateSTI(self) -> None:
         # Create lines for sti file that controls modhar
