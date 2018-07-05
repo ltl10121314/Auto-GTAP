@@ -8,17 +8,25 @@ simulations_to_run:
   - GTAP-E-J
   - GTAP-E-Custom-J
 parameter_modifications:
+  # This setting allows you to modify vector parameters of the GTAP-E parameter file
+  # NB: Modifying 0 or 2 dimenensional parameters is not currently supported
   low-elasticity:
+    # This is the user defined name of the alternate parameter values. Call this name in the simulation part of the
+    # config to use these elasticities
       -
-        - "ESBM"
-        - 4
-        - 0.2
+      # One entry for each parameter change
+        - "ESBM" # Parameter to be changed is listed first
+          # Armington CES for regional allocation of inputs
+        - 4 # The index to be changed
+        - 0.2 # Value to multiply old parameter by to get the new value
       -
         - "ESBD"
+          # Armington CES for domestic/regional allocation
         - 4
         - 0.2
 simulations:
   Actual:
+  # This simulation replicates the price and quantity changes that actually occured in the Shale Revolution
     subparts:
       1:
         type: GTAP-E
@@ -41,6 +49,7 @@ simulations:
           - 'qxw("Oil","USA")'
           - 'qiw("Oil","USA")'
   GTAP-E-J:
+  # This simulation tries to backcast the Shale Revolution using standard GTAP-E
     subparts:
       1:
         type: GTAP-E
@@ -63,6 +72,7 @@ simulations:
           - 'qxw("Oil","USA")'
           - 'qiw("Oil","USA")'
   GTAP-E-Custom-J:
+    # This simulation tries to backcast the Shale Revolution using low-elasticity GTAP-E
     subparts:
       1:
         type: modify_har
