@@ -2,3 +2,4 @@
 venv/
 **/WorkFiles/
 **/__pycache__
+**/2014/
