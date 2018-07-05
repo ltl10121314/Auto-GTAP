@@ -46,7 +46,9 @@ class MoveDatabaseFiles(object):
             destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
             destination_view_file = "{0}baseview.har".format(destination_folder)
 
-        if self.destination_type == "GTAP-V7" or self.destination_type == "GTAP-V6":
+        if self.destination_type == "GTAP-V7" or \
+                self.destination_type == "GTAP-V6" or \
+                self.destination_type == "GTAP-E":
             destination_folder = destination_part_folder
             destination_flows_file = "{0}basedata.har".format(destination_folder)
             destination_parameters_file = "{0}default.prm".format(destination_folder)
@@ -75,6 +77,14 @@ class MoveDatabaseFiles(object):
             source_view_file = "{0}newview.har".format(source_folder)
 
         if self.source_type == "Shocks-V6":
+            source_folder = source_part_folder
+            source_flows_file = "{0}basedata.har".format(source_folder)
+            source_parameters_file = "{0}default.prm".format(source_folder)
+            source_sets_file = "{0}sets.har".format(source_folder)
+            source_tax_rates_file = "{0}baserate.har".format(source_folder)
+            source_view_file = "{0}baseview.har".format(source_folder)
+
+        if self.source_type == "modify_har":
             source_folder = source_part_folder
             source_flows_file = "{0}basedata.har".format(source_folder)
             source_parameters_file = "{0}default.prm".format(source_folder)
