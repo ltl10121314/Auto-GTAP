@@ -24,14 +24,14 @@ class CreateSTI(object):
                 "bat         		! Run in batch. ",
                 "log		        ! Start a log file ",
                 "b		        	! Output to both terminal and log file ",
-                "{0}_sltoth.log	    	! Name of log file".format(self.input_file_name),
+                "{0}_sltoht.log	    	! Name of log file".format(self.input_file_name),
                 "ses                ! Output to spreadsheet with element labels ",
                 ",                  ! Character to use for data separation ",
                 "shl                ! Show level results, if available ",
                 "                   ! Done selecting general options ",
                 "{0}.sl4            ! Location of sl4 file to convert to csv ".format(self.input_file_name),
                 "c                  ! Want both levels and cumulative from solution file ",
-                "y                  ! Use file to choose which variables and components to ouptut ",
+                "y                  ! Use file to choose which variables and components to output ",
                 "{0}.map            ! Name of file to use choosing which variables and components to output ".format(
                     self.input_file_name),
                 "{0}.csv            ! Name of file to output to".format(self.input_file_name)
