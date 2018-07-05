@@ -53,8 +53,8 @@ for simulation_name in config.simulation_list:
             parameter_mod_description = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "parameter_mod_description"]
             parameter_modification_list = config.yaml_file["parameter_modifications"][parameter_mod_description]
-            ag.ModifyHAR(part_work_folder, "olddefault", "default",parameter_modification_list)
             os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
+            ag.ModifyHAR("olddefault", "default", parameter_modification_list)
             subprocess.call("modhar -sti cmd_modify_har.sti")
             os.chdir("..")
             os.chdir("..")
