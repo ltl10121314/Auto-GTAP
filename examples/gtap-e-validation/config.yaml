@@ -5,8 +5,8 @@
 # Simulations
 simulations_to_run:
   - Actual
-  - GTAP-E-Gragg
-  - GTAP-E-Custom-G
+  - GTAP-E-J
+  - GTAP-E-Custom-J
 parameter_modifications:
   low-elasticity:
       -
@@ -18,64 +18,6 @@ parameter_modifications:
         - 4
         - 0.2
 simulations:
-  GTAP-E-Johan:
-    input_directory: GTAP-E
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: j
-    modify_har: false
-    shock: experiment
-  GTAP-E-Custom-J:
-    input_directory: GTAP-E-Custom
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: j
-    modify_har: yes
-    parameter_modifications: low-elasticity
-    shock: experiment
-  GTAP-E-Custom-G:
-    input_directory: GTAP-E-Custom
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: g
-    modify_har: yes
-    parameter_modifications: low-elasticity
-    shock: experiment
-  GTAP-E-Beckman2010-J:
-    input_directory: GTAP-E-Beckman2010
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: j
-    modify_har: false
-    shock: experiment
-  GTAP-E-Beckman2010-G:
-    input_directory: GTAP-E-Beckman2010
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: g
-    modify_har: false
-    shock: experiment
-  GTAP-V6:
-    input_directory: GTAP-V6
-    model_file_name: gtap
-    model_type: gtap-v6
-    solution_method: j
-    modify_har: false
-    shock: experiment
-  GTAP-V7:
-    input_directory: GTAP-V7
-    model_file_name: gtap
-    model_type: gtap-v7
-    solution_method: j
-    modify_har: false
-    shock: experiment
-  GTAP-E-Gragg:
-    input_directory: GTAP-E
-    model_file_name: gtap
-    model_type: gtap-e
-    solution_method: g
-    modify_har: false
-    shock: experiment
   Actual:
     subparts:
       1:
@@ -98,7 +40,7 @@ simulations:
           - 'qo("Oil","USA")'
           - 'qxw("Oil","USA")'
           - 'qiw("Oil","USA")'
-  GTAP-E-Gragg:
+  GTAP-E-J:
     subparts:
       1:
         type: GTAP-E
@@ -120,7 +62,7 @@ simulations:
           - 'qo("Oil","USA")'
           - 'qxw("Oil","USA")'
           - 'qiw("Oil","USA")'
-  GTAP-E-Custom-G:
+  GTAP-E-Custom-J:
     subparts:
       1:
         type: modify_har
