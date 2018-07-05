@@ -4,8 +4,8 @@
 
 # Simulations
 simulations_to_run:
-#  - Actual
-#  - GTAP-E-Gragg
+  - Actual
+  - GTAP-E-Gragg
   - GTAP-E-Custom-G
 parameter_modifications:
   low-elasticity:
@@ -80,11 +80,12 @@ simulations:
     subparts:
       1:
         type: GTAP-E
-        input_folder: GTAP-E
+        input_folder: GTAP-E-model
         work_folder: Actual
         model_file_name: gtap
         solution_method: j
         shock: actual
+        additional_input_folder: GTAP-E-data
         map:
           - 'pm("Gas","USA")'
           - 'aoall("Gas","USA")'
@@ -100,11 +101,12 @@ simulations:
     subparts:
       1:
         type: GTAP-E
-        input_folder: GTAP-E
+        input_folder: GTAP-E-model
         work_folder: GTAP-E
         model_file_name: gtap
         solution_method: j #should be g but ok for now as debugging
         shock: actual #this shock is wrong but ok for now as debugging
+        additional_input_folder: GTAP-E-data
         map:
           - 'pm("Gas","USA")'
           - 'aoall("Gas","USA")'
