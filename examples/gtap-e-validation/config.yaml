@@ -85,7 +85,8 @@ simulations:
         model_file_name: gtap
         solution_method: j
         shock: actual
-        additional_input_folder: GTAP-E-data
+        additional_input_folders:
+          - GTAP-E-data
         map:
           - 'pm("Gas","USA")'
           - 'aoall("Gas","USA")'
@@ -106,7 +107,8 @@ simulations:
         model_file_name: gtap
         solution_method: j #should be g but ok for now as debugging
         shock: actual #this shock is wrong but ok for now as debugging
-        additional_input_folder: GTAP-E-data
+        additional_input_folders:
+          - GTAP-E-data
         map:
           - 'pm("Gas","USA")'
           - 'aoall("Gas","USA")'
