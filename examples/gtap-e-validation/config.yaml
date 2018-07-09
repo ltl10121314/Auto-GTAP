@@ -8,7 +8,8 @@ simulations_to_run:
   - GTAP-E-J
   - GTAP-E-Custom-J
 parameter_modifications:
-  # This setting allows you to modify vector parameters of the GTAP-E parameter file
+  # This setting allows you to modify vector parameters of the GTAP-E parameter file. It is mandatory if there is
+  # a subpart of the type modify_har. If there is no such subpart, this section is not used.
   # NB: Modifying 0 or 2 dimensional parameters is not currently supported
   low-elasticity:
     # This is the user defined name of the alternate parameter values. Call this name in the simulation part of the
