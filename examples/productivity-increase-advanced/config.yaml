@@ -88,6 +88,7 @@ simulations:
           # Running the GTPVEW-V6 subpart regenerates these files, so that welfare results can be reported. Note that
           # GTPVEW-6 does not have to be run after every run of GTAP. This is because although welfare results can't be
           # reported, all reportable results are calculated the same whether GTPVEW was run or not.
+        sim_environment: gemsim
         input_folder: GTPVEW-V6-gemsim
         work_folder: gtpvew
         model_file_name: gtpvew

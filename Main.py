@@ -69,9 +69,16 @@ for simulation_name in config.simulation_list:
             # Change working directory to WorkFiles so all output (and logs)
             # will go there when gemsim or sltoht is called
             os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
-            # Create GSS and GST files for shocks and model gemsim
-            subprocess.call("tablo -sti {0}.sti".format(model_file_name))
-            subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name))
+
+            part_sim_environment = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+                "sim_environment"]
+            if part_sim_environment == "gemsim":
+                # Create GSS and GST files for shocks and model gemsim
+                subprocess.call("tablo -sti {0}.sti".format(model_file_name))
+                subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name))
+            if part_sim_environment == "fortran":
+                subprocess.call("{0} -cmf {1}.cmf".format(model_file_name, cmf_file_name))
+
             os.chdir("..")
             os.chdir("..")
             os.chdir("..")
@@ -101,10 +108,11 @@ for simulation_name in config.simulation_list:
             # Change working directory to WorkFiles so all output (and logs)
             # will go there when gemsim or sltoht is called
             os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
-            # Create GSS and GST files for shocks and model gemsim
+
             part_sim_environment = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "sim_environment"]
             if part_sim_environment == "gemsim":
+                # Create GSS and GST files for shocks and model gemsim
                 subprocess.call("tablo -sti {0}.sti".format(model_file_name))
                 subprocess.call("gemsim -cmf {0}.cmf".format(model_file_name))
             if part_sim_environment == "fortran":
