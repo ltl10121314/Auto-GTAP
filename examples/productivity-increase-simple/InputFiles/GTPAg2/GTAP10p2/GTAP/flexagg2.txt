@@ -1,0 +1,350 @@
+ !      AGGREGATION TEMPLATE FOR GTAP 8 DATA BASE   
+ !                                               (BN, NV 17-NOV-2011)   
+ !  
+ !  NOTES:  
+ !  
+ !         a. All lines starting with ! are ignored.
+ !  
+ !         b. Comments after ! are also ignored.
+ !  
+ !     c. Empty lines are ignored.  
+ !  
+ !     d. Header names are used by the GEMPACK programs to  
+ !        read the data, do not change them.
+ !  
+ !         e. Sections 2, 4, and 6, are detailed listings of the
+ !        regions, sectors, and endowments included in the  
+ !        relevant GTAP version shipped with flexagg. Unless
+ !        you know exactly what you are doing you should not    
+ !        subtract/add lines to these sections. 
+ !          
+ !     f. If you do not see the point of the warning above, do not  
+ !        change the number of lines in sections 2, 4, and 6.   
+ !  
+ !         g. In sections 1, 3, and 5, a number of lines to be  
+ !            filled in are provided. Additional lines can be   
+ !            added as needed. Unused lines should be removed.  
+ !  
+ !         h. Names for aggregated commodities/regions/factors can  
+ !            include 12 characters. These can include letters, digits  
+ !            and the characters "@" and "_". The first character in
+ !            the name must be a letter.
+ !  
+ ! Send comments on the use of this form to mcdougar@purdue.edu 
+ !  
+ ! 1. AGGREGATED COMMODITIES
+ !  
+ !    In this section, the user fills in:   
+ !  
+ !           a) Number of aggregated commodities (XX STRINGS)   
+ !       b) short names for agregated commodities   
+ !           c) (optional) explanatory text to the right of !   
+ !  
+ !    Please note that in this section additional lines 
+ !    may be added as needed and unused lines should be 
+ !    removed.  
+    
+10 STRINGS LENGTH 12 header "H2" longname "Set TRAD_COMM traded commodities";
+GrainsCrops  ! Grains and Crops
+MeatLstk     ! Livestock and Meat Products
+Extraction   ! Mining and Extraction
+ProcFood     ! Processed Food
+TextWapp     ! Textiles and Clothing
+LightMnfc    ! Light Manufacturing
+HeavyMnfc    ! Heavy Manufacturing
+Util_Cons    ! Utilities and Construction
+TransComm    ! Transport and Communication
+OthServices  ! Other Services
+    
+ ! 2. COMMODITY AGGREGATION MAPPING 
+ !  
+ !   In this section the user fills in the short name of
+ !   the appropriate aggregated commodity (from the previous
+ !   list) for each GTAP commodity. The number of strings (57)  
+ !   shouldnt be changed unless you know what youre doing.
+    
+57 STRINGS LENGTH 12 header "DCOM" longname "Sectoral aggregation mapping";
+GrainsCrops  ! pdr          Paddy rice                     
+GrainsCrops  ! wht          Wheat                          
+GrainsCrops  ! gro          Cereal grains nec              
+GrainsCrops  ! v_f          Vegetables, fruit, nuts        
+GrainsCrops  ! osd          Oil seeds                      
+GrainsCrops  ! c_b          Sugar cane, sugar beet         
+GrainsCrops  ! pfb          Plant-based fibers             
+GrainsCrops  ! ocr          Crops nec                      
+MeatLstk     ! ctl          Cattle,sheep,goats,horses      
+MeatLstk     ! oap          Animal products nec            
+MeatLstk     ! rmk          Raw milk                       
+MeatLstk     ! wol          Wool, silk-worm cocoons        
+Extraction   ! frs          Forestry                       
+Extraction   ! fsh          Fishing                        
+Extraction   ! coa          Coal                           
+Extraction   ! oil          Oil                            
+Extraction   ! gas          Gas                            
+Extraction   ! omn          Minerals nec                   
+MeatLstk     ! cmt          Meat: cattle,sheep,goats,horse 
+MeatLstk     ! omt          Meat products nec              
+ProcFood     ! vol          Vegetable oils and fats        
+ProcFood     ! mil          Dairy products                 
+GrainsCrops  ! pcr          Processed rice                 
+ProcFood     ! sgr          Sugar                          
+ProcFood     ! ofd          Food products nec              
+ProcFood     ! b_t          Beverages and tobacco products 
+TextWapp     ! tex          Textiles                       
+TextWapp     ! wap          Wearing apparel                
+LightMnfc    ! lea          Leather products               
+LightMnfc    ! lum          Wood products                  
+LightMnfc    ! ppp          Paper products, publishing     
+HeavyMnfc    ! p_c          Petroleum, coal products       
+HeavyMnfc    ! crp          Chemical,rubber,plastic prods  
+HeavyMnfc    ! nmm          Mineral products nec           
+HeavyMnfc    ! i_s          Ferrous metals                 
+HeavyMnfc    ! nfm          Metals nec                     
+LightMnfc    ! fmp          Metal products                 
+LightMnfc    ! mvh          Motor vehicles and parts       
+LightMnfc    ! otn          Transport equipment nec        
+HeavyMnfc    ! ele          Electronic equipment           
+HeavyMnfc    ! ome          Machinery and equipment nec    
+LightMnfc    ! omf          Manufactures nec               
+Util_Cons    ! ely          Electricity                    
+Util_Cons    ! gdt          Gas manufacture, distribution  
+Util_Cons    ! wtr          Water                          
+Util_Cons    ! cns          Construction                   
+TransComm    ! trd          Trade                          
+TransComm    ! otp          Transport nec                  
+TransComm    ! wtp          Sea transport                  
+TransComm    ! atp          Air transport                  
+TransComm    ! cmn          Communication                  
+OthServices  ! ofi          Financial services nec         
+OthServices  ! isr          Insurance                      
+OthServices  ! obs          Business services nec          
+OthServices  ! ros          Recreation and other services  
+OthServices  ! osg          PubAdmin/Defence/Health/Educat 
+OthServices  ! dwe          Dwellings                      
+    
+ ! 3. AGGREGATED REGIONS
+ !  
+ !   In this section, the user fills in:
+ !           a) Number of aggregated regions (XX STRINGS)   
+ !           b) names   
+ !           c) (optional) explanatory text to the right of !   
+ !  
+ !    Please note that in this section additional lines 
+ !    may be added as needed and unused lines should be 
+ !    removed.  
+    
+3 STRINGS LENGTH 12 header "H1" longname "Set REG regions";
+chn          ! China
+usa          ! United States of America
+ROW          ! Rest of the World
+    
+ ! 4. REGIONAL AGGREGATION MAPPING  
+ !  
+ !  In this section, the user fills in the short
+ !  name for the aggregated region to which each
+ !  of the GTAP regions belong. The number of   
+ !  strings shouldnt be changed unless you   
+ !  know what youre doing. 
+141 STRINGS LENGTH 12 header "DREG" longname "Regional aggregation mapping";
+ROW          ! aus          Australia                      
+ROW          ! nzl          New Zealand                    
+ROW          ! xoc          Rest of Oceania                
+chn          ! chn          China                          
+ROW          ! hkg          Hong Kong                      
+ROW          ! jpn          Japan                          
+ROW          ! kor          Korea                          
+ROW          ! mng          Mongolia                       
+ROW          ! twn          Taiwan                         
+ROW          ! xea          Rest of East Asia              
+ROW          ! brn          Brunei Darussalam              
+ROW          ! khm          Cambodia                       
+ROW          ! idn          Indonesia                      
+ROW          ! lao          Lao People's Democratic Republ 
+ROW          ! mys          Malaysia                       
+ROW          ! phl          Philippines                    
+ROW          ! sgp          Singapore                      
+ROW          ! tha          Thailand                       
+ROW          ! vnm          Viet Nam                       
+ROW          ! xse          Rest of Southeast Asia         
+ROW          ! bgd          Bangladesh                     
+ROW          ! ind          India                          
+ROW          ! npl          Nepal                          
+ROW          ! pak          Pakistan                       
+ROW          ! lka          Sri Lanka                      
+ROW          ! xsa          Rest of South Asia             
+ROW          ! can          Canada                         
+usa          ! usa          United States of America       
+ROW          ! mex          Mexico                         
+ROW          ! xna          Rest of North America          
+ROW          ! arg          Argentina                      
+ROW          ! bol          Bolivia                        
+ROW          ! bra          Brazil                         
+ROW          ! chl          Chile                          
+ROW          ! col          Colombia                       
+ROW          ! ecu          Ecuador                        
+ROW          ! pry          Paraguay                       
+ROW          ! per          Peru                           
+ROW          ! ury          Uruguay                        
+ROW          ! ven          Venezuela                      
+ROW          ! xsm          Rest of South America          
+ROW          ! cri          Costa Rica                     
+ROW          ! gtm          Guatemala                      
+ROW          ! hnd          Honduras                       
+ROW          ! nic          Nicaragua                      
+ROW          ! pan          Panama                         
+ROW          ! slv          El Salvador                    
+ROW          ! xca          Rest of Central America        
+ROW          ! dom          Dominican Republic             
+ROW          ! jam          Jamaica                        
+ROW          ! pri          Puerto Rico                    
+ROW          ! tto          Trinidad and Tobago            
+ROW          ! xcb          Caribbean                      
+ROW          ! aut          Austria                        
+ROW          ! bel          Belgium                        
+ROW          ! cyp          Cyprus                         
+ROW          ! cze          Czech Republic                 
+ROW          ! dnk          Denmark                        
+ROW          ! est          Estonia                        
+ROW          ! fin          Finland                        
+ROW          ! fra          France                         
+ROW          ! deu          Germany                        
+ROW          ! grc          Greece                         
+ROW          ! hun          Hungary                        
+ROW          ! irl          Ireland                        
+ROW          ! ita          Italy                          
+ROW          ! lva          Latvia                         
+ROW          ! ltu          Lithuania                      
+ROW          ! lux          Luxembourg                     
+ROW          ! mlt          Malta                          
+ROW          ! nld          Netherlands                    
+ROW          ! pol          Poland                         
+ROW          ! prt          Portugal                       
+ROW          ! svk          Slovakia                       
+ROW          ! svn          Slovenia                       
+ROW          ! esp          Spain                          
+ROW          ! swe          Sweden                         
+ROW          ! gbr          United Kingdom                 
+ROW          ! che          Switzerland                    
+ROW          ! nor          Norway                         
+ROW          ! xef          Rest of EFTA                   
+ROW          ! alb          Albania                        
+ROW          ! bgr          Bulgaria                       
+ROW          ! blr          Belarus                        
+ROW          ! hrv          Croatia                        
+ROW          ! rou          Romania                        
+ROW          ! rus          Russian Federation             
+ROW          ! ukr          Ukraine                        
+ROW          ! xee          Rest of Eastern Europe         
+ROW          ! xer          Rest of Europe                 
+ROW          ! kaz          Kazakhstan                     
+ROW          ! kgz          Kyrgyzstan                     
+ROW          ! tjk          Tajikistan                     
+ROW          ! xsu          Rest of Former Soviet Union    
+ROW          ! arm          Armenia                        
+ROW          ! aze          Azerbaijan                     
+ROW          ! geo          Georgia                        
+ROW          ! bhr          Bahrain                        
+ROW          ! irn          Iran Islamic Republic of       
+ROW          ! isr          Israel                         
+ROW          ! jor          Jordan                         
+ROW          ! kwt          Kuwait                         
+ROW          ! omn          Oman                           
+ROW          ! qat          Qatar                          
+ROW          ! sau          Saudi Arabia                   
+ROW          ! tur          Turkey                         
+ROW          ! are          United Arab Emirates           
+ROW          ! xws          Rest of Western Asia           
+ROW          ! egy          Egypt                          
+ROW          ! mar          Morocco                        
+ROW          ! tun          Tunisia                        
+ROW          ! xnf          Rest of North Africa           
+ROW          ! ben          Benin                          
+ROW          ! bfa          Burkina Faso                   
+ROW          ! cmr          Cameroon                       
+ROW          ! civ          Cote d'Ivoire                  
+ROW          ! gha          Ghana                          
+ROW          ! gin          Guinea                         
+ROW          ! nga          Nigeria                        
+ROW          ! sen          Senegal                        
+ROW          ! tgo          Togo                           
+ROW          ! xwf          Rest of Western Africa         
+ROW          ! xcf          Central Africa                 
+ROW          ! xac          South Central Africa           
+ROW          ! eth          Ethiopia                       
+ROW          ! ken          Kenya                          
+ROW          ! mdg          Madagascar                     
+ROW          ! mwi          Malawi                         
+ROW          ! mus          Mauritius                      
+ROW          ! moz          Mozambique                     
+ROW          ! rwa          Rwanda                         
+ROW          ! tza          Tanzania                       
+ROW          ! uga          Uganda                         
+ROW          ! zmb          Zambia                         
+ROW          ! zwe          Zimbabwe                       
+ROW          ! xec          Rest of Eastern Africa         
+ROW          ! bwa          Botswana                       
+ROW          ! nam          Namibia                        
+ROW          ! zaf          South Africa                   
+ROW          ! xsc          Rest of South African Customs  
+ROW          ! xtw          Rest of the World              
+    
+    
+ ! 5. AGGREGATED ENDOWMENTS 
+ !  
+ !   In this section, the default endowment aggregation for GTAP
+ !   version 5 has been specified. Users may change the aggregation 
+ !   following these rules: 
+ !       a) Additional lines may be added as needed and unused lines
+ !          should be removed.  
+ !       b) If the aggregated database is to be used with the GTAP  
+ !          model, one of the aggregated endowment names should be  
+ !          "capital", since this plays a key role in the model.
+ !       c) Specify the classification of the aggregated factor,
+ !          whether sluggish or mobile. There should be at least one
+ !          sluggish and at least one mobile factor.
+ !       d) Specify a value for the elasticity of transformation,   
+ !          "ETRAE".  A number must be given for all endowments,
+ !          mobile or sluggish, though its value matters only for   
+ !          the sluggish endowments.
+    
+5 STRINGS LENGTH 12 header "H6" longname "Set ENDW_COMM endowment commodities";
+Land         ! -1.000000
+UnSkLab      ! mobile
+SkLab        ! mobile
+Capital      ! mobile
+NatRes       ! -0.001000
+    
+5 integer header "SLUG";    
+1 ! sluggish 
+0 ! mobile   
+0 ! mobile   
+0 ! mobile   
+1 ! sluggish 
+    
+5 real header "ETRE" longname "Value of ETRAE for endowments"; 
+-1.000000 ! sluggish 
+-2.0 ! mobile   
+-2.0 ! mobile   
+-2.0 ! mobile   
+-0.001000 ! sluggish 
+    
+ ! 6. ENDOWMENT AGGREGATION MAPPING 
+ !  In this section, the user fills in the short
+ !  name for the aggregated endowment to which each 
+ !  of the GTAP endowments belong. The number of strings (5)
+ !  shouldnt be changed unless you know what youre doing. 
+ !  
+ !Sample line follows:  
+ !land   !  LAN   Land                              
+    
+8 STRINGS LENGTH 12 header "DEND" longname "Endowment aggregation mapping";
+Land         ! Land         Land                           
+SkLab        ! tech_aspros  Technicians/AssocProfessional  
+UnSkLab      ! clerks       Clerks                         
+UnSkLab      ! service_shop Service/Shop workers           
+SkLab        ! off_mgr_pros Officials and Managers         
+UnSkLab      ! ag_othlowsk  Agricultural and Unskilled     
+Capital      ! Capital      Capital                        
+NatRes       ! NatlRes      Natural Resources              
+    
+ ! END OF FILE  

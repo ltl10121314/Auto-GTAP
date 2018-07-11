@@ -1,0 +1,89 @@
+!============================================================================!
+! AGGDAT.TAB: Data Aggregation TAB file                                      !
+! GTAP Data Base Version 6 (2004)                                             !
+! This file reads the global data, aggregates the value flows, and           !
+!      generates an aggregated database.                                     !
+!============================================================================!
+
+Equation (none);
+
+!============================================================================!
+! Input files                                                                !
+!============================================================================!
+
+File DSETS     # Set specification for disaggregate data #;
+File ASETS     # Set specification for aggregate data    #;
+
+!============================================================================!
+! Output files                                                               !
+!============================================================================!
+
+File (new) CHECKMAP # Diagnostic file #;
+
+!============================================================================!
+! Sets for dis-aggregate data                                                !
+!============================================================================!
+
+Set REG       # REGIONS #
+    read elements from file DSETS header "H1";
+
+Set TRAD_COMM # TRADED COMMODITIES #
+    read elements from file DSETS header "H2";
+
+Set ENDW_COMM  # ENDOWMENT COMMODITIES #
+    read elements from file DSETS header "H6";
+
+!============================================================================!
+! Sets for aggregate data                                                    !
+!============================================================================!
+
+Set AREG       # REGIONS IN AGGREGATE DATA SET #
+    read elements from file ASETS header "H1";
+
+Set ATRAD_COMM # TRADED COMMODITIES #
+    read elements from file ASETS header "H2";
+
+Set AENDW_COMM  # ENDOWMENT COMMODITIES #
+    read elements from file ASETS header "H6";
+
+Write (Set) REG to file CHECKMAP header "REG";
+Write (Set) TRAD_COMM to file CHECKMAP header "TRAD";
+Write (Set) ENDW_COMM to file CHECKMAP header "ENDW";
+
+!============================================================================!
+!                    READING AGGREGATION SCHEME                              !
+!============================================================================!
+
+Mapping MCOM from TRAD_COMM to ATRAD_COMM;
+         Read (BY_ELEMENTS) MCOM from file ASETS header "DCOM";
+
+Mapping MREG from REG to AREG;
+         Read (BY_ELEMENTS) MREG from file ASETS header "DREG";
+
+Mapping MEND from ENDW_COMM to AENDW_COMM;
+         Read (BY_ELEMENTS) MEND from file ASETS header "DEND";
+
+Set PROD_COMM = TRAD_COMM + "CGDS";
+Set APROD_COMM = ATRAD_COMM + "CGDS";
+
+Mapping MPRD from PROD_COMM to APROD_COMM;
+Formula (BY_ELEMENTS) (all,t,TRAD_COMM) MPRD(t) = MCOM(t);
+Formula (BY_ELEMENTS)  MPRD("CGDS") = "CGDS";
+
+File (new) SUPP     # Instructions for AggHAR #;
+Write (Set) AREG to file SUPP header "H1";
+Write (Set) ATRAD_COMM to file SUPP header "H2";
+Write (Set) AENDW_COMM to file SUPP header "H6";
+Write (Set) APROD_COMM to file SUPP header "HX";
+
+Write (Set) REG to file SUPP header "DH1";
+Write (Set) TRAD_COMM to file SUPP header "DH2";
+Write (Set) ENDW_COMM to file SUPP header "DH6";
+Write (Set) PROD_COMM to file SUPP header "DHX";
+
+Write (BY_ELEMENTS) MREG to file SUPP header "MREG";
+Write (BY_ELEMENTS) MCOM to file SUPP header "MCOM";
+Write (BY_ELEMENTS) MPRD to file SUPP header "MPRD";
+Write (BY_ELEMENTS) MEND to file SUPP header "MEND";
+
+!====================== END OF FILE AGGDAT.TAB ==============================!

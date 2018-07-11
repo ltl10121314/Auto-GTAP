@@ -1,0 +1,14 @@
+auxiliary files = split1;
+check-on-read elements = yes; 
+cpu = yes;  
+log only = yes;  
+! Input files:
+File GTAPSETS = input\sets.har;     ! Original GTAP sets file
+File SECSPLIT = input\secsplit.har; ! Specifies SplitCom and NewCom
+File INPAR    = input\default.prm;  ! Old parameters file
+! Output files:
+File WORKSETS = work\worksets.har;  ! Sets used for splitting data
+File OUTPAR   = output\default.prm; ! New parameters file
+File SPLITWGT = work\splitwgt.har;  ! Dummy user file of (simplified?) splitting weight
+File AGGSUPP  = work\aggsupp.har;   ! Input deck for AggHAR
+

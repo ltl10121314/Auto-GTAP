@@ -1,0 +1,26 @@
+auxiliary files = GTAP;
+iz1 = no ;
+NDS = yes; ! no displays
+CPU = yes;
+start with mmnz = 2000000;
+log file = yes;
+file gtapSETS = output\sets.har;
+file gtapDATA = output\basedata.har;
+file gtapPARM = output\default.prm;
+Updated file gtapDATA = work\gdata.upd;
+Verbal Description = uniform 1 percent tms reduction;
+Method = Johansen;
+Exogenous
+          pop
+          psaveslack pfactwld
+          profitslack incomeslack endwslack
+          cgdslack tradslack
+          ams atm atf ats atd
+          aosec aoreg avasec avareg
+          afcom afsec afreg afecom afesec afereg
+          aoall afall afeall
+          au dppriv dpgov dpsave
+          to tp tm tms tx txs
+          qo(ENDW_COMM,REG) ;
+Rest Endogenous ;
+shock tms = uniform -1;

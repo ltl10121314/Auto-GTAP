@@ -1,0 +1,194 @@
+! POSTBAL.TAB   constructs fullsize scaled expanded normalized flows data from:
+ * scaled new parts of National and Trade matrices (from BalFlo)
+ * fullsize unscaled expanded normalized flows data (from SplitFlo) !
+
+! Note: to conserve memory and allow larger splits without a GEMPACK licence
+  the previous program, BalFlo, operates only on the SPLIT part of the NATIONAL
+  and TRADE arrays. This program merges these split parts into the main
+  NATIONAL and TRADE arrays. !
+
+Zerodivide off;
+File
+       WORKSETS # Sets used in expanding the database #;
+       INFILE   # Fullsize unscaled expanded normalized flows data #;
+       BALOUT   # Scaled new parts of National and Trade matrices #;
+ (new) OUTFILE  # Expanded normalized scaled GTAP data #;
+ (new) NUWGT    # Weights computed from expanded scaled data #;
+
+Set ! constant sets !
+ TYP (BAS,TAX);
+ SRC (dom,imp);
+Set ! expanded sets !
+ REG # Regions #             read elements from file INFILE header "REG";
+ USER # All local users #    read elements from file INFILE header "USER";
+ COST # All industry costs # read elements from file INFILE header "COST";
+ COM # Commodities #         read elements from file INFILE header "COM";
+ MAR # Margin goods #        read elements from file INFILE header "MAR";
+ IND # Industries #          read elements from file INFILE header "IND";
+ TRADES # Basic, exptax, imptax, margins #
+                             read elements from file INFILE header "TRD";
+Set TRADEX(BASIC,                   !  exports at source market prices !
+          EXPTAX,                   !  trade tax levied at source !
+          IMPTAX);                  !  trade tax levied at dest !
+                                    !  then add international trade margins !
+Subset TRADEX is subset of TRADES;
+
+Coefficient ! expanded, unscaled flows !
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,u,r,t);
+(all,x,TRADES)(all,c,COM)(all,f,REG)(all,t,REG)   TRADE(x,c,f,t);
+Read
+ NATIONAL from file INFILE header "NATL";
+ TRADE    from file INFILE header "TRAD";
+
+Set ! sets from WORKSETS file !
+ NEWCOM   # The new parts of SplitCom #
+   read elements from file WORKSETS header "NCOM";
+ NEWIND   # The new industries #
+   read elements from file WORKSETS header "NCOM";
+ ORGUSER  # Users which are not split #
+   read elements from file WORKSETS header "OUSR";
+ ORGCOM   # Commodities which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGCOST  # Costs which are not split #
+   read elements from file WORKSETS header "OCST";
+
+Subset
+  ORGCOM   is subset of COM;
+  NEWCOM   is subset of COST;
+  NEWCOM   is subset of COM;
+  ORGCOST  is subset of COST;
+  ORGUSER  is subset of USER;
+  NEWIND   is subset of USER;
+     IND   is subset of USER;
+
+Coefficient ! scaled split elements from BalFlo !
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NEWROW(n,s,u,r,t)   # New rows of national matrix #;
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCOL(c,s,u,r,t)   # New cols of national matrix #;
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NEWCROSS(n,s,u,r,t) # New intersection of national matrix #;
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  NEWTRADE(x,n,f,t)   # New part of trade matrix #;
+Read
+ NEWROW   from file BALOUT header "NROW";
+ NEWCOL   from file BALOUT header "NCOL";
+ NEWCROSS from file BALOUT header "NCRS";
+ NEWTRADE from file BALOUT header "NTRD";
+
+Formula ! merge split parts into the main  NATIONAL and TRADE arrays !
+(all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+  NATIONAL(n,s,u,r,t) =  NEWROW(n,s,u,r,t);
+(all,c,ORGCOST)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,u,r,t) =  NEWCOL(c,s,u,r,t);
+(all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  NATIONAL(n,s,u,r,t) = NEWCROSS(n,s,u,r,t);
+(all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADE(x,n,f,t)      = NEWTRADE(x,n,f,t);
+
+Write
+ NATIONAL to file OUTFILE header "NATL";
+ TRADE    to file OUTFILE header "TRAD";
+
+! addition Dec 2008 for multiproduction !
+Set SEC = COM intersect IND;
+Coefficient (all,i,IND)(all,r,REG) COSTS(i,r) # Industry costs #;
+Formula     (all,i,IND)(all,r,REG) COSTS(i,r)
+   = sum{k,COST, sum{s,SRC, sum{t,TYP, NATIONAL(k,s,i,r,t)}}};
+Coefficient (all,c,COM)(all,i,IND)(all,r,REG) MAKE(c,i,r) # MAKE matrix #;
+Formula (all,c,COM)(all,i,IND)(all,r,REG) MAKE(c,i,r) = 0;
+Formula (all,x,SEC)(all,r,REG) MAKE(x,x,r) = COSTS(x,r);
+Write MAKE to file OUTFILE header "MAKE";
+
+Transfer "IND"  from file INFILE to file OUTFILE;
+Transfer "COM"  from file INFILE to file OUTFILE;
+Transfer "COST" from file INFILE to file OUTFILE;
+Transfer "USER" from file INFILE to file OUTFILE;
+Transfer "REG"  from file INFILE to file OUTFILE;
+Transfer "MAR"  from file INFILE to file OUTFILE;
+Transfer "FAC"  from file INFILE to file OUTFILE;
+Transfer "INV"  from file INFILE to file OUTFILE;
+Transfer "TRD"  from file INFILE to file OUTFILE;
+Transfer "EVOA" from file INFILE to file OUTFILE;
+Transfer "SAVE" from file INFILE to file OUTFILE;
+Transfer "VKB"  from file INFILE to file OUTFILE;
+Transfer "VDEP" from file INFILE to file OUTFILE;
+Transfer "DPSM" from file INFILE to file OUTFILE;
+Transfer "VST"  from file INFILE to file OUTFILE;
+
+!*****************************************************!
+! remainder of TAB file just recomputes splitting weights from scaled numbers !
+
+Set MORECOLS (INV,HOU,GOV,EXP,lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+Set SUMCOLS = IND + MORECOLS;
+Subset USER is subset of SUMCOLS;
+Subset COM is subset of COST;
+Subset MAR is subset of COST;
+
+Coefficient
+(all,x,TRADES)(all,c,COM)(all,t,REG) TRADE_F(x,c,t)# TRADE summed over sources#;
+(all,x,TRADES)(all,c,COM)(all,f,REG) TRADE_T(x,c,f)# TRADE summed over dests #;
+(all,m,MAR)(all,r,REG) VST(m,r)
+  # Trade - Exports for International Transportation, Market Prices #;
+Formula
+(all,x,TRADES)(all,c,COM)(all,t,REG) TRADE_F(x,c,t)= sum{f,REG,TRADE(x,c,f,t)};
+(all,x,TRADES)(all,c,COM)(all,f,REG) TRADE_T(x,c,f)= sum{t,REG,TRADE(x,c,f,t)};
+Read VST from file INFILE header "VST";
+
+Coefficient
+(all,q,COST)(all,c,SUMCOLS)(all,r,REG) SUMMARY(q,c,r)
+ # Summary producer price flows table #;
+Formula
+(all,i,COST)(all,j,SUMCOLS)(all,r,REG) SUMMARY(i,j,r) = 0;
+(all,i,COST)(all,j,USER)(all,r,REG)
+  SUMMARY(i,j,r) = sum{t,TYP,sum{s,SRC, NATIONAL(i,s,j,r,t)}};
+(all,i,COM)(all,f,REG) SUMMARY(i,"exp",f)
+  = sum{x,TRADEX,TRADE_T(x,i,f)} - TRADE_T("imptax",i,f);
+
+(all,i,MAR)(all,r,REG) SUMMARY(i,"exp",r) = SUMMARY(i,"exp",r)+ VST(i,r);
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessDomTax",r) =
+ - sum{u,USER, NATIONAL(i,"dom",u,r,"TAX")} - TRADE_T("expTax",i,r);
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessImpTax",r) =
+ - sum{u,USER, NATIONAL(i,"imp",u,r,"TAX")};
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessTariff",r) = - TRADE_F("impTax",i,r);
+
+(all,i,COM)(all,r,REG) SUMMARY(i,"lessImpCIF",r) =
+  TRADE_F("impTax",i,r) - sum{x,TRADES, TRADE_F(x,i,r)};
+Write SUMMARY to file NUWGT header "SMRY";
+
+Coefficient
+(all,q,COST)(all,c,SUMCOLS) SUMMARY_R(q,c)
+ # World Summary producer price flows table #;
+Formula
+(all,q,COST)(all,c,SUMCOLS) SUMMARY_R(q,c) = sum{r,REG, SUMMARY(q,c,r)};
+Write SUMMARY_R to file NUWGT header "WSUM";
+
+Set ABSORP (INV,GOV,HOU);
+Subset ABSORP is subset of SUMCOLS;
+
+Set MOREWGT (Production, IntUse, Absorption, Exports, Imports);
+Coefficient
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r)
+ # Summary producer price weights #;
+Formula
+ (all,s,SEC)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r) = 0;
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Production",r) =
+    sum{q,COST, SUMMARY(q,s,r)} - SUMMARY(s,"lessDomTax",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"IntUse",r) =
+                                    sum{i,IND, SUMMARY(s,i,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Absorption",r) =
+                                     sum{a,ABSORP, SUMMARY(s,a,r)};
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Exports",r) =   SUMMARY(s,"exp",r);
+ (all,s,SEC)(all,r,REG) WEIGHTS(s,"Imports",r) = -
+[SUMMARY(s,"lessImpCIF",r)+SUMMARY(s,"lessImpTax",r)+SUMMARY(s,"lessTariff",r)];
+
+Subset NEWIND is subset of SEC;
+Write
+(all,s,NEWIND)(all,w,MOREWGT)(all,r,REG) WEIGHTS(s,w,r)
+  to file NUWGT header "WGTS";
+
+! end of file !

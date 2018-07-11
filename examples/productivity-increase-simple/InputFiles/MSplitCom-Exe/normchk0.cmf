@@ -1,0 +1,9 @@
+auxiliary files = normchek;
+check-on-read elements = yes; 
+cpu=yes ;  
+log only = yes;   
+! Input files:
+File InFile = work\orig.har;      ! Normalized flows data file
+! Output files:
+File Diag   = work\<cmf>.har; ! Diagnostic file
+

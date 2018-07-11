@@ -1,0 +1,659 @@
+! Program to adjust normalized GTAP database  !
+
+File   INFILE # Normalized GTAP data - containing flows and sets #;
+
+!**** SETS *******************************************************************!
+Set
+ REG # Regions in the model # read elements from file INFILE header "REG";
+ IND # Industries #           read elements from file INFILE header "IND";
+ COM # Commodities #          read elements from file INFILE header "COM";
+ FAC # Primary factors #      read elements from file INFILE header "FAC";
+ MAR # Margin commodities #   read elements from file INFILE header "MAR";
+CGDS_COMM # Investment user # read elements from file INFILE header "INV";
+
+ FIN  # More demanders #  (HOU,INV,GOV);
+ USER     = IND + FIN;
+ SRC      (dom,imp);
+ PRODTAX  (PTAX);
+ MORECOST # Non-commodity industry costs # = FAC + PRODTAX;
+ COST     # All industry costs # = COM + MORECOST;
+ SEC      # Set to compare COM and IND # = COM intersect IND;
+ TYP (Bas,Tax);
+ TRADEX(BASIC,                   !  exports at source market prices !
+       EXPTAX,                   !  trade tax levied at source !
+       IMPTAX);                  !  trade tax levied at dest !
+                                 !  then add international trade margins !
+ TRADES # Basic, exptax, imptax, margins # = TRADEX + MAR;
+ DIFFREP # Set for reporting differences # (Supply,Demand,Diff,Percent);
+
+Subset MAR is subset of COST; Subset MAR is subset of COM;
+
+!**** MAIN DATA ARRAYS *******************************************************!
+Coefficient 
+(all,c,COST)(all,s,SRC)(all,u,USER)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,u,r,t) # GTAP national data #;
+(all,x,TRADES)(all,c,COM)(all,f,REG)(all,t,REG)
+  TRADE(x,c,f,t)      # GTAP trade data #;
+(all,m,MAR)(all,r,REG) VST(m,r)
+ # Trade - Exports for International Transportation, Market Prices #;
+Read
+ NATIONAL from file INFILE header "NATL";
+ TRADE    from file INFILE header "TRAD";
+ VST      from file INFILE header "VST";
+
+Variable ! Updating variables for main data arrays begin with 'u'. 
+ These are the percentage changes in the main data arrays. !
+
+! NATIONAL: demands by industries !
+(all,c,COM)(all,s,SRC)(all,i,IND)(all,r,REG)(all,t,TYP)
+   uNatIndCom(c,s,i,r,t) # Updater for IND, COM part of NATIONAL #;
+(all,f,FAC)(all,i,IND)(all,r,REG)(all,t,TYP)
+   uNatIndFac(f,i,r,t) # Updater for IND, FAC part of NATIONAL #;
+(all,i,IND)(all,r,REG)
+   uNatIndPtax(i,r) # Updater for IND, ProdTax part of NATIONAL #;
+! NATIONAL: local final demands !
+(all,c,COM)(all,s,SRC)(all,d,FIN)(all,r,REG)(all,t,TYP)
+   uNatFinCom(c,s,d,r,t) # Updater for [HOU INV GOV], COM part of NATIONAL #;
+! TRADE !
+(all,x,TRADES)(all,c,COM)(all,f,REG)(all,t,REG)
+   utrade(x,c,f,t) # Updater for TRADE #;
+! VST: demands for international shipping !
+(all,m,MAR)(all,r,REG) uVST(m,r) # Updater for VST margins #;
+
+Update
+! NATIONAL: demands by industries !
+(all,c,COM)(all,s,SRC)(all,i,IND)(all,r,REG)(all,t,TYP)
+  NATIONAL(c,s,i,r,t) = uNatIndCom(c,s,i,r,t);
+(all,f,FAC)(all,i,IND)(all,r,REG)(all,t,TYP)
+   NATIONAL(f,"dom",i,r,t) = uNatIndFac(f,i,r,t);
+(all,i,IND)(all,r,REG) NATIONAL("PTAX","dom",i,r,"TAX") = uNatIndPtax(i,r);
+! NATIONAL: local final demands !
+(all,c,COM)(all,s,SRC)(all,d,FIN)(all,r,REG)(all,t,TYP)
+   NATIONAL(c,s,d,r,t) = uNatFinCom(c,s,d,r,t);
+! TRADE !
+(all,x,TRADES)(all,c,COM)(all,f,REG)(all,t,REG) TRADE(x,c,f,t)=utrade(x,c,f,t);
+! VST: demands for international shipping !
+(all,m,MAR)(all,r,REG) VST(m,r) = uVST(m,r);
+
+!**** HELPER VARIABLES *******************************************************!
+! From main data arrays, and from % changes in these (the "u"
+variables) we can deduce all sorts of aggregates, in levels and in % changes.
+These are used to check for balance, or to serve as targets in adjustment. !
+
+! Create helper variable vTRADE_t !
+Coefficient (all,x,TRADES)(all,c,COM)(all,f,REG)
+ TRADE_t(x,c,f) # TRADE by source, ie, summed over destinations #;
+Formula (all,x,TRADES)(all,c,COM)(all,f,REG)
+ TRADE_t(x,c,f) = sum{t,REG, TRADE(x,c,f,t)}; 
+Variable (orig_level=TRADE_t) (all,x,TRADES)(all,c,COM)(all,f,REG)
+ vTRADE_t(x,c,f) # TRADE by destination, ie, summed over sources #;
+Equation E_vTRADE_t (all,x,TRADES)(all,c,COM)(all,f,REG)
+ ID01[TRADE_t(x,c,f)]*vTRADE_t(x,c,f)=sum{t,REG,TRADE(x,c,f,t)*uTRADE(x,c,f,t)}; 
+Backsolve vTRADE_t using E_vTRADE_t;
+
+! Create helper variable vTRADE_f !
+Coefficient (all,x,TRADES)(all,c,COM)(all,t,REG)
+ TRADE_f(x,c,t) # TRADE by destination, ie, summed over sources #;
+Formula (all,x,TRADES)(all,c,COM)(all,t,REG)
+ TRADE_f(x,c,t) = sum{f,REG, TRADE(x,c,f,t)}; 
+Variable (orig_level=TRADE_f) (all,x,TRADES)(all,c,COM)(all,t,REG)
+ vTRADE_f(x,c,t) # TRADE by destination, ie, summed over sources #;
+Equation E_vTRADE_f (all,x,TRADES)(all,c,COM)(all,t,REG)
+ ID01[TRADE_f(x,c,t)]*vTRADE_f(x,c,t)=sum{f,REG,TRADE(x,c,f,t)*uTRADE(x,c,f,t)}; 
+Backsolve vTRADE_f using E_vTRADE_f;
+
+Coefficient ! helper coefficient !
+(all,c,COM)(all,f,REG)(all,t,REG) TRADE_x(c,f,t) #TRADE summed over set TRADES#;
+Formula
+(all,c,COM)(all,f,REG)(all,t,REG) TRADE_x(c,f,t) =sum{x,TRADES, TRADE(x,c,f,t)};
+
+! Create helper variable vSPEND !
+Coefficient (all,c,COM)(all,d,FIN)(all,r,REG) SPEND(c,d,r) # Final spending #;
+Formula     (all,c,COM)(all,d,FIN)(all,r,REG) SPEND(c,d,r)
+  = sum{s,SRC, sum{t,TYP, NATIONAL(c,s,d,r,t)}};
+Variable (orig_level=SPEND)
+ (all,c,COM)(all,d,FIN)(all,r,REG) vSPEND(c,d,r) # Final spending #;
+Equation E_vSPEND (all,c,COM)(all,d,FIN)(all,r,REG)
+ ID01[SPEND(c,d,r)]*vSPEND(c,d,r)
+  = sum{s,SRC, sum{t,TYP, NATIONAL(c,s,d,r,t)*uNatFinCom(c,s,d,r,t)  }};
+Backsolve vSPEND using E_vSPEND;
+
+! Create helper variable vEXPEND(d,r) = C I G !
+Coefficient (all,d,FIN)(all,r,REG) EXPEND(d,r) # C, I, G #;
+Formula     (all,d,FIN)(all,r,REG) EXPEND(d,r) = sum{c,COM, SPEND(c,d,r)};
+Variable (orig_level=EXPEND) (all,d,FIN)(all,r,REG) vEXPEND(d,r) # C, I, G #;
+Equation E_vEXPEND (all,d,FIN)(all,r,REG)
+ EXPEND(d,r)*vEXPEND(d,r) = sum{c,COM, SPEND(c,d,r)*vSPEND(c,d,r)};
+
+! create helper variable vIMPCIF !
+Set FOB (BASIC, EXPTAX); CIF # Basic, exptax, margins # = FOB + MAR;
+Subset CIF is subset of TRADES;
+Coefficient (all,c,COM)(all,t,REG) IMPCIF(c,t)  # CIF imports #;
+Formula (all,c,COM)(all,t,REG)
+       IMPCIF(c,t) = sum{x,CIF, TRADE_f(x,c,t)};
+Variable (orig_level=IMPCIF)
+  (all,c,COM)(all,t,REG) vIMPCIF(c,t)  # CIF imports #;
+Equation E_vIMPCIF (all,c,COM)(all,t,REG)  ID01[IMPCIF(c,t)]*vIMPCIF(c,t)
+        = sum{x,CIF, TRADE_f(x,c,t)*vtrade_f(x,c,t)};
+
+! create helper variable vEXPFOB !
+Coefficient (all,c,COM)(all,r,REG) EXPFOB(c,r)  # Regional FOB exports #;
+Formula     (all,c,COM)(all,f,REG)
+   EXPFOB(c,f) = sum{x,FOB, TRADE_t(x,c,f)};
+Variable  (orig_level=EXPFOB)
+ (all,c,COM)(all,f,REG) vEXPFOB(c,f) # Regional FOB exports #;
+Equation E_vEXPFOB  (all,c,COM)(all,f,REG) ID01[EXPFOB(c,f)]*vEXPFOB(c,f) =
+   sum{x,FOB, TRADE_t(x,c,f)*vtrade_t(x,c,f)};
+
+! create helper variable vGDPEXPS !
+Set TRD (EXP,IMP);
+Set GDE # GDP expenditure-side terms # = FIN + TRD + "VST";
+Coefficient (all,g,GDE)(all,r,REG) GDPEXPS(g,r)  # GDP expenditure-side terms #;
+Formula     (all,f,FIN)(all,r,REG) GDPEXPS(f,r) = EXPEND(f,r);
+ (all,r,REG) GDPEXPS("EXP",r) =  sum{c,COM, EXPFOB(c,r)};
+ (all,r,REG) GDPEXPS("IMP",r) = -sum{c,COM, IMPCIF(c,r)};
+ (all,r,REG) GDPEXPS("VST",r) =  sum{m,MAR, VST(m,r)};
+Variable (orig_level=GDPEXPS) (all,g,GDE)(all,r,REG)
+           vGDPEXPS(g,r)  # GDP expenditure-side terms #;
+Equation
+E_vGDPEXPSa (all,f,FIN)(all,r,REG) vGDPEXPS(f,r) = vEXPEND(f,r);
+E_vGDPEXPSb (all,r,REG) 
+   GDPEXPS("EXP",r)*vGDPEXPS("EXP",r) = sum{c,COM, EXPFOB(c,r)*vEXPFOB(c,r)};
+E_vGDPEXPSc (all,r,REG)
+  -GDPEXPS("IMP",r)*vGDPEXPS("IMP",r) = sum{c,COM, IMPCIF(c,r)*vIMPCIF(c,r)};
+E_vGDPEXPSd (all,r,REG)
+   GDPEXPS("VST",r)*vGDPEXPS("VST",r) = sum{m,MAR, VST(m,r)*uVST(m,r)};
+
+! create helper variable vGDPEXP !
+Coefficient (all,r,REG) GDPEXP(r)  # GDP expenditure-side #;
+Formula     (all,r,REG) GDPEXP(r) = sum{g,GDE, GDPEXPS(g,r)};
+Variable (orig_level=GDPEXP)(all,r,REG) vGDPEXP(r)  # GDP expenditure-side #;
+Equation E_vGDPEXP (all,r,REG)
+      GDPEXP(r)*vGDPEXP(r) = sum{g,GDE, GDPEXPS(g,r)*vGDPEXPS(g,r)};
+
+! create helper variable vTRDTAX !
+Coefficient (all,c,COM)(all,t,TRD)(all,r,REG)
+ TRDTAX(c,t,r)  # Trade Taxes accruing to region r #;
+Formula  (all,c,COM)(all,f,REG)
+  TRDTAX(c,"exp",f) = TRADE_t("EXPTAX",c,f);
+Formula  (all,c,COM)(all,t,REG)
+  TRDTAX(c,"imp",t) = TRADE_f("IMPTAX",c,t);
+Variable (orig_level=TRDTAX) (all,c,COM)(all,t,TRD)(all,r,REG)
+ vTRDTAX(c,t,r)  # Trade Taxes accruing to region r #;
+Equation
+ E_vTRDTAXa (all,c,COM)(all,f,REG) vTRDTAX(c,"exp",f) = vTRADE_t("EXPTAX",c,f);
+ E_vTRDTAXb (all,c,COM)(all,t,REG) vTRDTAX(c,"imp",t) = vTRADE_f("IMPTAX",c,t);
+
+! create helper variable vTRDTAXTOT !
+Coefficient (all,t,TRD)(all,r,REG)
+  TRDTAXTOT(t,r)  # Trade Taxes accruing to region r #;
+Formula  (all,t,TRD)(all,r,REG) TRDTAXTOT(t,r)  = sum{c,COM, TRDTAX(c,t,r)}; 
+Variable (orig_level=TRDTAXTOT) (all,t,TRD)(all,r,REG)
+ vTRDTAXTOT(t,r)  # Trade Taxes accruing to region r #;
+Equation E_vTRDTAXTOT (all,t,TRD)(all,r,REG) 
+ID01[TRDTAXTOT(t,r)]*vTRDTAXTOT(t,r) = sum{c,COM, TRDTAX(c,t,r)*vTRDTAX(c,t,r)}; 
+
+! create helper variable vNATTAX !
+Coefficient (all,c,COM)(all,r,REG) NATTAX(c,r)  # Commodity Taxes #;
+Formula     (all,c,COM)(all,r,REG)
+         NATTAX(c,r) = sum{s,SRC, sum{u,USER, NATIONAL(c,s,u,r,"tax")}};
+Variable (orig_level=NATTAX)(all,c,COM)(all,r,REG) 
+     vNATTAX(c,r)  # Commodity Taxes #;
+Equation E_vNATTAX (all,c,COM)(all,r,REG)
+         ID01[NATTAX(c,r)]*vNATTAX(c,r) =
+  sum{s,SRC, sum{i,IND, NATIONAL(c,s,i,r,"tax")*uNatIndCom(c,s,i,r,"tax")}}
++ sum{s,SRC, sum{f,FIN, NATIONAL(c,s,f,r,"tax")*uNatFinCom(c,s,f,r,"tax")}};
+
+! create helper variable vNATTAXTOT !
+Coefficient (all,r,REG) NATTAXTOT(r) # Commodity Taxes #;
+Formula     (all,r,REG) NATTAXTOT(r) = sum{c,COM, NATTAX(c,r)};
+Variable (orig_level=NATTAXTOT) (all,r,REG) vNATTAXTOT(r) # Commodity Taxes #;
+Equation E_vNATTAXTOT (all,r,REG) 
+ ID01[NATTAXTOT(r)]*vNATTAXTOT(r) = sum{c,COM, NATTAX(c,r)*vNATTAX(c,r)};
+
+! create helper variable vGDPFACS !
+Coefficient (all,f,FAC)(all,r,REG) GDPFACS(f,r) # Factor earnings #;
+Formula     (all,f,FAC)(all,r,REG) 
+       GDPFACS(f,r) = sum{i,IND,sum{t,TYP, NATIONAL(f,"dom",i,r,t)}}; 
+Variable    (all,f,FAC)(all,r,REG) vGDPFACS(f,r) # Factor earnings #;
+Equation E_vGDPFACS  (all,f,FAC)(all,r,REG) ID01[GDPFACS(f,r)]*vGDPFACS(f,r)
+     =  sum{i,IND,sum{t,TYP, NATIONAL(f,"dom",i,r,t)*uNatIndFac(f,i,r,t)}}; 
+
+! create helper variable vGDPFAC !
+Coefficient (all,r,REG) GDPFAC(r)  # Factor GDP #;
+Formula     (all,r,REG) GDPFAC(r)  = sum{f,FAC, GDPFACS(f,r)};
+Variable (orig_level=GDPFAC)(all,r,REG) vGDPFAC(r) # Factor GDP #;
+Equation E_vGDPFAC (all,r,REG)
+    GDPFAC(r)*vGDPFAC(r)=sum{f,FAC, GDPFACS(f,r)*vGDPFACS(f,r)};
+
+! create helper variable vGDPINCS !
+Set TAX (NATTAX,EXPTAX,IMPTAX,PRDTAX);
+Set GDI # GDP income-side terms # = FAC + TAX;
+Coefficient (all,g,GDI)(all,r,REG) GDPINCS(g,r)  # GDP income-side terms #;
+Formula  
+ (all,f,FAC)(all,r,REG) GDPINCS(f,r) = GDPFACS(f,r);
+ (all,r,REG) GDPINCS("NATTAX",r) = NATTAXTOT(r);
+ (all,r,REG) GDPINCS("EXPTAX",r) = TRDTAXTOT("exp",r);
+ (all,r,REG) GDPINCS("IMPTAX",r) = TRDTAXTOT("imp",r);
+ (all,r,REG) GDPINCS("PRDTAX",r) = sum{i,IND,NATIONAL("PTAX","dom",i,r,"TAX")};
+Variable (orig_level=GDPINCS) (all,g,GDI)(all,r,REG)
+         vGDPINCS(g,r)  # GDP income-side terms #;
+Equation   
+E_vGDPINCSa  (all,f,FAC)(all,r,REG) vGDPINCS(f,r) = vGDPFACS(f,r);
+E_vGDPINCSb  (all,r,REG) vGDPINCS("NATTAX",r) = vNATTAXTOT(r);
+E_vGDPINCSc  (all,r,REG) vGDPINCS("EXPTAX",r) = vTRDTAXTOT("exp",r);
+E_vGDPINCSd  (all,r,REG) vGDPINCS("IMPTAX",r) = vTRDTAXTOT("imp",r);
+E_vGDPINCSe  (all,r,REG) GDPINCS("PRDTAX",r)*vGDPINCS("PRDTAX",r) =
+                  sum{i,IND,NATIONAL("PTAX","dom",i,r,"TAX")*uNatIndPtax(i,r)};
+
+! create helper variable vGDPINC !
+Coefficient (all,r,REG) GDPINC(r)  # GDP income-side #;
+Formula     (all,r,REG) GDPINC(r) = sum{g,GDI, GDPINCS(g,r)};
+Variable (orig_level=GDPINC)(all,r,REG) vGDPINC(r)  # GDP income-side #;
+Equation E_vGDPINC (all,r,REG)
+      GDPINC(r)*vGDPINC(r) = sum{g,GDI, GDPINCS(g,r)*vGDPINCS(g,r)};
+
+! check coefficient for report files !
+Coefficient (all,r,REG) GDPDIFF(r)  # GDP difference, income - expenditure #;
+Formula     (all,r,REG) GDPDIFF(r) = GDPINC(r) - GDPEXP(r);
+
+! create helper variable vGDPWLD !
+Coefficient  GDPWLD  # World GDP #;
+Formula      GDPWLD = sum{r,REG, GDPINC(r)}; 
+Variable (orig_level=GDPWLD) vGDPWLD  # World GDP #;
+Equation E_vGDPWLD  GDPWLD*vGDPWLD = sum{r,REG, GDPINC(r)*vGDPINC(r)};
+
+! create helper variable vBASDEM !
+Coefficient
+(all,c,COM)(all,s,SRC)(all,r,REG) BASDEM(c,s,r) # Regional basic local demands#;
+Formula (all,c,COM)(all,s,SRC)(all,r,REG)
+     BASDEM(c,s,r) = sum{u,USER, NATIONAL(c,s,u,r,"BAS")};
+Variable
+(all,c,COM)(all,s,SRC)(all,r,REG) vBASDEM(c,s,r) #Regional basic local demands#;
+Equation E_vBASDEM (all,c,COM)(all,s,SRC)(all,r,REG)
+  ID01[BASDEM(c,s,r)]*vBASDEM(c,s,r) =
+  sum{i,IND, NATIONAL(c,s,i,r,"BAS") * uNatIndCom(c,s,i,r,"BAS")}
++ sum{d,FIN, NATIONAL(c,s,d,r,"BAS") * uNatFinCom(c,s,d,r,"BAS")};
+
+! create helper variable vLOCDEM = the domestic part of vBASDEM !
+Coefficient (all,c,COM)(all,r,REG) LOCDEM(c,r)  # Local demand #;
+Formula     (all,c,COM)(all,r,REG) LOCDEM(c,r)  = BASDEM(c,"dom",r);
+Variable (all,c,COM)(all,r,REG) vLOCDEM(c,r)  # Local demand #;
+Equation E_vLOCDEM (all,c,COM)(all,r,REG) vLOCDEM(c,r) = vBASDEM(c,"dom",r);
+
+! create helper variable vEXPDEM !
+Coefficient (all,c,COM)(all,r,REG) EXPDEM(c,r)  # Regional basic exports #;
+Formula     (all,c,COM)(all,r,REG) EXPDEM(c,r) = TRADE_t("BASIC",c,r);
+Variable  (orig_level=EXPDEM)
+ (all,c,COM)(all,r,REG) vEXPDEM(c,r) # Regional basic exports #;
+Equation E_vEXPDEM  (all,c,COM)(all,r,REG) vEXPDEM(c,r) = vtrade_t("BASIC",c,r);
+
+! create helper variable vCOSTS = all costs of industry (i,r) !
+Coefficient (all,i,IND)(all,r,REG) COSTS(i,r)  # Industry costs #;
+Formula     (all,i,IND)(all,r,REG) COSTS(i,r)
+  = sum{k,COST, sum{s,SRC, sum{t,TYP, NATIONAL(k,s,i,r,t)}}};
+Variable (orig_level=COSTS)(all,i,IND)(all,r,REG) vCOSTS(i,r) # Industry costs#;
+Equation E_vCOSTS (all,i,IND)(all,r,REG) COSTS(i,r)*vCOSTS(i,r) = sum{c,COM,
+   sum{s,SRC,sum{t,TYP, NATIONAL(c,s,i,r,t)*uNatIndCom(c,s,i,r,t)}}}
+ +sum{f,FAC, sum{t,TYP, NATIONAL(f,"dom",i,r,t)*uNatIndFac(f,i,r,t)}}
+                     +  NATIONAL("PTAX","dom",i,r,"TAX")*uNatIndPtax(i,r);
+
+! create helper variable vSALES = all sales of com c made in r !
+
+! apparatus to allow MAR variable on RHS of COM equation !
+Coefficient (all,c,COM) ISMAR(c) # 1 Iff a margin, else 0 #;
+Formula (all,c,COM) ISMAR(c) =0; (all,m,MAR) ISMAR(m) =1;
+Mapping (onto) COM2MAR from COM to MAR;
+Formula (all,c,COM) COM2MAR(c) =1; (by_elements) (all,m,MAR) COM2MAR(m)=m;
+
+Coefficient (all,c,COM)(all,r,REG) SALES(c,r)  # Sales at basic value #;
+Formula     (all,c,COM)(all,r,REG) SALES(c,r)  =
+       LOCDEM(c,r) + EXPDEM(c,r) + ISMAR(c)*VST(COM2MAR(c),r);
+Variable    (all,c,COM)(all,r,REG) vSALES(c,r) # Sales at basic value #;
+Equation E_vSALES (all,c,COM)(all,r,REG) SALES(c,r)*vSALES(c,r) =
+        LOCDEM(c,r)*vLOCDEM(c,r) + EXPDEM(c,r)*vEXPDEM(c,r)
+          + ISMAR(c)*VST(COM2MAR(c),r)*uVST(COM2MAR(c),r);
+
+!**** THE COSTS=SALES DOMESTIC ACCOUNTING CONSTRAINT *************************!
+! Assure COSTS=SALES balance for (all,i,IND)(all,r,REG)
+using scale factor domslack on all flows entering into COSTS !
+
+! here just translating COM sales to IND sales !
+Coefficient (all,i,IND)(all,r,REG) INDSALES(i,r) # Ind version of vSALES #;
+Formula     (all,i,IND)(all,r,REG) INDSALES(i,r) = 0; ! avoid warning !
+Formula     (all,s,SEC)(all,r,REG) INDSALES(s,r) = SALES(s,r);
+Variable (all,i,IND)(all,r,REG) vINDSALES(i,r) # Ind version of vSALES #;
+Equation E_vINDSALES (all,s,SEC)(all,r,REG) vINDSALES(s,r) = vSALES(s,r);
+
+Coefficient (all,i,IND)(all,r,REG) DOMCHECK(i,r) # Costs -Sales:should be zero#;
+Formula (all,i,IND)(all,r,REG) DOMCHECK(i,r)= COSTS(i,r) - INDSALES(i,r);
+
+Variable (change,orig_level=DOMCHECK)
+  (all,i,IND)(all,r,REG) dDOMCHECK(i,r) #Change in Costs-Sales#;
+Equation E_dDOMCHECK (all,i,SEC)(all,r,REG)
+          100*dDOMCHECK(i,r)= COSTS(i,r)*vCOSTS(i,r) - SALES(i,r)*vSALES(i,r);
+
+! CMF file contains the lines
+   swap  domslack = dDOMCHECK; 
+   final_level  dDOMCHECK = uniform 0;   
+which will use domslack to scale all parts of COSTS to force COSTS=SALES !
+
+Variable (all,i,IND)(all,r,REG) rDOMCHECK(i,r) # Costs/Sales: should be zero #;
+Equation E_rDOMCHECK (all,i,IND)(all,r,REG)
+          rDOMCHECK(i,r)= vCOSTS(i,r) - vINDSALES(i,r);
+
+!**** THE IMPORTS ACCOUNTING CONSTRAINT **************************************!
+! Ensure that sum of local import demands = sum trade matrix , ie:
+(all,c,COM)(all,r,REG) IMPORT(c,r) = sum{u,USER, NATIONAL(c,"imp",u,r,"BAS")};
+(all,c,COM)(all,t,REG) IMPORT(c,t) = sum{x,TRADES, sum{f,REG,TRADE(x,c,f,t)}};
+using scale factor impslack to scale TRADE !
+
+Coefficient (all,c,COM)(all,r,REG) IMPDEM(c,r)  # Regional imports (basic) #;
+Formula     (all,c,COM)(all,r,REG) IMPDEM(c,r) = BASDEM(c,"imp",r);
+Variable (orig_level=IMPDEM)(all,c,COM)(all,r,REG)
+    vIMPDEM(c,r)  # Regional imports (basic) #;
+Equation E_vIMPDEM (all,c,COM)(all,r,REG) vIMPDEM(c,r) = vBASDEM(c,"imp",r);
+
+Coefficient (all,c,COM)(all,t,REG) IMPSUP(c,t)  # Regional supply of imports #;
+Formula (all,c,COM)(all,t,REG)
+       IMPSUP(c,t) = sum{x,TRADES, TRADE_f(x,c,t)};
+Variable (all,c,COM)(all,t,REG) vIMPSUP(c,t)  # Regional supply of imports #;
+Equation E_vIMPSUP (all,c,COM)(all,t,REG)  ID01[IMPSUP(c,t)]*vIMPSUP(c,t)
+        = sum{x,TRADES, TRADE_f(x,c,t)*vtrade_f(x,c,t)};
+
+Coefficient (all,c,COM)(all,t,REG) IMPCHECK(c,t)
+                         # Demand-Supply for imports: should be zero #;
+Formula     (all,c,COM)(all,t,REG) IMPCHECK(c,t) = IMPDEM(c,t) - IMPSUP(c,t);
+Variable (change,orig_level=IMPCHECK)(all,c,COM)(all,t,REG) dIMPCHECK(c,t)
+                         # Change in: Demand-Supply for imports #;
+Equation E_dIMPCHECK (all,c,COM)(all,t,REG)
+ 100*dIMPCHECK(c,t) = IMPDEM(c,t)*vIMPDEM(c,t) - IMPSUP(c,t)*vIMPSUP(c,t);
+
+! CMF file contains the lines
+   swap  impslack = dIMPCHECK;  
+   final_level  dIMPCHECK = uniform 0;  
+which will use impslack to scale the TRADE matrix
+ to force supply=demand for imports !
+
+Variable (all,c,COM)(all,t,REG) rIMPCHECK(c,t)
+                         # Demand/Supply for imports: should be zero #;
+Equation E_rIMPCHECK (all,c,COM)(all,t,REG)
+ rIMPCHECK(c,t) = vIMPDEM(c,t) - vIMPSUP(c,t);
+
+!**** THE MARGINS ACCOUNTING CONSTRAINT **************************************!
+! Assure VST balance for (all,m,MAR), ie:
+sum{c,COM,sum{t,REG,sum{f,REG,TRADE(x,c,f,t)}}}=sum{r,REG, VST(m,r)}; 
+using scale factor marslack on VST !
+
+Coefficient (all,m,MAR) MARDEM(m) # World demand for shipping margins #;
+Formula (all,m,MAR) MARDEM(m) =sum{c,COM, sum{t,REG, TRADE_f(m,c,t)}};
+Variable (all,m,MAR) vMARDEM(m) # World demand for shipping margins #;
+Equation E_vMARDEM (all,m,MAR) MARDEM(m)*vMARDEM(m) =
+           sum{c,COM, sum{t,REG, TRADE_f(m,c,t)*vtrade_f(m,c,t)}};
+
+Coefficient (all,m,MAR) MARSUP(m)  # World supply of shipping margins #;
+Formula     (all,m,MAR) MARSUP(m)  = sum{r,REG, VST(m,r)};
+Variable    (all,m,MAR) vMARSUP(m) # World supply of shipping margins #;
+Equation E_vMARSUP (all,m,MAR)
+ MARSUP(m)*vMARSUP(m) = sum{r,REG, VST(m,r)*uVST(m,r)};
+
+Coefficient (all,m,MAR) MARCHECK(m)
+                         # Demand-Supply for shipping margins: should be zero #;
+Formula (all,m,MAR) MARCHECK(m) = MARDEM(m) - MARSUP(m);
+
+Variable (change, orig_level=MARCHECK) (all,m,MAR) dMARCHECK(m)
+                         # Change in: Demand-Supply for shipping margins #;
+Equation E_dMARCHECK (all,m,MAR)
+   100*dMARCHECK(m) = MARDEM(m)*vMARDEM(m) -  MARSUP(m)*vMARSUP(m);
+
+! CMF file contains the lines
+   swap  marslack = dMARCHECK;  
+   final_level  dMARCHECK = uniform 0;
+which will use marslack to scale VST matrix to force supply=demand for shipping!
+
+Variable (all,m,MAR) rMARCHECK(m)
+                         # Demand/Supply for shipping margins: should be zero #;
+Equation E_rMARCHECK (all,m,MAR) rMARCHECK(m) = vMARDEM(m) - vMARSUP(m);
+
+! check coefficient for report files !
+Coefficient ALLCHECK # Sum of absolute values of all imbalances #;
+Formula     ALLCHECK  = sum{i,IND, sum{r,REG, ABS[DOMCHECK(i,r)]}}
+                      + sum{c,COM, sum{t,REG, ABS[IMPCHECK(c,t)]}}
+                      + sum{r,REG, ABS[GDPDIFF(r)]}
+                      + sum{m,MAR, ABS[MARCHECK(m)]};
+
+!**** SCALING INSTRUMENTS TO MEET ACCOUNTING CONSTRAINTS *********************!
+Variable
+(all,i,IND)(all,r,REG) domslack(i,r) 
+   # slack to scale all flows entering into COSTS so that COSTS=SALES #;
+(all,c,COM)(all,t,REG) impslack(c,t)
+   # Slack to scale TRADE to balance Regional imports #;
+(all,m,MAR) marslack(m)
+   # Slack to scale VST to balance supply/demand of shipping margins #;
+
+!**** SCALING INSTRUMENTS TO MEET TARGETS ************************************!
+
+Variable ! "q" prefix instrument variables: endogenize to hit targets !
+ (all,r,REG) qnatsiz(r) # Size factor: use to target national GDP #;
+ (all,c,COM)(all,f,REG) qexp(c,f) # Export factor: use to target exports #;
+ (all,c,COM)(all,f,REG) qdem(c,f) # scales ALL use of c made in f #;
+ (all,c,COM)(all,t,REG) qimp(c,t) # Import factor: use to target imports #;
+ (all,f,REG) qexptot(f) # Export factor: use to target aggregate exports #;
+ (all,t,REG) qimptot(t) # Import factor: use to target aggregate imports #;
+ (all,d,FIN)(all,r,REG) qexpend(d,r) # Absorption factors: to target C, I, G #;
+ (all,c,COM)(all,t,TRD)(all,r,REG) qTRDTAX(c,t,r) # to target TRDTAX #;
+ (all,t,TRD)(all,r,REG) qTRDTAXTOT(t,r) # to target TRDTAXTOT #;
+ (all,c,COM)(all,r,REG) qNATTAX(c,r) # to target NATTAX #;
+ (all,r,REG) qNATTAXTOT(r) # to target NATTAXTOT #;
+ (all,f,FAC)(all,r,REG) qfac(f,r) # to target [parts of] vGDPFACS(f,r) #;
+
+! Additional optional apparatus for targeting Bilateral FOB flows ! 
+! Create helper variable (or target) vTRADE_FOB !
+Coefficient (all,c,COM)(all,f,REG)(all,t,REG)
+ TRADE_FOB(c,f,t) # Bilateral TRADE FOB #;
+Formula (all,c,COM)(all,f,REG)(all,t,REG)
+ TRADE_FOB(c,f,t) = sum{x,FOB,TRADE(x,c,f,t)}; 
+Variable (orig_level=TRADE_FOB) (all,c,COM)(all,f,REG)(all,t,REG)
+ vTRADE_FOB(c,f,t) # TRADE by destination, ie, summed over sources #;
+Equation E_vTRADE_FOB (all,c,COM)(all,f,REG)(all,t,REG)
+ ID01[TRADE_FOB(c,f,t)]*vTRADE_FOB(c,f,t) =
+       sum{x,FOB,TRADE(x,c,f,t)*uTRADE(x,c,f,t)}; 
+Coefficient (all,c,COM)(all,f,REG)(all,t,REG) IMPSHR(c,f,t)
+                       # share source f in imports to t #;
+Formula     (all,c,COM)(all,f,REG)(all,t,REG) IMPSHR(c,f,t) = 
+                       TRADE_x(c,f,t) / IMPSUP(c,t);
+Variable
+ (all,c,COM)(all,f,REG)(all,t,REG) qtrdbi(c,f,t)
+  # scales exports from f to t [to target vTRADE_FOB] #;
+! To reduce system size, the next 2 lines condense out the 2 new huge variables.
+  To target vTRADE_FOB, you'd need to
+(a) add qtrdbi to exogenous list in CMF file 
+(b) comment out the next 2 lines.  !
+Backsolve vTRADE_FOB using E_vTRADE_FOB;
+Omit qtrdbi;
+
+!**** OPTIONAL LINK FROM GDP TO ABSORPTION ***********************************!
+
+Variable
+  (all,d,FIN)(all,r,REG) q1absorp(d,r) # GDP/absorption link variable #;
+  (all,d,FIN)(all,r,REG) q2absorp(d,r) # GDP/absorption link variable #;
+  q3absorp # World GDP/absorption link variable #;
+Equation E_q2absorp (all,d,FIN)(all,r,REG)
+   q1absorp(d,r) = q3absorp + q2absorp(d,r) + vGDPINC(r);
+! Above provides an optional way to link absorption (C,I,G) to GDP:
+* with q2absorb exogenous, absorption follows GDP
+* with q1absorb exogenous (the default), absorption does NOT follow GDP.
+Note that if absorption follows GDP, nothing prevents the world doubling in
+size. Hence, if q2absorb is exogenous, q3absorb should be endogenous and
+vGDPWLD fixed instead.    !
+
+!**** SCALING RULES **********************************************************!
+
+Coefficient
+ (all,s,SRC) ISDOM(s) # 1 Iff dom, else 0 #;
+ (all,s,SRC) ISIMP(s) # 1 Iff imp, else 0 #;
+Formula
+ (all,s,SRC) ISDOM(s) = 0; ISDOM("dom") = 1;
+ (all,s,SRC) ISIMP(s) = 1 - ISDOM(s);
+
+Equation ! rules for updating the main data arrays !
+
+! demands by industries !
+E_uNatIndCom (all,c,COM)(all,s,SRC)(all,i,IND)(all,r,REG)(all,t,TYP)
+ uNatIndCom(c,s,i,r,t)= vINDSALES(i,r) + domslack(i,r)
+  + ISIMP(s)*[qimp(c,r)+qimptot(r) + sum{f,REG,IMPSHR(c,f,r)*qtrdbi(c,f,r)}]
+  + ISDOM(s)*qdem(c,r)
+  + if(t="tax",  qNATTAX(c,r) + qNATTAXTOT(r));
+
+E_uNatIndFac (all,f,FAC)(all,i,IND)(all,r,REG)(all,t,TYP)
+ uNatIndFac(f,i,r,t)  = vINDSALES(i,r) + qfac(f,r) + domslack(i,r);
+
+E_uNatIndPtax (all,i,IND)(all,r,REG)
+ uNatIndPtax(i,r)     = vINDSALES(i,r) + domslack(i,r);
+
+! local final demands !
+E_uNatFinCom (all,c,COM)(all,s,SRC)(all,d,FIN)(all,r,REG)(all,t,TYP)
+ uNatFinCom(c,s,d,r,t)  = qnatsiz(r) + qexpend(d,r) + q1absorp(d,r)
+  + ISIMP(s)*[qimp(c,r)+qimptot(r)+sum{f,REG,IMPSHR(c,f,r)*qtrdbi(c,f,r)}]
+  + ISDOM(s)*qdem(c,r)
+  + if(t="tax",  qNATTAX(c,r) + qNATTAXTOT(r));
+
+! international trade !
+E_utrade (all,x,TRADES)(all,c,COM)(all,f,REG)(all,t,REG)
+ utrade(x,c,f,t)      = vIMPDEM(c,t) + impslack(c,t)
+   + qnatsiz(f) + qexp(c,f) + qexptot(f) + qdem(c,f) + qtrdbi(c,f,t)   
++ if(x="exptax",  qTRDTAX(c,"exp",f) + qTRDTAXTOT("exp",f))
++ if(x="imptax",  qTRDTAX(c,"imp",t) + qTRDTAXTOT("imp",t));
+
+! demands for international shipping !
+E_uVST (all,m,MAR)(all,f,REG) uVST(m,f)  = vMARDEM(m) + marslack(m)+ qdem(m,f);
+
+!**** CONDENSATION ***********************************************************!
+
+Backsolve uNatFinCom  using E_uNatFinCom;   ! COM*SRC*FIN*REG*TYP !
+Backsolve uNatIndCom  using E_uNatIndCom;   ! COM*SRC*IND*REG*TYP !
+Backsolve uNatIndFac  using E_uNatIndFac;   ! FAC*IND*REG*TYP !
+Backsolve uNatIndPtax using E_uNatIndPtax;  ! IND*REG !
+Backsolve utrade      using E_utrade;       ! TRADES*COM*REG*REG !
+
+!**** REPORT FILES ***********************************************************!
+
+File (new) INITIAL  # Diagnostic output for pre-adjustment data #;
+Write
+ GDPFACS  to file INITIAL header "GDF0";
+ GDPINCS  to file INITIAL header "GDI0";
+ GDPEXPS  to file INITIAL header "GDE0";
+ GDPDIFF  to file INITIAL header "GDD0";
+ EXPEND   to file INITIAL header "ABS0";
+ IMPCIF   to file INITIAL header "CIF0";
+ EXPDEM   to file INITIAL header "EXP0";
+ EXPFOB   to file INITIAL header "FOB0";
+ TRDTAX   to file INITIAL header "TTX0";
+ NATTAX   to file INITIAL header "NTX0";
+ COSTS    to file INITIAL header "CST0";
+ DOMCHECK to file INITIAL header "DCK0";
+ IMPCHECK to file INITIAL header "ICK0";
+ MARCHECK to file INITIAL header "MCK0";
+ ALLCHECK to file INITIAL header "ACK0";
+
+File   (new) FINAL  # Diagnostic output for post-adjustment data #;
+PostSim (begin);
+Write
+vGDPWLD    to file FINAL header "pGDW" longname "%chg world GDP";
+ GDPFACS   to file FINAL header "GDF1";
+vGDPFACS   to file FINAL header "pGDF" longname "%chg factor GDP parts";
+vGDPFAC    to file FINAL header "pGFT" longname "%chg factor GDP";
+ GDPINCS   to file FINAL header "GDI1";
+vGDPINCS   to file FINAL header "pGDI" longname "%chg GDP income parts";
+vGDPINC    to file FINAL header "pGDT" longname "%chg GDP income";
+ GDPEXPS   to file FINAL header "GDE1";
+vGDPEXPS   to file FINAL header "pGDE" longname "%chg GDP expenditure parts";
+vGDPEXP    to file FINAL header "pGDX" longname "%chg GDP expenditure";
+ GDPDIFF   to file FINAL header "GDD1";
+ EXPEND    to file FINAL header "ABS1";
+vEXPEND    to file FINAL header "pABS" longname "%chg C, I, G";
+ IMPCIF    to file FINAL header "CIF1";
+vIMPCIF    to file FINAL header "pCIF" longname "%chg CIF imports";
+ EXPDEM    to file FINAL header "EXP1";
+vEXPDEM    to file FINAL header "pEXP" longname "%chg basic exports";
+ EXPFOB    to file FINAL header "FOB1";
+vEXPFOB    to file FINAL header "pFOB" longname "%chg FOB exports";
+ TRDTAX    to file FINAL header "TTX1";
+vTRDTAX    to file FINAL header "pTTX" longname "%chg trade tax revenue";
+vTRDTAXTOT to file FINAL header "pTTT" longname "%chg trade tax revenue";
+ NATTAX    to file FINAL header "NTX1";  
+vNATTAX    to file FINAL header "pNTX" longname "%chg commodity tax revenue";
+vNATTAXTOT to file FINAL header "pNTT" longname "%chg commod tax revenue";
+ COSTS     to file FINAL header "CST1";
+vCOSTS     to file FINAL header "pCST" longname "%chg sector outputs";
+ DOMCHECK  to file FINAL header "DCK1";
+ IMPCHECK  to file FINAL header "ICK1";
+ MARCHECK  to file FINAL header "MCK1";
+ ALLCHECK  to file FINAL header "ACK1";
+ domslack  to file FINAL header "DSLK";
+ impslack  to file FINAL header "ISLK";
+ marslack  to file FINAL header "MSLK";
+PostSim (end);
+
+!**** UPDATING MINOR DATA ARRAYS *********************************************!
+
+Coefficient (all,f,FAC)(all,r,REG) EVOA(f,r)
+ # Endowments - Output at Agents' Prices #;
+Read EVOA from file InFile header "EVOA";
+Update (all,f,FAC)(all,r,REG) EVOA(f,r) =  vGDPFACS(f,r);
+
+Coefficient (all,r,REG) VKB(r) # Capital Stock - Value at Beginning-of-Period #;
+Read VKB from file InFile header "VKB ";
+Update (all,r,REG) VKB(r) = vGDPFACS("capital",r);
+
+Coefficient (all,r,REG) VDEP(r) # Capital Stock - Value of Depreciation #;
+Read VDEP from file InFile header "VDEP";
+Update (all,r,REG) VDEP(r) = vGDPFACS("capital",r);
+
+Coefficient (all,r,REG) DPARSUM(r)
+ # Sum of Distribution Parameters in Household Demand System #;
+Read DPARSUM from file InFile header "DPSM";
+Update (change) (all,r,REG) DPARSUM(r) = 0.0;
+
+Coefficient (all,r,REG) SAVE(r) # Savings - Net Expenditure at Agents' Prices #;
+Read SAVE from file InFile header "SAVE";
+Update (change) (all,r,REG) SAVE(r) = 0.0;
+! note: above is re-calculated by Norm2Gtp program !
+
+! transfer some dynamic GTAP data which may be present
+   - if not present it will be created with dummy values!
+Coefficient
+ (all,r,REG) YQHFIRM(r) # income of region r from local firms #;
+ (all,r,REG) YQHTRUST(r) # regional income from global trust #;
+ (all,r,REG) YQTFIRM(r) # income of global trust from firms in region r #;
+ (all,r,REG) RORGEXP(r) # expected gross rate of return #;
+ (all,r,REG) RORGTARG(r) # expected gross rate of return #;
+ (all,r,REG) KHAT(r) # price-neutral rate of growth in the capital stock #;
+ (all,r,REG) YHAT(r) # long run rate of growth of a region #;
+Formula 
+(initial) (all,r,REG) YQHFIRM(r)  = 0;
+(initial) (all,r,REG) YQHTRUST(r) = 0;
+(initial) (all,r,REG) YQTFIRM(r)  = 0;
+(initial) (all,r,REG) RORGEXP(r)  = 0.13; ! default value ! 
+(initial) (all,r,REG) RORGTARG(r) = 0.13; ! default value ! 
+(initial) (all,r,REG) KHAT(r)     = 0.08; ! default value ! 
+(initial) (all,r,REG) YHAT(r)     = 0.08; ! default value ! 
+Read 
+(ifheaderexists) YQHFIRM  from file InFile header "YQHF";
+(ifheaderexists) YQHTRUST from file InFile header "YQHT";
+(ifheaderexists) YQTFIRM  from file InFile header "YQTF";
+(ifheaderexists) RORGEXP from file Infile header "RRGE";
+(ifheaderexists) RORGTARG from file Infile header "RRGT";
+(ifheaderexists) KHAT from file Infile header "KHAT";
+(ifheaderexists) YHAT from file Infile header "YHAT";
+! These update rules may be only approximately correct !
+Update
+ (all,r,REG)    YQHFIRM(r)  = vGDPFACS("capital",r);
+ (all,r,REG)    YQHTRUST(r) = vGDPFACS("capital",r);
+ (all,r,REG)    YQTFIRM(r)  = vGDPFACS("capital",r);
+ (change) (all,r,REG) RORGEXP(r)  = 0;
+ (change) (all,r,REG) RORGTARG(r) = 0;
+ (change) (all,r,REG)     KHAT(r) = 0;
+ (change) (all,r,REG)     YHAT(r) = 0;
+
+! end of file !

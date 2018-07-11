@@ -1,0 +1,4 @@
+Database for standard GTAP model
+Appropriate model (including TAB) files, usable with RunGTAP, 
+for this data base may be found at the following URL:
+https://www.gtap.agecon.purdue.edu/products/rungtap/default.asp

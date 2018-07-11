@@ -1,0 +1,11 @@
+auxiliary files = gtp2norm;
+check-on-read elements = yes; 
+cpu=yes;  
+log only = yes;   
+! Input files:
+File INFILE   = input\basedata.har; ! Standard GTAP flows data file
+File GTAPSETS = input\SETS.har;     ! Standard GTAP sets file
+! Output files:
+File OUTFILE  = work\orig.har;      ! Normalized flows data file
+File DIAG     = work\<cmf>.har; ! Diagnostic file
+

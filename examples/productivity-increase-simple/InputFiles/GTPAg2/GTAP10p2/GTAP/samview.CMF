@@ -1,0 +1,12 @@
+auxiliary files = samview;
+check-on-read elements = warn; ! Optional: very often needed
+cpu=yes ; ! Optional: Reports CPU times for various stages
+
+log file = yes;  ! Optional
+! Input files:
+File GTAPDATA = output\basedata.har; ! File containing all base data
+File GTAPSETS = output\sets.har;     ! File with set specification
+File GTAPPARM = output\default.prm;  ! File containing behavioral prameters
+! Output files:
+File GTAPSAM = output\gtapsam.har; ! File with headers for viewing
+

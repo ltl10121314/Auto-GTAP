@@ -1,0 +1,18 @@
+auxiliary files = sumsplit;
+check-on-read elements = warn;  
+cpu = yes;  
+log only = yes;   
+! Input files:
+File SUMWGT   = work\normchk0.har; ! To get SMRY and WGTS for original GTAP data 
+File WORKSETS = work\worksets.har; ! Sets used in expanding the database
+File USERWGT  = input\userwgt.har; ! User file of splitting weights
+! Output files:
+File DIAG     = work\dgsumsplit.har;! Diagnostic File
+Updated file USERWGT = work\sumsplit.har; ! weights scaled to agree with original GTAP data
+exogenous unity;
+rest endogenous;
+Method = Euler;
+Steps =50; ! must not exceed 50
+shock unity=1;
+Verbal description = scale user wgts to agree with original data ;
+

@@ -1,0 +1,986 @@
+!<
+    Deriving a Global Social Accounting Matrix from GTAP Data
+            By Vitaly Kharitonov, Tasneem Mirza and Terrie Walmsley 
+                            Nov 2006
+
+
+This program is a compliment to:
+Scott McDonald and Karen Thierfelder, "Deriving a Global Social Accounting
+Matrix from GTAP version 5 Data", Sheffield Economic Research Paper 2004:002.
+Dept of Economics University of Sheffield. www.shef.ac.uk/economics/serp
+
+The program was developed by Vitaly Kharitonov 
+(Center for Global Trade Analysis, Purdue University). 
+>!
+
+!========================================================================!
+!                              Declare Files                             !
+!========================================================================!
+
+File
+      GTAPDATA # File containing all base data #;
+      GTAPSETS # File with set specification #;
+      GTAPPARM # File containing behavioral prameters #; ! even if unused !
+(new) GTAPSAM # File with headers for viewing #;
+
+!========================================================================!
+!                              Declare Sets                              !
+!========================================================================!
+
+!GTAPSets from GTAPAgg!
+
+Set
+    REG # regions in the model #
+    read elements from file GTAPSETS header "H1";
+Set
+    TRAD_COMM # traded commodities #
+    read elements from file GTAPSETS header "H2";
+Set
+    MARG_COMM # margin commodities #
+    read elements from file GTAPSETS header "MARG";
+Subset
+    MARG_COMM is subset of TRAD_COMM;
+Set 
+    ENDW_COMM #Factors#
+    read elements from file GTAPsets header "H6";
+Set
+    CGDS_COMM # capial goods #
+    read elements from file GTAPSETS header "H9";
+Set
+    PROD_COMM #production commodities# = TRAD_COMM union CGDS_COMM ;
+
+! Common sets !
+
+Set 
+    FACTDEP #Factors subject to depreciation# (Capital);
+Subset
+    FACTDEP is subset of ENDW_COMM; 
+
+Set 
+    REGHOUS #Regional Household# (REGHOUS);
+
+Set 
+    PRIV #Private Expenditure# (PRIV);
+
+Set 
+    PRODTAX #Production Taxes# (PRODTAX);
+Set 
+    DIRTAX #Direct Taxes# (DIRTAX);
+Set 
+    GOVT #Government# (GOVT);
+Set 
+    ROW #Aggregated region# (world);
+
+!Makes new set labels!
+
+Set 
+    MLABL #Imported commodities labels# (m) ;
+Set 
+    DLABL #Domestic commodities labels# (d) ;
+Set 
+    ALABL #Activity labels# (a) ;
+Set 
+    LTMM #Import duties# (tmm);
+Set 
+    LTEE #Export taxes# (tee);
+Set 
+    LTSSM #Import Sales Taxes# (tssm);
+Set 
+    LTSSD #Domestic Sales Taxes# (tssd);
+Set 
+    LTFF #Factor Taxes# (tf);
+Set 
+    LTRXM #Export of Margins# (pvst);
+Set 
+    LWW #Rest of World# (ww);
+
+Set LABELS #Special labels for SAM# = MLABL + DLABL + ALABL + LTMM + LTEE + 
+LTSSM + LTSSD + LTFF + LTRXM + LWW + FACTDEP + REGHOUS + PRIV + PRODTAX + DIRTAX
++ GOVT + ROW ;
+
+set LONGLABEL #Long names of special labels for SAM# 
+(ImportCommod, DomCommod, Activities,ImportDuties, ExportTaxes,
+ImportSalTax, DomSalTax,FactorTaxes, ExportMargin,RestOfWorld, 
+Depreciation,RegionHhold, PrivExpend, 
+ProductTaxes, DirectTaxes,Government, AggregRegion);
+
+!New sets for SAM!
+
+Set 
+    MCOM #Imported commodities # = MLABL x TRAD_COMM ;
+Set 
+    DCOM #Domestic commodities # = DLABL x TRAD_COMM ;
+
+
+Coefficient (all,i,TRAD_COMM) ISMAR(i) # 1 iff margin #;
+Formula     (all,i,TRAD_COMM) ISMAR(i) =0;
+            (all,i,MARG_COMM) ISMAR(i) =1;
+
+MAPPING (PROJECT) COMDCOM from DCOM to TRAD_COMM ;
+
+Set 
+  !  MARG_DCOM #Domestic margins commodities # = DLABL x MARG_COMM ;!
+   MARG_DCOM #Domestic margins commodities # = (all,d,DCOM:ISMAR(COMDCOM(d))=1);
+
+MAPPING  MARGCOM from MARG_DCOM to MARG_COMM ;
+Formula (all,d,MARG_DCOM) MARGCOM(d)=$pos(d);
+!Subset MARG_DCOM is subset of DCOM ;!
+Set 
+    ACT #Activities# = ALABL x TRAD_COMM ;
+Set 
+    TMM #Import duties# = LTMM x REG ;
+Set 
+    TEE #Export taxes# = LTEE x REG ;
+Set 
+    TSSM #Import Sales Taxes# = LTSSM x TRAD_COMM ;
+Set 
+    TSSD #Domestic Sales Taxes# = LTSSD x TRAD_COMM ;
+Set 
+    TFF #Factor Taxes# = LTFF x ENDW_COMM ;
+Set 
+    TRMM #Import of Margins# = MARG_COMM x REG ;
+Set 
+    TRXM #Export of Margins# = MARG_COMM x LTRXM ;
+Set 
+    WW #Rest of World# = LWW x REG ;
+
+Set SAMAC #Social Accounting Matrix Accounts# = MCOM + DCOM + ACT + ENDW_COMM +
+TMM + TEE + TSSM + TSSD + TFF + TRMM + TRXM + WW + REGHOUS + PRIV + PRODTAX
++ DIRTAX + GOVT + CGDS_COMM ;
+
+Set 
+    ATMM #Aggregate Import duties# = LTMM x ROW ; 
+Set 
+    ATEE #Aggregate Export taxes# = LTEE x ROW ; 
+Set 
+    AWW #Aggregate Rest of World# = LWW x ROW ; 
+Set 
+    AMARG #Aggregate Import Margins# = MARG_COMM x ROW ; 
+
+Set ASAMAC #Social Accounting Matrix Accounts# = MCOM + DCOM + ACT + ENDW_COMM 
++ ATMM + ATEE + TSSM + TSSD + TFF + AMARG + TRXM + AWW + REGHOUS + PRIV 
++ PRODTAX + DIRTAX + GOVT + CGDS_COMM ;
+
+!========================================================================!
+!                              Declare Mappings                          !
+!========================================================================!
+
+MAPPING (PROJECT) REGTMM from TMM to REG ;
+MAPPING (PROJECT) REGTEE from TEE to REG ;
+MAPPING (PROJECT) REGWW from WW to REG ;
+MAPPING (PROJECT) ACTCOM from ACT to TRAD_COMM ;
+MAPPING (PROJECT) COMMCOM from MCOM to TRAD_COMM ;
+MAPPING (PROJECT) MARGTRXM from TRXM to MARG_COMM ;
+MAPPING (PROJECT) COMTSSM from TSSM to TRAD_COMM ;
+MAPPING (PROJECT) COMTSSD from TSSD to TRAD_COMM ;
+MAPPING (PROJECT) FACTTFF from TFF to ENDW_COMM ;
+MAPPING (PROJECT) MARGTRMM from TRMM to MARG_COMM ;
+MAPPING (PROJECT) REGTRMM from TRMM to REG ;
+MAPPING (PROJECT) MARGAMARG from AMARG to MARG_COMM ;
+
+!========================================================================!
+!                      Reading Data from GTAP Database                    !
+!========================================================================!
+
+!Imported Commodities!
+
+Coefficient (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+    VIFM_GT(i,j,r) #Firms' Imports at Market Prices#;
+Read
+    VIFM_GT from file GTAPDATA header "VIFM";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VIPM_GT(i,r) #Private Consumption of Imported Commodities Market Prices#;
+Read
+    VIPM_GT from file GTAPDATA header "VIPM";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VIGM_GT(i,r) #Government Consumption of Imported Commodities Market Prices#;
+Read
+    VIGM_GT from file GTAPDATA header "VIGM";
+Coefficient (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+    VIFA_GT(i,j,r) #Firms' Imports at Agent Prices#;
+Read
+    VIFA_GT from file GTAPDATA header "VIFA";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VIPA_GT(i,r) #Private Consumption of Imported Commodities Agent Prices#;
+Read
+    VIPA_GT from file GTAPDATA header "VIPA";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VIGA_GT(i,r) #Private Consumption of Imported Commodities Agent Prices#;
+Read
+    VIGA_GT from file GTAPDATA header "VIGA";
+
+!Domestic Commodities!
+Coefficient (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+    VDFM_GT(i,j,r) #Firms' Usage of Domestics at Market Prices#;
+Read
+    VDFM_GT from file GTAPDATA header "VDFM";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VDPM_GT(i,r) #Private Consumption of Domestic Commodities Market Prices#;
+Read
+    VDPM_GT from file GTAPDATA header "VDPM";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VDGM_GT(i,r) #Government Consumption of Imported Commodities Market Prices#;
+Read
+    VDGM_GT from file GTAPDATA header "VDGM";
+
+Coefficient (all,i,MARG_COMM)(all,r,REG)
+    VST_GT(i,r) #Marginal Domestic Commodities Market Prices#;
+Read
+    VST_GT from file GTAPDATA header "VST";
+Coefficient (all,i,TRAD_COMM)(all,j,REG)(all,r,REG)
+    VXWD_GT(i,j,r);
+Read
+    VXWD_GT from file GTAPDATA header "VXWD";
+Coefficient (all,i,TRAD_COMM)(all,j,REG)(all,r,REG)
+    VXMD_GT(i,j,r);
+Read
+    VXMD_GT from file GTAPDATA header "VXMD";
+
+Coefficient (all,i,TRAD_COMM)(all,j,PROD_COMM)(all,r,REG)
+    VDFA_GT(i,j,r) #Firms' Domestic Purchases at Agent Prices#;
+Read
+    VDFA_GT from file GTAPDATA header "VDFA";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VDPA_GT(i,r) #Private Consumption of Domestic Commodities Agent Prices#;
+Read
+    VDPA_GT from file GTAPDATA header "VDPA";
+
+Coefficient (all,i,TRAD_COMM)(all,r,REG)
+    VDGA_GT(i,r) #Private Consumption of Domestic Commodities Agent Prices#;
+Read
+    VDGA_GT from file GTAPDATA header "VDGA";
+
+!Factors!
+Coefficient (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+    VFM_GT(i,j,r) #Factor Usage at Market Price#;
+Read
+    VFM_GT from file GTAPDATA header "VFM";
+Coefficient (all,i,ENDW_COMM)(all,j,PROD_COMM)(all,r,REG)
+    EVFA_GT(i,j,r)#Endowments: Firms Purchase at Agent Price#;
+Read
+    EVFA_GT from file GTAPDATA header "EVFA";
+Coefficient (all,i,ENDW_COMM)(all,r,REG)
+    EVOA_GT(i,r)#Endowments: Outputs at Agent Price#;
+Read
+    EVOA_GT from file GTAPDATA header "EVOA";
+Coefficient (all,i,FACTDEP)(all,r,REG)
+    VDEP_GT(i,r)#Capital Depreciation#;
+Read
+    VDEP_GT from file GTAPDATA header "VDEP";
+
+!Trade: Import!
+Coefficient (all,i,TRAD_COMM)(all,j,REG)(all,r,REG)
+    VIMS_GT(i,j,r) #Import at Market Price#;
+Read
+    VIMS_GT from file GTAPDATA header "VIMS";
+
+Coefficient (all,i,TRAD_COMM)(all,j,REG)(all,r,REG)
+    VIWS_GT(i,j,r) #Import at World Price#;
+Read
+    VIWS_GT from file GTAPDATA header "VIWS";
+!Transportation!
+Coefficient (all,i,MARG_COMM) (all,j,TRAD_COMM) (all,s,REG) (all,r,REG)
+    VTWR_GT(i,j,s,r);
+Read
+    VTWR_GT from file GTAPDATA header "VTWR";
+Coefficient (all,i,CGDS_COMM)(all,r,REG) 
+    SAVE_GT(i,r);
+Read
+    SAVE_GT from file GTAPDATA header "SAVE";
+!=========================================================================!
+!                       Preparing Data for SAM                            !
+!=========================================================================!
+
+                !=============================!
+                !Block 1. Imported Commodities!
+                !=============================!
+! Usage of imported comodities by firms (1:3 in SAM)! 
+Coefficient (all,i,MCOM)(all,j,ACT)(all,r,REG)
+    VIAM(i,j,r);
+Formula (all, i,MCOM)(all, j, ACT) (all,r,REG)
+    VIAM(i,j,r) = VIFM_GT(COMMCOM(i),ACTCOM(j),r);
+!Private Consumption of Imported Commodities(1:14 in SAM)!
+Coefficient (all,i,MCOM)(all,j,PRIV)(all,r,REG)
+    VIPM(i,j,r);
+Formula (all,i,MCOM)(all,j,PRIV)(all,r,REG)
+    VIPM(i,j,r)= VIPM_GT(COMMCOM(i),r);
+!Government Consumption of Imported Commodities(1:17 in SAM)!
+Coefficient (all,i,MCOM)(all,j,GOVT)(all,r,REG)
+    VIGM(i,j,r);
+Formula (all,i,MCOM)(all,j,GOVT)(all,r,REG)
+    VIGM(i,j,r)= VIGM_GT(COMMCOM(i),r);
+!Usage of imported capital good (1:18 in SAM)!
+Coefficient (all,i,MCOM)(all,j,CGDS_COMM)(all,r,REG)
+    VIIM(i,j,r);
+Formula (all,i,MCOM)(all,j,CGDS_COMM)(all,r,REG)
+    VIIM(i,j,r)= VIFM_GT(COMMCOM(i),j,r);
+
+                !=============================!
+                !Block 2. Domestic Commodities!
+                !=============================!
+!Usage of Domestic Comodities by firms (2:3 in SAM)!
+Coefficient (all,i,DCOM)(all,j,ACT)(all,r,REG)
+    VDAM(i,j,r);
+Formula (all, i,DCOM)(all, j, ACT) (all,r,REG)
+    VDAM(i,j,r)
+         = VDFM_GT(COMDCOM(i),ACTCOM(j),r);
+
+!Private Consumption of Domestic Commodities(2:14 in SAM)!
+Coefficient (all,i,DCOM)(all,j,PRIV)(all,r,REG)
+    VDPM(i,j,r);
+Formula (all,i,DCOM)(all,j,PRIV)(all,r,REG)
+    VDPM(i,j,r) = VDPM_GT(COMDCOM(i),r);
+
+!Government Consumption of Domestic Commodities(2:17 in SAM)!
+Coefficient (all,i,DCOM)(all,j,GOVT)(all,r,REG)
+    VDGM(i,j,r);
+Formula (all,i,DCOM)(all,j,GOVT)(all,r,REG)
+    VDGM(i,j,r)= VDGM_GT(COMDCOM(i),r);
+!Usage of Domestic Capital Good (2:18 in SAM)!
+Coefficient (all,i,DCOM)(all,j,CGDS_COMM)(all,r,REG)
+    VDIM(i,j,r);
+Formula (all,i,DCOM)(all,j,CGDS_COMM)(all,r,REG)
+    VDIM(i,j,r)= VDFM_GT(COMDCOM(i),j,r);
+!Export of Margings (2:11 in SAM)!
+Coefficient (all,i,MARG_COMM)(all,j,MARG_COMM)(all,r,REG)
+    VST_GT1(i,j,r);
+Formula (all,i,MARG_COMM)(all,r,REG)
+    VST_GT1(i,i,r)= VST_GT(i,r);
+Coefficient (all,i,DCOM)(all,j,TRXM)(all,r,REG)
+    VST(i,j,r); 
+Formula (all,i,DCOM)(all,j,TRXM)(all,r,REG)
+    VST(i,j,r)=0;
+Formula (all,i,MARG_DCOM) (all,j,TRXM) (all,r,REG)
+    VST(i,j,r)= VST_GT1(MARGCOM(i),MARGTRXM(j),r);
+!Rest of World Consumption of Domestic Commodities!
+Coefficient (all,i,DCOM)(all,j,WW)(all,r,REG)
+    VXWD(i,j,r);
+Formula (all,i,DCOM)(all,j,WW)(all,r,REG)
+    VXWD(i,j,r) = VXWD_GT(COMDCOM(i),r,REGWW(j));
+!Aggregate Rest of World Consumption of Domestic Commodities(2:12 in SAM)!
+Coefficient (all,i,DCOM)(all,j,AWW)(all,r,REG)
+    AVXWD(i,j,r);
+Formula (all,i,DCOM)(all,j,AWW)(all,r,REG)
+    AVXWD(i,j,r)= sum{k,WW, VXWD(i,k,r)};
+
+
+                !=============================!
+                !      Block 3. Activities    !
+                !=============================!
+!Value of Output Market Price (3:2 in SAM)!
+Coefficient (all,i,TRAD_COMM)(all,r,REG) 
+    VOM_GT(i,r);
+Formula (all,i,TRAD_COMM)(all,r,REG) 
+    VOM_GT(i,r)=sum{j,PROD_COMM,VDFM_GT(i,j,r)}+VDPM_GT(i,r)+VDGM_GT(i,r)+
+                sum{s,REG,VXMD_GT(i,r,s)};
+Formula (all,i,MARG_COMM)(all,r,REG)
+    VOM_GT(i,r)=sum{j,PROD_COMM,VDFM_GT(i,j,r)}+VDPM_GT(i,r)+VDGM_GT(i,r)+
+                sum{s,REG,VXMD_GT(i,r,s)}+VST_GT(i,r);
+Coefficient (all,i,TRAD_COMM)(all,j,TRAD_COMM)(all,r,REG) 
+    VOM_GT1(i,j,r);
+Formula (all,i,TRAD_COMM)(all,r,REG)
+    VOM_GT1(i,i,r)= VOM_GT(i,r);
+Coefficient (all,i,ACT)(all,j,DCOM)(all,r,REG) 
+    VOM(i,j,r)#Value of Output (3:2 in SAM)#;
+Formula (all,i,ACT)(all,j,DCOM)(all,r,REG)
+    VOM(i,j,r)
+        = VOM_GT1(ACTCOM(i),COMDCOM(j),r);
+
+                !=============================!
+                !   Block 4. Factors          !
+                !=============================!
+!Factor Usage (4:3 in SAM)!
+Coefficient (all,i,ENDW_COMM)(all,j,ACT)(all,r,REG)
+    VFM(i,j,r);
+Formula (all,i,ENDW_COMM)(all,j,ACT)(all,r,REG)
+    VFM(i,j,r)= VFM_GT(i,ACTCOM(j),r);
+
+                !=============================!
+                !   Block 5. Import Duties    !
+                !=============================!
+
+!Import Duties!
+Coefficient (all,j,TMM)(all,i,MCOM)(all,r,REG)
+    IMD(j,i,r);
+Formula (all,j,TMM)(all,i,MCOM)(all,r,REG)
+    IMD(j,i,r)
+        = VIMS_GT(COMMCOM(i),REGTMM(j),r) 
+        - VIWS_GT(COMMCOM(i),REGTMM(j),r);
+
+!Aggregate Import Duties (5:1 in SAM)!
+Coefficient (all,j,ATMM)(all,i,MCOM)(all,r,REG)
+    AIMD(j,i,r);
+Formula (all,j,ATMM)(all,i,MCOM)(all,r,REG)
+    AIMD(j,i,r)=sum{k,TMM,IMD(k,i,r)};
+
+                !=============================!
+                !   Block 6. Export Taxes     !
+                !=============================!
+
+!Export Taxes!
+Coefficient (all,j,TEE)(all,i,DCOM)(all,r,REG)
+    EXTAX(j,i,r);
+Formula (all,j,TEE)(all,i,DCOM)(all,r,REG)
+    EXTAX(j,i,r) =VXWD_GT(COMDCOM(i),r,REGTEE(j))
+            -VXMD_GT(COMDCOM(i),r,REGTEE(j));
+
+!Aggregate Export Taxes (6:1 in SAM)!
+Coefficient (all,j,ATEE)(all,i,DCOM)(all,r,REG)
+    AEXTAX(j,i,r);
+Formula (all,j,ATEE)(all,i,DCOM)(all,r,REG)
+    AEXTAX(j,i,r)=sum{k,TEE,EXTAX(k,i,r)};
+
+                !================================!
+                !   Block 7. Import Sales Taxes  !
+                !================================!
+!Import Sales Taxes on Intermediates Imports (7:3 in SAM)!
+Coefficient (all,i,TSSM)(all,j,ACT)(all,r,REG)
+    TSSMA(i,j,r);
+Formula (all,i,TSSM)(all,j,ACT)(all,r,REG)
+    TSSMA(i,j,r)= VIFA_GT(COMTSSM(i),ACTCOM(j),r)
+           -VIFM_GT(COMTSSM(i),ACTCOM(j),r);
+!Import Sales Taxes on Foreign Investment (7:18 in SAM)!
+Coefficient (all,i,TSSM)(all,j,CGDS_COMM)(all,r,REG)
+    TSSMK(i,j,r);
+Formula (all,i,TSSM)(all,j,CGDS_COMM)(all,r,REG)
+    TSSMK(i,j,r)= VIFA_GT(COMTSSM(i),j,r)-VIFM_GT(COMTSSM(i),j,r);
+!Import Sales Taxes on Private Consumption (7:14 in SAM)!
+Coefficient (all,i,TSSM)(all,j,PRIV)(all,r,REG)
+    TSSMH(i,j,r);
+Formula (all,i,TSSM)(all,j,PRIV)(all,r,REG)
+    TSSMH(i,j,r)= VIPA_GT(COMTSSM(i),r)-VIPM_GT(COMTSSM(i),r);
+!Import Sales Taxes on Governmnet Consumption (7:17 in SAM)!
+Coefficient (all,i,TSSM)(all,j,GOVT)(all,r,REG)
+    TSSMG(i,j,r);
+Formula (all,i,TSSM)(all,j,GOVT)(all,r,REG)
+    TSSMG(i,j,r)= VIGA_GT(COMTSSM(i),r)-VIGM_GT(COMTSSM(i),r);
+                
+                !================================!
+                ! Block 8. Domestic Sales Taxes  !
+                !================================!
+!Domestic Sales Taxes on Intermediates (8:3 in SAM)!
+Coefficient (all,i,TSSD)(all,j,ACT)(all,r,REG)
+    TSSDA(i,j,r);
+Formula (all,i,TSSD)(all,j,ACT)(all,r,REG)
+    TSSDA(i,j,r)= VDFA_GT(COMTSSD(i),ACTCOM(j),r)
+                  -VDFM_GT(COMTSSD(i),ACTCOM(j),r);
+!Domestic Sales Taxes on Investment (8:18 in SAM)!
+Coefficient (all,i,TSSD)(all,j,CGDS_COMM)(all,r,REG)
+    TSSDK(i,j,r);
+Formula (all,i,TSSD)(all,j,CGDS_COMM)(all,r,REG)
+    TSSDK(i,j,r)= VDFA_GT(COMTSSD(i),j,r)
+                - VDFM_GT(COMTSSD(i),j,r);
+!Domestic Sales Taxes on Private Consumption (8:14 in SAM)!
+Coefficient (all,i,TSSD)(all,j,PRIV)(all,r,REG)
+    TSSDH(i,j,r);
+Formula (all,i,TSSD)(all,j,PRIV)(all,r,REG)
+    TSSDH(i,j,r)= VDPA_GT(COMTSSD(i),r)-VDPM_GT(COMTSSD(i),r);
+!Domestic Sale Taxes on Governmnet Consumption (8:17 in SAM)!
+Coefficient (all,i,TSSD)(all,j,GOVT)(all,r,REG)
+    TSSDG(i,j,r)#Import Sale Taxes on Governmnet Consumption (7:16 in SAM)#;
+Formula (all,i,TSSD)(all,j,GOVT)(all,r,REG)
+    TSSDG(i,j,r)= VDGA_GT(COMTSSD(i),r)-VDGM_GT(COMTSSD(i),r);
+
+                !================================!
+                !   Block 9. Factor Taxes        !
+                !================================!
+!Factor Taxes (9:3 in SAM)!
+Coefficient (all,i,TFF)(all,j,ACT)(all,r,REG)
+    TFFA(i,j,r)#Factor Taxes#;
+Formula (all,i,TFF)(all,j,ACT)(all,r,REG)
+    TFFA(i,j,r)= EVFA_GT(FACTTFF(i),ACTCOM(j),r)
+               -VFM_GT(FACTTFF(i),ACTCOM(j),r);
+
+                !================================!
+                !   Block 10. Import Margins     !
+                !================================!
+!Import Margins!
+Coefficient (all,i,MARG_COMM) (all,j,MCOM) (all,s,REG) (all,r,REG)
+    VTWR_GT1(i,j,s,r);
+Formula (all,i,MARG_COMM) (all,j,MCOM) (all,s,REG) (all,r,REG)
+    VTWR_GT1(i,j,s,r)= VTWR_GT(i,COMMCOM(j),s,r);
+Coefficient (all,j,TRMM) (all,i,MCOM) (all,r,REG)
+    VTWR(j,i,r);
+Formula (all,j,TRMM) (all,i,MCOM) (all,r,REG)
+    VTWR(j,i,r)= VTWR_GT1(MARGTRMM(j),i,REGTRMM(j),r);
+
+!Aggregate Import Margins (10:1 in SAM)!
+Coefficient (all,j,AMARG) (all,i,MCOM) (all,r,REG)
+    AVTWR(j,i,r);
+Formula (all,j,AMARG) (all,i,MCOM) (all,r,REG)
+    AVTWR(j,i,r) = sum(s, REG, VTWR_GT1(MARGAMARG(j),i,s,r)) ;
+
+
+                !================================!
+                !   Block 11. Export Margins     !
+                !================================!
+!Export Margins!
+Coefficient (all,i,TRXM) (all,s,REG) (all,r,REG)
+    VTWR_X(i,s,r);
+Formula (all,i,TRXM) (all,s,REG) (all,r,REG)
+    VTWR_X(i,s,r)=sum{j,TRAD_COMM,VTWR_GT(MARGTRXM(i),j,s,r)};
+Coefficient (all,i,TRXM)(all,j,TRMM)(all,r,reg)
+    VTWR_EX(i,j,r);
+Formula (all,i,TRXM)(all,j,TRMM)(all,r,reg)
+    VTWR_EX(i,j,r)=0;
+Formula (all,i,TRXM)(all,j,TRMM)(all,r,reg: MARGTRXM(i)=MARGTRMM(j))
+    VTWR_EX(i,j,r) = VTWR_X(i,REGTRMM(j),r);
+
+!Aggregate Export Margins (11:10 in SAM)!
+Coefficient (all,i,TRXM)(all,j,AMARG)(all,r,reg)
+    AVTWR_EX(i,j,r);
+Formula (all,i,TRXM)(all,j,AMARG)(all,r,reg)
+    AVTWR_EX(i,j,r)=sum {k,TRMM: MARGTRMM(k)=MARGAMARG(j), VTWR_EX(i,k,r)};
+
+                !================================!
+                !   Block 12. Rest of World      !
+                !================================!
+!Rest of World (12:1 in SAM)!
+Coefficient (all,j,WW) (all,i,MCOM) (all,r,REG)
+    WWM(j,i,r);
+Formula (all,j,WW) (all,i,MCOM) (all,r,REG)
+    WWM(j,i,r)= VIWS_GT(COMMCOM(i),REGWW(j),r)
+       -sum{l,MARG_COMM ,VTWR_GT(l,COMMCOM(i),REGWW(j),r)};
+
+!Aggregate Rest of World (12:1 in SAM)!
+Coefficient (all,j,AWW)(all,i,MCOM)(all,r,REG)
+    AWWM(j,i,r);
+Formula (all,j,AWW)(all,i,MCOM)(all,r,REG)
+    AWWM(j,i,r)=sum{k,WW,WWM(k,i,r)};
+
+
+                !================================!
+                !   Block 14. Private Household  !
+                !================================!
+
+!Private Household Income (14:13 in SAM)!
+Coefficient (all,i,PRIV)(all,j,REGHOUS)(all,r,REG)
+    YH(i,j,r);
+Formula (all,i,PRIV)(all,j,REGHOUS)(all,r,REG)
+    YH(i,j,r)=sum{m,MCOM,VIPM(m,i,r)}+sum{c,DCOM,VDPM(c,i,r)}
+              +sum{t,TSSM,TSSMH(t,i,r)}+sum{d,TSSD,TSSDH(d,i,r)};
+
+                !================================!
+                !   Block 17. Government         !
+                !================================!
+!Government Income (17:13 in SAM)!
+Coefficient (all,i,GOVT)(all,j,REGHOUS)(all,r,REG)
+    YG(i,j,r);
+Formula (all,i,GOVT)(all,j,REGHOUS)(all,r,REG)
+    YG(i,j,r)=sum{m,MCOM,VIGM(m,i,r)}+sum{c,DCOM,VDGM(c,i,r)}
+              +sum{t,TSSM,TSSMG(t,i,r)}+sum{d,TSSD,TSSDG(d,i,r)};
+
+                !================================!
+                !   Block 18. Capital            !
+                !================================!
+!Capital: Value of Depreciation (18:4 in SAM)!
+Coefficient (all,i,CGDS_COMM)(all,j,ENDW_COMM)(all,r,REG)
+    VDEP(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,ENDW_COMM)(all,r,REG)
+    VDEP(i,j,r)=0; 
+Formula (all,i,CGDS_COMM)(all,j,FACTDEP)(all,r,REG)
+    VDEP(i,j,r)=VDEP_GT(j,r);
+!Capital: Saving (18:13 in SAM)!
+Coefficient (all,i,CGDS_COMM)(all,j,REGHOUS)(all,r,REG)
+    SAVE(i,j,r); 
+Formula (all,i,CGDS_COMM)(all,j,REGHOUS)(all,r,REG)
+    SAVE(i,j,r)=SAVE_GT(i,r);
+!Capital:Transportation (18:11 in SAM)!
+Coefficient (all,i,CGDS_COMM)(all,j,TRXM)(all,r,REG)
+    CAPTR(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,TRXM)(all,r,REG)
+    CAPTR(i,j,r)=sum{c,TRAD_COMM,sum{s,REG,
+                 VTWR_GT(MARGTRXM(j),c,s,r)}}-
+                 sum{d,DCOM,VST(d,j,r)};
+!Capital:Rest of World!
+Coefficient (all,i,CGDS_COMM)(all,j,WW)(all,r,REG)
+    CAPWW(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,WW)(all,r,REG)
+    CAPWW(i,j,r)=sum{k,TRAD_COMM,VIWS_GT(k,REGWW(j),r)}
+            -sum{m,MARG_COMM,sum{c,TRAD_COMM,
+           VTWR_GT(m,c,REGWW(j),r)}}
+            -sum{d,DCOM,VXWD(d,j,r)};
+!Capital:Aggregate Rest of World (18:12 in SAM)!
+Coefficient (all,i,CGDS_COMM)(all,j,AWW)(all,r,REG)
+    ACAPWW(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,AWW)(all,r,REG)
+    ACAPWW(i,j,r)=sum{k,WW,CAPWW(i,k,r)};
+
+
+                !================================!
+                !   Block 15. Production Taxes   !
+                !================================!
+!Production Tax on Activities (15:3 in SAM)!
+Coefficient (all,i,PRODTAX) (all,j,ACT) (all,r,REG)
+    PTAXACT(i,j,r);
+Formula (all,i,PRODTAX) (all,j,ACT) (all,r,REG)
+    PTAXACT(i,j,r)=sum{d,DCOM,VOM(j,d,r)}-
+                [sum{m,MCOM,VIAM(m,j,r)}+sum{c,DCOM,VDAM(c,j,r)}
+                +sum{k,ENDW_COMM,VFM(k,j,r)}
+                +sum{t,TSSM,TSSMA(t,j,r)}+sum{s,TSSD,TSSDA(s,j,r)}
+                +sum{f,TFF,TFFA(f,j,r)}];
+!Production Tax on Investment (15:18 in SAM)!
+Coefficient (all,i,PRODTAX) (all,j,CGDS_COMM) (all,r,REG)
+    PTAXINV(i,j,r);
+Formula (all,i,PRODTAX) (all,j,CGDS_COMM) (all,r,REG)
+    PTAXINV(i,j,r)=sum{f,ENDW_COMM,VDEP(j,f,r)}+sum{h,REGHOUS,SAVE(j,h,r)}+
+                   sum{t,TRXM,CAPTR(j,t,r)}+sum{w,WW,CAPWW(j,w,r)}-
+                   sum{c,MCOM,VIIM(c,j,r)}-sum{d,DCOM,VDIM(d,j,r)}-
+                   sum{m,TSSM,TSSMK(m,j,r)}-sum{s,TSSD,TSSDK(s,j,r)};
+
+                !================================!
+                !   Block 13. Regional Household !
+                !================================!
+
+!Regional Household: Factors (13:4 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,ENDW_COMM) (all,r,REG)
+    RHF(i,j,r)#Regional Household: Factors#;
+Formula (all,i,REGHOUS) (all,j,ENDW_COMM) (all,r,REG)
+    RHF(i,j,r)=EVOA_GT(j,r);
+Formula (all,i,REGHOUS) (all,j,FACTDEP) (all,r,REG)
+    RHF(i,j,r)=EVOA_GT(j,r)-VDEP_GT(j,r);
+
+                !================================!
+                !   Block 16. Direct Taxes       !
+                !================================!
+!Direct Tax on Factors (16:4 in SAM)!
+
+Coefficient (all,i,DIRTAX) (all,j,ENDW_COMM)(all,r,REG)
+    DTAX(i,j,r);
+Formula (all,i,DIRTAX) (all,j,ENDW_COMM)(all,r,REG)
+    DTAX(i,j,r)=sum{a,ACT,VFM(j,a,r)}-sum{h,REGHOUS,RHF(h,j,r)}
+    -sum{k,CGDS_COMM,VDEP(k,j,r)};
+
+            !======================================!
+            !Block 13. Regional Household: Continue!
+            !======================================!
+
+!Regional Household: Import Duties (13:5 in SAM!
+Coefficient  (all,i,REGHOUS) (all,j,TMM) (all,r,REG)
+    RHTMM(i,j,r)#Regional Household: Import Taxes#;
+Formula (all,i,REGHOUS) (all,j,TMM) (all,r,REG)
+    RHTMM(i,j,r)=sum{k,MCOM,IMD(j,k,r)};
+!Regional Household: Export Taxes (13:6 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,TEE) (all,r,REG)
+    RHTEE(i,j,r)#Regional Household: Import Taxes#;
+Formula (all,i,REGHOUS) (all,j,TEE) (all,r,REG)
+    RHTEE(i,j,r)=sum{k,DCOM,EXTAX(j,k,r)};
+!Regional Household: Import Sales Taxes (13:7 in SAM)!
+!Regional Household: Import Duties (13:5 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,ATMM) (all,r,REG)
+    ARHTMM(i,j,r)#Regional Household: Aggregate Import Taxes#;
+Formula (all,i,REGHOUS) (all,j,ATMM) (all,r,REG)
+    ARHTMM(i,j,r)=sum{k,MCOM,AIMD(j,k,r)};
+!Regional Household: Export Taxes (13:6 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,ATEE) (all,r,REG)
+    ARHTEE(i,j,r)#Regional Household: Aggregate Export Taxes#;
+Formula (all,i,REGHOUS) (all,j,ATEE) (all,r,REG)
+    ARHTEE(i,j,r)=sum{k,DCOM,AEXTAX(j,k,r)};
+!Regional Household: Import Sales Taxes (13:7 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,TSSM) (all,r,REG)
+    RHTSSM(i,j,r)#Regional Household: Import Sales Taxes#;
+Formula (all,i,REGHOUS) (all,j,TSSM) (all,r,REG)
+    RHTSSM(i,j,r)=sum{a,ACT,TSSMA(j,a,r)}+sum{g,GOVT,TSSMG(j,g,r)}+
+                sum{s,PRIV,TSSMH(j,s,r)}+sum{k,CGDS_COMM,TSSMK(j,k,r)};
+!Regional Household: Domestic Sales Taxes (13:8 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,TSSD) (all,r,REG)
+    RHTSSD(i,j,r)#Regional Household: Domestic Sales Taxes#;
+Formula (all,i,REGHOUS) (all,j,TSSD) (all,r,REG)
+    RHTSSD(i,j,r)=sum{a,ACT,TSSDA(j,a,r)}+sum{g,GOVT,TSSDG(j,g,r)}+
+                sum{s,PRIV,TSSDH(j,s,r)}+sum{k,CGDS_COMM,TSSDK(j,k,r)};
+!Regional Household: Factor Taxes (13:9 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,TFF) (all,r,REG)
+    RHTFF(i,j,r)#Regional Household: Factor Taxes#;
+Formula (all,i,REGHOUS) (all,j,TFF) (all,r,REG)
+    RHTFF(i,j,r)=sum{a,ACT,TFFA(j,a,r)};
+!Regional Household: Production Taxes (13:15 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,PRODTAX) (all,r,REG)
+    RHTPT(i,j,r)#Regional Household: Production Taxes#;
+Formula (all,i,REGHOUS) (all,j,PRODTAX) (all,r,REG)
+    RHTPT(i,j,r)=sum{a,ACT,PTAXACT(j,a,r)}+sum{k,CGDS_COMM,PTAXINV(j,k,r)};
+!Regional Household: Direct Taxes (13:16 in SAM)!
+Coefficient  (all,i,REGHOUS) (all,j,DIRTAX) (all,r,REG)
+    RHTDT(i,j,r)#Regional Household: Direct Taxes#;
+Formula (all,i,REGHOUS) (all,j,DIRTAX) (all,r,REG)
+    RHTDT(i,j,r)=sum{f,ENDW_COMM,DTAX(j,f,r)};
+!===================================================================!
+!                         CONSTRUCTING SAM                          !
+!===================================================================!
+Coefficient (all,i,ASAMAC)(all,j,ASAMAC)(all,r,REG)
+    ASAM(i,j,r) # Aggregated Social Accounting Matrix #;
+Formula (all,i,MCOM)(all,j,ASAMAC)(all,r,REG)
+    ASAM(i,j,r)=0;
+!Block 1.Imported Commodities !
+Formula (all,i,MCOM)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=VIAM(i,j,r);
+Formula (all,i,MCOM)(all,j,PRIV)(all,r,REG)
+    ASAM(i,j,r)=VIPM(i,j,r);
+Formula (all,i,MCOM)(all,j,GOVT)(all,r,REG)
+    ASAM(i,j,r)=VIGM(i,j,r);
+Formula (all,i,MCOM)(all,j,CGDS_COMM)(all,r,REG)
+    ASAM(i,j,r)=VIIM(i,j,r);
+
+!Block 2. Domestic Commodities! 
+Formula (all,i,DCOM)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=VDAM(i,j,r);
+Formula (all,i,DCOM)(all,j,PRIV)(all,r,REG)
+    ASAM(i,j,r)=VDPM(i,j,r);
+Formula (all,i,DCOM)(all,j,GOVT)(all,r,REG)
+    ASAM(i,j,r)=VDGM(i,j,r);
+Formula (all,i,DCOM)(all,j,CGDS_COMM)(all,r,REG)
+    ASAM(i,j,r)=VDIM(i,j,r);
+Formula (all,i,DCOM)(all,j,TRXM)(all,r,REG)
+    ASAM(i,j,r)=VST(i,j,r);
+Formula (all,i,DCOM)(all,j,AWW)(all,r,REG)
+    ASAM(i,j,r)=AVXWD(i,j,r);
+!Block 3. Activities! 
+Formula (all,i,ACT)(all,j,DCOM)(all,r,REG)
+    ASAM(i,j,r)=VOM(i,j,r);
+!Block 4. Factors! 
+Formula (all,i,ENDW_COMM)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=VFM(i,j,r);
+
+!Block 5. Aggregate Import Duties!
+Formula (all,i,ATMM)(all,j,MCOM)(all,r,REG)
+    ASAM(i,j,r)=AIMD(i,j,r);
+
+!Block 6. Export Taxes!
+Formula(all,i,ATEE)(all,j,DCOM)(all,r,REG)    
+    ASAM(i,j,r)=AEXTAX(i,j,r);
+
+!Block 7. Import Sales Taxes!
+Formula (all,i,TSSM)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=TSSMA(i,j,r);
+Formula (all,i,TSSM)(all,j,PRIV)(all,r,REG)
+    ASAM(i,j,r)=TSSMH(i,j,r);
+Formula (all,i,TSSM)(all,j,GOVT)(all,r,REG)
+    ASAM(i,j,r)=TSSMG(i,j,r);
+Formula (all,i,TSSM)(all,j,CGDS_COMM)(all,r,REG)
+    ASAM(i,j,r)=TSSMK(i,j,r);
+
+!Block 8. Domestic Sales Taxes!
+Formula (all,i,TSSD)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=TSSDA(i,j,r);
+Formula (all,i,TSSD)(all,j,PRIV)(all,r,REG)
+    ASAM(i,j,r)=TSSDH(i,j,r);
+Formula (all,i,TSSD)(all,j,GOVT)(all,r,REG)
+    ASAM(i,j,r)=TSSDG(i,j,r);
+Formula (all,i,TSSD)(all,j,CGDS_COMM)(all,r,REG)
+    ASAM(i,j,r)=TSSDK(i,j,r);
+
+!Block 9. Factor Taxes!
+Formula (all,i,TFF)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=TFFA(i,j,r);
+
+!Block 10. Import Margins!
+Formula (all,j,AMARG) (all,i,MCOM) (all,r,REG)
+    ASAM(j,i,r)=AVTWR(j,i,r);
+
+!Block 11. Export Margins!
+Formula (all,i,TRXM)(all,j,AMARG)(all,r,reg)
+    ASAM(i,j,r)=AVTWR_EX(i,j,r);
+
+!Block 12. Rest of World!
+Formula(all,i,AWW)(all,j,MCOM)(all,r,reg)
+    ASAM(i,j,r)=AWWM(i,j,r);
+
+!Block 13. Regional Household!
+Formula (all,i,REGHOUS)(all,j,ENDW_COMM)(all,r,REG)
+    ASAM(i,j,r)=RHF(i,j,r);
+Formula (all,i,REGHOUS)(all,j,ATMM)(all,r,REG)
+    ASAM(i,j,r)=ARHTMM(i,j,r);
+Formula (all,i,REGHOUS)(all,j,ATEE)(all,r,REG)
+    ASAM(i,j,r)=ARHTEE(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TSSM)(all,r,REG)
+    ASAM(i,j,r)=RHTSSM(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TSSD)(all,r,REG)
+    ASAM(i,j,r)=RHTSSD(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TFF)(all,r,REG)
+    ASAM(i,j,r)=RHTFF(i,j,r);
+Formula (all,i,REGHOUS)(all,j,PRODTAX)(all,r,REG)
+    ASAM(i,j,r)=RHTPT(i,j,r);
+Formula (all,i,REGHOUS)(all,j,DIRTAX)(all,r,REG)
+    ASAM(i,j,r)=RHTDT(i,j,r);
+
+!Block 14. Private Household!
+Formula (all,i,PRIV)(all,j,REGHOUS)(all,r,REG)
+    ASAM(i,j,r)=YH(i,j,r);
+
+!Block 15. Production Taxes!
+Formula (all,i,PRODTAX)(all,j,ACT)(all,r,REG)
+    ASAM(i,j,r)=PTAXACT(i,j,r);
+Formula (all,i,PRODTAX)(all,j,CGDS_COMM)(all,r,REG)
+    ASAM(i,j,r)=PTAXINV(i,j,r);
+
+!Block 16. Direct Taxes!
+Formula (all,i,DIRTAX)(all,j,ENDW_COMM)(all,r,REG)
+    ASAM(i,j,r)=DTAX(i,j,r);
+
+!Block 17. Government!
+Formula (all,i,GOVT)(all,j,REGHOUS)(all,r,REG)
+    ASAM(i,j,r)=YG(i,j,r);
+
+!Block 18. Capital!
+Formula (all,i,CGDS_COMM)(all,j,ENDW_COMM)(all,r,REG)
+    ASAM(i,j,r)=VDEP(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,REGHOUS)(all,r,REG)
+    ASAM(i,j,r)=SAVE(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,TRXM)(all,r,REG)
+    ASAM(i,j,r)=CAPTR(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,AWW)(all,r,REG)
+    ASAM(i,j,r)=ACAPWW(i,j,r);
+
+Coefficient (all,i,SAMAC)(all,j,SAMAC)(all,r,REG)
+    SAM(i,j,r) # Social Accounting Matrix #;
+Formula (all,i,MCOM)(all,j,SAMAC)(all,r,REG)
+    SAM(i,j,r)=0;
+!Block 1.Imported Commodities !
+Formula (all,i,MCOM)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=VIAM(i,j,r);
+Formula (all,i,MCOM)(all,j,PRIV)(all,r,REG)
+    SAM(i,j,r)=VIPM(i,j,r);
+Formula (all,i,MCOM)(all,j,GOVT)(all,r,REG)
+    SAM(i,j,r)=VIGM(i,j,r);
+Formula (all,i,MCOM)(all,j,CGDS_COMM)(all,r,REG)
+    SAM(i,j,r)=VIIM(i,j,r);
+
+!Block 2. Domestic Commodities! 
+Formula (all,i,DCOM)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=VDAM(i,j,r);
+Formula (all,i,DCOM)(all,j,PRIV)(all,r,REG)
+    SAM(i,j,r)=VDPM(i,j,r);
+Formula (all,i,DCOM)(all,j,GOVT)(all,r,REG)
+    SAM(i,j,r)=VDGM(i,j,r);
+Formula (all,i,DCOM)(all,j,CGDS_COMM)(all,r,REG)
+    SAM(i,j,r)=VDIM(i,j,r);
+Formula (all,i,DCOM)(all,j,TRXM)(all,r,REG)
+    SAM(i,j,r)=VST(i,j,r);
+Formula (all,i,DCOM)(all,j,WW)(all,r,REG)
+    SAM(i,j,r)=VXWD(i,j,r);
+!Block 3. Activities! 
+Formula (all,i,ACT)(all,j,DCOM)(all,r,REG)
+    SAM(i,j,r)=VOM(i,j,r);
+!Block 4. Factors! 
+Formula (all,i,ENDW_COMM)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=VFM(i,j,r);
+
+!Block 5. Aggregate Import Duties!
+Formula (all,i,TMM)(all,j,MCOM)(all,r,REG)
+    SAM(i,j,r)=IMD(i,j,r);
+
+!Block 6. Export Taxes!
+Formula(all,i,TEE)(all,j,DCOM)(all,r,REG)    
+    SAM(i,j,r)=EXTAX(i,j,r);
+
+!Block 7. Import Sales Taxes!
+Formula (all,i,TSSM)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=TSSMA(i,j,r);
+Formula (all,i,TSSM)(all,j,PRIV)(all,r,REG)
+    SAM(i,j,r)=TSSMH(i,j,r);
+Formula (all,i,TSSM)(all,j,GOVT)(all,r,REG)
+    SAM(i,j,r)=TSSMG(i,j,r);
+Formula (all,i,TSSM)(all,j,CGDS_COMM)(all,r,REG)
+    SAM(i,j,r)=TSSMK(i,j,r);
+
+!Block 8. Domestic Sales Taxes!
+Formula (all,i,TSSD)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=TSSDA(i,j,r);
+Formula (all,i,TSSD)(all,j,PRIV)(all,r,REG)
+    SAM(i,j,r)=TSSDH(i,j,r);
+Formula (all,i,TSSD)(all,j,GOVT)(all,r,REG)
+    SAM(i,j,r)=TSSDG(i,j,r);
+Formula (all,i,TSSD)(all,j,CGDS_COMM)(all,r,REG)
+    SAM(i,j,r)=TSSDK(i,j,r);
+
+!Block 9. Factor Taxes!
+Formula (all,i,TFF)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=TFFA(i,j,r);
+
+!Block 10. Import Margins!
+Formula (all,j,TRMM) (all,i,MCOM) (all,r,REG)
+    SAM(j,i,r)=VTWR(j,i,r);
+
+!Block 11. Export Margins!
+Formula (all,i,TRXM)(all,j,TRMM)(all,r,reg)
+    SAM(i,j,r)=VTWR_EX(i,j,r);
+
+!Block 12. Rest of World!
+Formula(all,i,WW)(all,j,MCOM)(all,r,reg)
+    SAM(i,j,r)=WWM(i,j,r);
+
+!Block 13. Regional Household!
+Formula (all,i,REGHOUS)(all,j,ENDW_COMM)(all,r,REG)
+    SAM(i,j,r)=RHF(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TMM)(all,r,REG)
+    SAM(i,j,r)=RHTMM(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TEE)(all,r,REG)
+    SAM(i,j,r)=RHTEE(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TSSM)(all,r,REG)
+    SAM(i,j,r)=RHTSSM(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TSSD)(all,r,REG)
+    SAM(i,j,r)=RHTSSD(i,j,r);
+Formula (all,i,REGHOUS)(all,j,TFF)(all,r,REG)
+    SAM(i,j,r)=RHTFF(i,j,r);
+Formula (all,i,REGHOUS)(all,j,PRODTAX)(all,r,REG)
+    SAM(i,j,r)=RHTPT(i,j,r);
+Formula (all,i,REGHOUS)(all,j,DIRTAX)(all,r,REG)
+    SAM(i,j,r)=RHTDT(i,j,r);
+
+!Block 14. Private Household!
+Formula (all,i,PRIV)(all,j,REGHOUS)(all,r,REG)
+    SAM(i,j,r)=YH(i,j,r);
+
+!Block 15. Production Taxes!
+Formula (all,i,PRODTAX)(all,j,ACT)(all,r,REG)
+    SAM(i,j,r)=PTAXACT(i,j,r);
+Formula (all,i,PRODTAX)(all,j,CGDS_COMM)(all,r,REG)
+    SAM(i,j,r)=PTAXINV(i,j,r);
+
+!Block 16. Direct Taxes!
+Formula (all,i,DIRTAX)(all,j,ENDW_COMM)(all,r,REG)
+    SAM(i,j,r)=DTAX(i,j,r);
+
+!Block 17. Government!
+Formula (all,i,GOVT)(all,j,REGHOUS)(all,r,REG)
+    SAM(i,j,r)=YG(i,j,r);
+
+!Block 18. Capital!
+Formula (all,i,CGDS_COMM)(all,j,ENDW_COMM)(all,r,REG)
+    SAM(i,j,r)=VDEP(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,REGHOUS)(all,r,REG)
+    SAM(i,j,r)=SAVE(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,TRXM)(all,r,REG)
+    SAM(i,j,r)=CAPTR(i,j,r);
+Formula (all,i,CGDS_COMM)(all,j,WW)(all,r,REG)
+    SAM(i,j,r)=CAPWW(i,j,r);
+ 
+!Writing Data to the Output File!
+Write
+ ASAM to file GTAPSAM header "ASAM";
+ SAM to file GTAPSAM header "SAM";
+ (set) SAMAC to file GTAPSAM header "SSET";
+ (set) ASAMAC to file GTAPSAM header "ASET";
+ (set) LABELS to file GTAPSAM header "LAB";
+ (set) LONGLABEL to file GTAPSAM header "LABL";
+ (set) ACT to file GTAPSAM header "ACT";
+ (set) AMARG to file GTAPSAM header "AMRG";
+ (set) ATEE to file GTAPSAM header "ATEE";
+ (set) ATMM to file GTAPSAM header "ATMM";
+ (set) AWW to file GTAPSAM header "AWW";
+ (set) TEE to file GTAPSAM header "TEE";
+ (set) TFF to file GTAPSAM header "TFF";
+ (set) TMM to file GTAPSAM header "TMM";
+ (set) TRMM to file GTAPSAM header "TRMM";
+ (set) TRXM to file GTAPSAM header "TRXM";
+ (set) TSSD to file GTAPSAM header "TSSD";
+ (set) TSSM to file GTAPSAM header "TSSM";
+ (set) WW to file GTAPSAM header "WW";
+Transfer unwritten from file GTAPSETS to file GTAPSAM;
+

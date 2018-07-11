@@ -1,0 +1,165 @@
+! EXPWGT.TAB   expand user weights to full size, using default rules !
+
+Zerodivide off;
+File
+      WORKSETS # Sets used in expanding the database #;
+      FULLSUM  # Scaled user splitting weights (only SMRY header is read) #;
+      USERWGT  # Original user weights (for full rank weights) #;
+(new) EXPWGT   # Full rank weights(shares) for splitting SplitCom into NewCom #;
+(new) JUNK     # File needed to work around GEMPACK bug #;
+! All lines containing JUNK are needed to work around a bug in early versions of
+  GEMPACK version 9. You can remove them if you have an update from March 2006
+  or later !
+
+Set ! constant sets !
+ TYP (BAS,TAX);
+ SRC (dom,imp);
+ MOREDEM # More demanders # (HOU,INV,GOV);
+
+Set ! sets from original data !
+ REG # Regions #  read elements from file WORKSETS header "REG";
+ USER0 # All local users #  read elements from file WORKSETS header "USR0";
+ COST0 # All industry costs # read elements from file WORKSETS header "CST0";
+ COM0 # Commodities # read elements from file WORKSETS header "COM0";
+ IND0 # Industries # read elements from file WORKSETS header "COM0";
+ TRADES # Basic, exptax, imptax, margins #
+           read elements from file WORKSETS header "TRD";
+
+Set ! sets from WORKSETS file !
+ SPLITCOM # The commodities which are split #
+   read elements from file WORKSETS header "SCOM";
+ SPLITIND # The industries which are split #
+   read elements from file WORKSETS header "SCOM";
+ NEWCOM   # The new parts of SplitCom #
+   read elements from file WORKSETS header "NCOM";
+ NEWIND   # The new industries #
+   read elements from file WORKSETS header "NCOM";
+ ORGUSER  # Users which are not split #
+   read elements from file WORKSETS header "OUSR";
+ ORGCOM   # Commodities which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGIND   # Industries which are not split #
+   read elements from file WORKSETS header "OCOM";
+ ORGCOST  # Costs which are not split #
+   read elements from file WORKSETS header "OCST";
+ COM1     # The complete enlarged commodity set #
+   read elements from file WORKSETS header "COM1";
+ IND1     # The complete enlarged industry set #
+   read elements from file WORKSETS header "COM1";
+ USER1    # The complete enlarged user set #
+   read elements from file WORKSETS header "USR1";
+ COST1 # The complete enlarged cost set #
+   read elements from file WORKSETS header "CST1";
+
+Subset
+  SPLITCOM is subset of COM0;
+  ORGCOM   is subset of COM0;
+  ORGCOM   is subset of COM1;
+  NEWCOM   is subset of COST1;
+  NEWCOM   is subset of COM1;
+  SPLITCOM is subset of COST0;
+  ORGCOST  is subset of COST0;
+  ORGCOST  is subset of COST1;
+  ORGUSER  is subset of USER0;
+  ORGUSER  is subset of USER1;
+  NEWIND   is subset of USER1;
+  IND1     is subset of USER1;
+  MOREDEM  is subset of USER1;
+  NEWIND   is subset of NEWCOM;
+  SPLITIND is subset of USER0;
+
+Set AGGUSER (INT,HOU,INV,GOV);
+Subset MOREDEM is subset of AGGUSER;
+
+Set MORECOLS (INV,HOU,GOV,EXP,lessDomTax,lessImpTax,lessTariff,lessImpCIF);
+Set SUMCOLS1 = IND1 + MORECOLS;
+Subset USER1 is subset of SUMCOLS1;
+
+Coefficient
+(all,c,COST1)(all,s,SUMCOLS1)(all,r,REG) SUMMARY1(c,s,r)
+ # Expanded summary producer price flows table #;
+Read SUMMARY1 from file FULLSUM header "SMRY";
+
+!********* SHARES TO SPLIT TRADE MATRIX *********!
+
+Coefficient (all,n,NEWCOM)(all,f,REG) TEXP(n,f) # FOB exports #;
+Formula     (all,n,NEWCOM)(all,f,REG) TEXP(n,f) = SUMMARY1(n,"exp",f);
+
+Coefficient (all,n,NEWCOM)(all,t,REG) TIMP(n,t) # CIF imports #;
+Formula     (all,n,NEWCOM)(all,t,REG) TIMP(n,t) = -SUMMARY1(n,"lessImpCIF",t);
+
+Coefficient (all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADEFOB(n,f,t)   # Shares for new coms in trade matrix #;
+Formula   (all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADEFOB(n,f,t) =  TIMP(n,t)*TEXP(n,f);
+Write TRADEFOB to file JUNK header "TFOB";
+Read (IfHeaderExists) TRADEFOB from file USERWGT header "TFOB";
+
+Coefficient (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADEWGT(x,n,f,t)   # Full shares for new coms in trade matrix #;
+Formula     (all,x,TRADES)(all,n,NEWCOM)(all,f,REG)(all,t,REG)
+  TRADEWGT(x,n,f,t) = TRADEFOB(n,f,t);
+Write TRADEWGT to file JUNK header "TWGT";
+Read (IfHeaderExists) TRADEWGT from file USERWGT header "TWGT";
+Write TRADEWGT to file EXPWGT header "TWGT";
+
+!********* SHARES TO SPLIT NATIONAL MATRIX *********!
+Subset ORGIND is subset of ORGUSER;
+!**** ROW weights ****!
+
+Coefficient (all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+ ROWWGT(n,s,u,r,t) # Full shares for new rows of national matrix #;
+Formula   !  (all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)!
+       (all,n,NEWCOM)(all,s,SRC)(all,u,ORGUSER)(all,r,REG)(all,t,TYP)
+ ROWWGT(n,s,u,r,t) = SUMMARY1(n,u,r);
+
+!**** COL weights ****!
+
+Coefficient (all,c,ORGCOST)(all,s,SRC)(all,i,NEWIND)(all,r,REG)
+  COLA(c,s,i,r) # Partial shares for new cols of national matrix #;
+Formula     (all,c,ORGCOST)(all,s,SRC)(all,i,NEWIND)(all,r,REG)
+  COLA(c,s,i,r) =    SUMMARY1(c,i,r);
+
+Coefficient (all,c,ORGCOST)(all,s,SRC)(all,i,NEWIND)(all,r,REG)(all,t,TYP)
+  COLWGT(c,s,i,r,t) # Full shares for new cols of national matrix #;
+Formula     (all,c,ORGCOST)(all,s,SRC)(all,i,NEWIND)(all,r,REG)(all,t,TYP)
+  COLWGT(c,s,i,r,t) = COLA(c,s,i,r);
+Write COLWGT to file JUNK header "CWGT";
+Read (IfHeaderExists) COLWGT from file USERWGT header "CWGT";
+
+!**** Cross weights ****!
+
+Coefficient (all,n,NEWCOM)(all,u,NEWIND)(all,r,REG)
+  CROSSB(n,u,r) # Partial shares for new intersection of national matrix #;
+Formula (all,n,NEWCOM)(all,u,NEWIND)(all,r,REG)
+  CROSSB(n,u,r) = SUMMARY1(n,u,r);
+
+Coefficient (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)
+  CROSSA(n,s,u,r) # Partial shares for new intersection of national matrix #;
+Formula (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)
+  CROSSA(n,s,u,r) = CROSSB(n,u,r);
+Write CROSSA to file JUNK header "XWGA";
+Read (IfHeaderExists) CROSSA from file USERWGT header "XWGA";
+
+Coefficient (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSSWGT(n,s,u,r,t) # Full shares for new intersection of national matrix #;
+Formula     (all,n,NEWCOM)(all,s,SRC)(all,u,NEWIND)(all,r,REG)(all,t,TYP)
+  CROSSWGT(n,s,u,r,t) = CROSSA(n,s,u,r);
+Write CROSSWGT to file JUNK header "XWGT";
+Read (IfHeaderExists) CROSSWGT from file USERWGT header "XWGT";
+
+Coefficient TRADESCAL
+# Normally 1, set to 0 to prevent trade matrix changing #;
+Formula    TRADESCAL =1;
+Write TRADESCAL to file JUNK header "TSCA";
+Read (IfHeaderExists) TRADESCAL from file USERWGT header "TSCA";
+
+! note: you can modify this EXPWGT program,
+but you MUST include the following writes:  !
+Write
+ ROWWGT   to file EXPWGT header "RWGT";
+ COLWGT   to file EXPWGT header "CWGT";
+ CROSSWGT to file EXPWGT header "XWGT";
+TRADESCAL to file EXPWGT header "TSCA";
+
+!end of file !
