@@ -47,6 +47,7 @@ simulations:
           #This directory contains the Har file that describes which sectors to split and with which weights
       3:
         type: GTAP-V6 # This subpart runs a GEMSIM on GTAP-V6
+        sim_environment: gemsim
         input_folder: GTAP-V6-tax-levels
           # For a GEMSIM GTAP-V6 part, the input_folder only needs to contain a .tab and .sti file
         work_folder: alter
@@ -71,6 +72,7 @@ simulations:
         shock: OceanGrains
       5:
         type: GTAP-V6
+        sim_environment: gemsim
         input_folder: GTAP-V6
         work_folder: gtap1
         model_file_name: gtap
@@ -96,6 +98,7 @@ simulations:
         # This is the final subpart. Results of this simulation are automatically exported to OutputFiles.
         # Each simulation must end with a subpart of the type GTAP-V6 or GTAP-E.
         type: GTAP-V6
+        sim_environment: gemsim
         input_folder: GTAP-V6
         work_folder: gtap2
         model_file_name: gtap
