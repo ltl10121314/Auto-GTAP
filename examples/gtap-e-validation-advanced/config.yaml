@@ -32,7 +32,7 @@ simulations:
       1:
         type: GTAP-E
         sim_environment: gemsim
-        input_folder: GTAP-E-model
+        input_folder: GTAP-E-model-gemsim
         work_folder: Actual
         model_file_name: gtap
         solution_method: j
@@ -56,7 +56,7 @@ simulations:
       1:
         type: GTAP-E
         sim_environment: gemsim
-        input_folder: GTAP-E-model
+        input_folder: GTAP-E-model-gemsim
         work_folder: GTAP-E
         model_file_name: gtap
         solution_method: j #should be g but ok for now as debugging
@@ -85,7 +85,7 @@ simulations:
       2:
         type: GTAP-E
         sim_environment: gemsim
-        input_folder: GTAP-E-model
+        input_folder: GTAP-E-model-gemsim
         work_folder: simulation
         model_file_name: gtap
         solution_method: j #should be g but ok for now as debugging
