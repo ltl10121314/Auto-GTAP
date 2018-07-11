@@ -65,7 +65,16 @@ python -m venv venv
 ./setup.ps1
 ```
 
-- Create WorkFiles folder
+- Create WorkFiles folders at
+
+```bash
+Auto-GTAP\examples\gtap-e-validation-advanced\WorkFiles
+Auto-GTAP\examples\gtap-e-validation-simple\WorkFiles
+Auto-GTAP\examples\productivity_increase-advanced\WorkFiles
+Auto-GTAP\examples\productivity_increase-simple\WorkFiles
+
+```
+
 - Put Raw GTAP Data in subfolder of InputFiles for your aggregation program
 
 ## Example projects
