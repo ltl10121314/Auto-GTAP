@@ -24,13 +24,25 @@ Until now. Auto-GTAP provides a unified framework for running all parts of a GTA
 
 TODO: describe the environment
 
-Mandatory:
--Python
--pyyaml
+Mandatory
+- Python 3.6 (other versions untested)
+- Pyyaml 4.2bt (other versions untested)
 
-Optional (but required for example)
--GEMPACK (requires license)
--Raw GTAP Data
+Required for GTAP-E Validation Example
+- GEMPACK 14.0 (other versions untested, requires license from CoPS)
+
+Rquired for Productivity Increase Example
+- GEMPACK 14.0 (other versions untested, requires license from CoPS)
+- Raw GTAP Data.
+
+This specific data was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
+
+``GTPAg2\GTAP10p2\GTAP\2014``
+
+and should be placed in
+
+``Auto-GTAP\examples\productivity_increase\InputFiles\GTPAg2\GTAP10p2\GTAP\2014``
+
  
  
 ### Clone the repository 
@@ -53,8 +65,8 @@ python -m venv venv
 ./setup.ps1
 ```
 
--Create WorkFiles folder
--Put Raw GTAP Data in subfolder of InputFiles for your aggregation program
+- Create WorkFiles folder
+- Put Raw GTAP Data in subfolder of InputFiles for your aggregation program
 
 ## Example projects
 
