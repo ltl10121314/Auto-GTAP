@@ -47,8 +47,8 @@ simulations:
           #This directory contains the Har file that describes which sectors to split and with which weights
       3:
         type: GTAP-V6 # This subpart runs a GEMSIM on GTAP-V6
-        sim_environment: gemsim
-        input_folder: GTAP-V6-tax-levels-gemsim
+        sim_environment: fortran
+        input_folder: GTAP-V6-tax-levels-fortran
           # For a GEMSIM GTAP-V6 part, the input_folder only needs to contain a .tab and .sti file
         work_folder: alter
         model_file_name: gtap
@@ -72,8 +72,8 @@ simulations:
         shock: OceanGrains
       5:
         type: GTAP-V6
-        sim_environment: gemsim
-        input_folder: GTAP-V6-gemsim
+        sim_environment: fortran
+        input_folder: GTAP-V6-fortran
         work_folder: gtap1
         model_file_name: gtap
         solution_method: j
@@ -88,7 +88,7 @@ simulations:
           # Running the GTPVEW-V6 subpart regenerates these files, so that welfare results can be reported. Note that
           # GTPVEW-6 does not have to be run after every run of GTAP. This is because although welfare results can't be
           # reported, all reportable results are calculated the same whether GTPVEW was run or not.
-        input_folder: GTPVEW-V6-gemsim
+        input_folder: GTPVEW-V6-fortran
         work_folder: gtpvew
         model_file_name: gtpvew
         cmf_file_name: GTAPVu2
@@ -98,8 +98,8 @@ simulations:
         # This is the final subpart. Results of this simulation are automatically exported to OutputFiles.
         # Each simulation must end with a subpart of the type GTAP-V6 or GTAP-E.
         type: GTAP-V6
-        sim_environment: gemsim
-        input_folder: GTAP-V6-gemsim
+        sim_environment: fortran
+        input_folder: GTAP-V6-fortran
         work_folder: gtap2
         model_file_name: gtap
         solution_method: j

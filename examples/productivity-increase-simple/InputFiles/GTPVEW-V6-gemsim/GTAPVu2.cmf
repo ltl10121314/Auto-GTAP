@@ -1,8 +1,0 @@
-! This Command file
-! was written by RunGTAP (Version 3.61 built 19/Oct/2013)
-aux files = GTPVEW;
-file gtapsets = sets.har;
-file gtapparm = default.prm;
-file gtapDATA = gtap.har;
-file gtapVIEW = newview.har;
-file TaxRates = newrate.har;
