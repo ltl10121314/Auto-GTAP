@@ -79,7 +79,8 @@ Auto-GTAP\examples\productivity_increase-simple\WorkFiles
 
 ## Example projects
 
-- [Productivity Increase](examples/productivity_increase)
+- [Productivity Increase (Simple)](examples/productivity-increase-simple)
+- [Productivity Increase (Advanced)](examples/productivity-increase-advanced)
 - [GTAP-E Validation (Simple)](examples/gtap-e-validation-simple)
 - [GTAP-E Validation (Advanced)](examples/gtap-e-validation-advanced)
 
