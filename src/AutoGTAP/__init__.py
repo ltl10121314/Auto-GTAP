@@ -10,6 +10,6 @@ from AutoGTAP.GTAPAdjustCMF.GTAPAdjustCMF import GTAPAdjustCMF
 from AutoGTAP.ImportCSV_SL4.ImportCSV_SL4 import ImportCSV_SL4
 from AutoGTAP.ModifyDatabase.ModifyDatabase import ModifyDatabase
 from AutoGTAP.ModifyHAR.ModifyHAR import ModifyHAR
-from AutoGTAP.MoveDatabaseFiles.MoveDatabaseFiles import MoveDatabaseFiles
+from AutoGTAP.MoveFilesBetweenSteps.MoveFilesBetweenSteps import MoveFilesBetweenSteps
 from AutoGTAP.SimulationCMF.SimulationCMF import SimulationCMF
 from AutoGTAP.SplitCommodities.SplitCommodities import SplitCommodities
