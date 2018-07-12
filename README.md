@@ -28,14 +28,17 @@ Mandatory
 - Python 3.6 (other versions untested)
 - Pyyaml 4.2bt (other versions untested)
 
-Required for GTAP-E Validation Example
+Required for GTAP-E Validation Advanced Example
 - GEMPACK 14.0 (other versions untested, requires license from CoPS)
 
-Rquired for Productivity Increase Example
+Required for Productivity Increase Advanced Example
 - GEMPACK 14.0 (other versions untested, requires license from CoPS)
 - Raw GTAP Data.
 
-This specific data was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
+Rquired for Productivity Increase Simple Example
+- Raw GTAP Data.
+
+This specific "Raw GTAP Data" above was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
 
 ``GTPAg2\GTAP10p2\GTAP\2014``
 
