@@ -5,7 +5,7 @@ __created__ = "2018-4-25"
 import shutil
 
 
-class MoveDatabaseFiles(object):
+class MoveFilesBetweenSteps(object):
     """Moves files. Typically moves the output of one module to the input of another module"""
 
     __slots__ = ["source_type", "destination_type", "files", "simulation_name", "source_part_folder",
