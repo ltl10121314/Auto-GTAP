@@ -108,12 +108,6 @@ class SimulationShocksShale(object):
                                + line_list_gas_shocks_actual \
                                + line_list_oil_shocks_actual
 
-        elif self.shock_type == "pop5":
-            line_list_shocks = ['Shock pop(REG) = uniform 5;']
-
-        elif self.shock_type == "pfactorworld":
-            line_list_shocks = ['Shock pfactwld = uniform 10;']
-
         else:
             raise ValueError('Unexpected shock type: %s' % self.shock_type)
 
