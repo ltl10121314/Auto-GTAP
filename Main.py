@@ -79,7 +79,6 @@ for simulation_name in config.simulation_list:
                 subprocess.call("{0} -cmf {1}.cmf".format(model_file_name, cmf_file_name))
             os.chdir(old_work_directory)
 
-
         elif part_type == "GTAP-Adjust":
             # Load additional configuration information specific to GTAP simulations
             part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
@@ -93,7 +92,6 @@ for simulation_name in config.simulation_list:
             os.chdir(work_directory)
             subprocess.call("adjust.bat")
             os.chdir(old_work_directory)
-
 
         elif part_type == "GTAP-V6" or part_type == "GTAP-E":
             # Load additional configuration information specific to GTAP simulations
@@ -128,7 +126,6 @@ for simulation_name in config.simulation_list:
             os.chdir(work_directory)
             subprocess.call("sltoht -sti {0}_sltoht.sti".format(model_file_name))
             os.chdir(old_work_directory)
-
 
         else:
             raise ValueError('Unexpected part type: %s' % part_type)
