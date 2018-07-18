@@ -45,7 +45,7 @@ class ImportCsvSl4(object):
                     # Variable name is between the 7th character of the line and the first space after that character
                     name_variable = (line[7:].split(" "))[0]
 
-                if not name_variable:  # checks if list is empty
+                if name_variable:  # runs if list is nonempty
                     if line.split(",")[0].strip() in list_variable_properties:
                         # line defines name of matrix if its equal to array name followed by "("
                         variable_index = line.split(",")[0].strip()
