@@ -5,7 +5,7 @@ __created__ = "2018-3-15"
 from typing import List
 
 
-class ImportCSV_SL4(object):
+class ImportCsvSl4(object):
     """Imports the CSV Files created by SLTOHT"""
 
     __slots__ = ["file_path_list"]
@@ -39,12 +39,13 @@ class ImportCSV_SL4(object):
             ]
 
             for line in self.filecontents(file_path):
-                # checks if line contains name of variable by looking if it begins with "! The" and ends with "#" and a line break
+                # checks if line contains name of variable by looking if it begins with "! The" and endswith "#" and a
+                # line break
                 if line[0:7] == " ! The " and line[-5:] == "part\n":
                     # Variable name is between the 7th character of the line and the first space after that character
                     name_variable = (line[7:].split(" "))[0]
 
-                if name_variable != []:
+                if not name_variable:  # checks if list is empty
                     if line.split(",")[0].strip() in list_variable_properties:
                         # line defines name of matrix if its equal to array name followed by "("
                         variable_index = line.split(",")[0].strip()

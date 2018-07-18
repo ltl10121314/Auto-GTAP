@@ -13,9 +13,9 @@ class ModifyHAR(object):
         self.output_file = output_file
         self.sti_file = "cmd_modify_har.sti"
         self.modifications = modifications
-        self.CreateSTI()
+        self.CreateSti()
 
-    def CreateSTI(self) -> None:
+    def CreateSti(self) -> None:
         # Create lines for sti file that controls modhar
         line_list_start = [
             "bat",

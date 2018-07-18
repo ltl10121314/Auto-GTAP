@@ -42,10 +42,10 @@ class CreateConfig(object):
             model_csv_path = simulation + "//" + final_part_work_directory + "//gtap.csv"
             model_csv_paths.append(model_csv_path)
         return model_csv_paths
-    
-    def part_additional_input_folders(self,simulation_name:str,part_num:int):
+
+    def part_additional_input_folders(self, simulation_name: str, part_num: int):
         try:
-            folders=self.yaml_file["simulations"][simulation_name]["subparts"][part_num]["additional_input_folders"]
+            folders = self.yaml_file["simulations"][simulation_name]["subparts"][part_num]["additional_input_folders"]
         except:
-            folders=[]
+            folders = []
         return folders

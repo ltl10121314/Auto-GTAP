@@ -131,7 +131,7 @@ for simulation_name in config.simulation_list:
 # Import simulation results into a single database
 os.chdir("WorkFiles")
 # load the various CSV files created by the experiment simulation into a database
-databaseSL4 = ag.ImportCSV_SL4(config.csv_paths()).create()
+databaseSL4 = ag.ImportCsvSl4(config.csv_paths()).create()
 # Modify the database to make it more readable
 databaseMod = ag.ModifyDatabase(databaseSL4).create()
 # Export the database to a results csv file

@@ -2,7 +2,10 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-15"
 
-import shutil, datetime
+import shutil
+
+
+# import datetime
 
 
 class CreateOutput(object):

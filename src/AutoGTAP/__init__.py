@@ -7,7 +7,7 @@ from AutoGTAP.CreateMAP.CreateMAP import CreateMAP
 from AutoGTAP.CreateOutput.CreateOutput import CreateOutput
 from AutoGTAP.CreateSTI.CreateSTI import CreateSTI
 from AutoGTAP.GTAPAdjustCMF.GTAPAdjustCMF import GTAPAdjustCMF
-from AutoGTAP.ImportCSV_SL4.ImportCSV_SL4 import ImportCSV_SL4
+from AutoGTAP.ImportCSV_SL4.ImportCsvSl4 import ImportCsvSl4
 from AutoGTAP.ModifyDatabase.ModifyDatabase import ModifyDatabase
 from AutoGTAP.ModifyHAR.ModifyHAR import ModifyHAR
 from AutoGTAP.MoveFilesBetweenSteps.MoveFilesBetweenSteps import MoveFilesBetweenSteps
