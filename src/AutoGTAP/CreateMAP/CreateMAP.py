@@ -4,7 +4,7 @@ __created__ = "2018-3-13"
 
 
 class CreateMAP(object):
-    """Creates the MAP File for use in SLTOTH
+    """Creates the MAP File for use in SLTOHT
     Map gives the list of variables to be exported from the sl4 to the csv results file"""
 
     __slots__ = ["project_name", "simulation_name", "map_lines"]
