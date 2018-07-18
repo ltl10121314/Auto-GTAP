@@ -10,10 +10,12 @@ class SimulationCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the policy simulation (as opposed to the shock
     calculation)"""
 
-    __slots__ = ["simulation_name", "solution_method", "model_folder", "shock_type", "model_type"]
+    __slots__ = ["working_directory", "simulation_name", "solution_method", "model_folder", "shock_type", "model_type"]
 
-    def __init__(self, simulation_name: str, solution_method: str, model_folder: str, shock_type: str,
+    def __init__(self, working_directory: str, simulation_name: str, solution_method: str, model_folder: str,
+                 shock_type: str,
                  model_type: str) -> None:
+        self.working_directory = working_directory
         self.solution_method = solution_method
         self.model_folder = model_folder
         self.shock_type = shock_type
@@ -213,6 +215,6 @@ class SimulationCMF(object):
         line_list_total = line_list_header + line_list_method + line_list_exogendo + line_list_shocks
 
         # Create final file
-        cmf_file_name_with_path = "WorkFiles\\" + self.simulation_name + "\\" + self.model_folder + "\\" + cmf_file_name
+        cmf_file_name_with_path = self.working_directory + "\\" + cmf_file_name
         with open(cmf_file_name_with_path, "w+") as writer:  # Create the empty file
             writer.writelines(line + '\n' for line in line_list_total)  # write the line list to the file

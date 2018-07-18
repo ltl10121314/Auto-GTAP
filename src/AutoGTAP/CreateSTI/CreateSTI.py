@@ -10,9 +10,10 @@ class CreateSTI(object):
 
     # Also creates STI files for PGSing .tab files
 
-    __slots__ = ["input_file_name", "simulation_name", "sti_type"]
+    __slots__ = ["work_directory", "input_file_name", "simulation_name", "sti_type"]
 
-    def __init__(self, input_file_name: str, simulation_name: str, sti_type: str) -> None:
+    def __init__(self, work_directory: str, input_file_name: str, simulation_name: str, sti_type: str) -> None:
+        self.work_directory = work_directory
         self.input_file_name = input_file_name
         self.simulation_name = simulation_name
         self.sti_type = sti_type
@@ -42,5 +43,5 @@ class CreateSTI(object):
             raise ValueError('Unexpected sti type: %s' % self.sti_type)
 
         # Create final file
-        with open("{0}.sti".format(output_file_name), "w+") as writer:  # Create the empty file
+        with open(self.work_directory + "\\{0}.sti".format(output_file_name), "w+") as writer:  # Create the empty file
             writer.writelines(line + '\n' for line in line_list)  # write the line list to the file
