@@ -45,10 +45,10 @@ for simulation_name in config.simulation_list:
                 "data_subfolder"]
             ag.AggregateModelData(simulation_name, part_work_folder, agg_scheme_file, data_subfolder)
 
-        if part_type == "MSplitCom-Exe":
+        elif part_type == "MSplitCom-Exe":
             ag.SplitCommodities(simulation_name)
 
-        if part_type == "modify_har":
+        elif part_type == "modify_har":
             # Modify_HAR directly modifies a HAR file
             # This module should be rarely used
             parameter_mod_description = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
@@ -62,7 +62,7 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
             os.chdir("..")
 
-        if part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
+        elif part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
             cmf_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["cmf_file_name"]
 
@@ -83,7 +83,7 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
             os.chdir("..")
 
-        if part_type == "GTAP-Adjust":
+        elif part_type == "GTAP-Adjust":
             # Load additional configuration information specific to GTAP simulations
             part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
 
@@ -97,7 +97,7 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
             os.chdir("..")
 
-        if part_type == "GTAP-V6" or part_type == "GTAP-E":
+        elif part_type == "GTAP-V6" or part_type == "GTAP-E":
             # Load additional configuration information specific to GTAP simulations
             part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
             part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
@@ -128,6 +128,9 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
             os.chdir("..")
             os.chdir("..")
+
+        else:
+            raise ValueError('Unexpected part type: %s' % part_type)
 
 # Import simulation results into a single database
 os.chdir("WorkFiles")
