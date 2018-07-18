@@ -1,6 +1,6 @@
 # Auto-GTAP
 
-Auto-GTAP combines all steps of running a GTAP-based reasearch project under a single framework.
+Auto-GTAP combines all steps of running a GTAP-based research project under a single framework.
 
 ## Why use Auto-GTAP?
 
