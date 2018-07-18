@@ -2,8 +2,6 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-28"
 
-import subprocess
-
 
 class ModifyHAR(object):
     """Modifies the values of a HAR file"""
@@ -17,28 +15,8 @@ class ModifyHAR(object):
         self.modifications = modifications
         self.CreateSTI()
 
-
     def CreateSTI(self) -> None:
         # Create lines for sti file that controls modhar
-        line_list1 = [
-            "bat",
-            "",
-            "y",
-            self.input_file + ".har",  # old filename
-            self.output_file + ".prm",  # new filename
-            "mw",
-            "EPEN",  # header to modify
-            "m",
-            "r",  # replace entries of array
-            "o",  # *one* entry
-            "5",
-            "16",
-            "w",
-            "n",
-            "ex",
-            "a",
-            "0"]
-
         line_list_start = [
             "bat",
             "",
@@ -98,4 +76,4 @@ class ModifyHAR(object):
 
         # Create final file
         with open(self.sti_file, "w+") as writer:  # Create the empty file
-            writer.writelines( line + '\n' for line in line_list_total)  # write the line list to the file
+            writer.writelines(line + '\n' for line in line_list_total)  # write the line list to the file

@@ -14,7 +14,7 @@ class CreateOutput(object):
         self.list_of_files_to_copy = ["Results.csv"]
 
         # Gets current date and time
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M")
+        # current_time = datetime.datetime.now().strftime("%Y-%m-%d %H-%M")
 
         # loop to copy and rename output files
         for file_name in self.list_of_files_to_copy:

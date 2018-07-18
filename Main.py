@@ -102,7 +102,7 @@ for simulation_name in config.simulation_list:
             part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "solution_method"]
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
-            map = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["map"]
+            map_variables = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["map"]
 
             ag.SimulationCMF(simulation_name, part_solution_method, part_work_folder, part_shock, part_type)
             # Change working directory to WorkFiles so all output (and logs)
@@ -119,7 +119,7 @@ for simulation_name in config.simulation_list:
                 subprocess.call("{0} -cmf {0}.cmf".format(model_file_name))
 
             # Use SLtoHT export the results of the simulation from sl4 to a CSV file
-            ag.CreateMAP("sim", simulation_name, map)  # Map file determines which variables to export
+            ag.CreateMAP("sim", simulation_name, map_variables)  # Map file determines which variables to export
             ag.CreateSTI(model_file_name, simulation_name, "sltoht")  # STI file controls running of sltoht
             subprocess.call("sltoht -sti {0}_sltoht.sti".format(model_file_name))
 
