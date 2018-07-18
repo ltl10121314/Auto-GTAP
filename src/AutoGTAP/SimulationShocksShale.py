@@ -103,15 +103,18 @@ class SimulationShocks(object):
         if self.shock_type == "experiment":
             line_list_shocks = line_list_gas_price_shocks + line_list_gdp_shocks
 
-        if self.shock_type == "actual":
+        elif self.shock_type == "actual":
             line_list_shocks = line_list_gdp_shocks \
                                + line_list_gas_shocks_actual \
                                + line_list_oil_shocks_actual
 
-        if self.shock_type == "pop5":
+        elif self.shock_type == "pop5":
             line_list_shocks = ['Shock pop(REG) = uniform 5;']
 
-        if self.shock_type == "pfactorworld":
+        elif self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;']
+
+        else:
+            raise ValueError('Unexpected shock type: %s' % self.shock_type)
 
         return line_list_shocks

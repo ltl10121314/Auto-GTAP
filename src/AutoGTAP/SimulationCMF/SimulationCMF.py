@@ -23,8 +23,11 @@ class SimulationCMF(object):
         if self.model_type == "GTAP-V6":
             cmf_file_name = "gtap.cmf"
 
-        if self.model_type == "GTAP-E":
+        elif self.model_type == "GTAP-E":
             cmf_file_name = "gtap.cmf"
+
+        else:
+            raise ValueError('Unknown model type in CMF for CMF name: %s' % self.model_type)
 
         # Create list of lines to be added to CMF file
 
@@ -45,7 +48,7 @@ class SimulationCMF(object):
                 "accuracy criterion = Solution;",
                 ""]
         else:
-            raise ValueError('Unknown solution method in CMF')
+            raise ValueError('Unknown solution method in CMF: %s' % self.solution_method)
 
         # Create lines for header that gives file locations
         if self.model_type == "GTAP-E":
@@ -116,7 +119,7 @@ class SimulationCMF(object):
 
             line_list_shocks = SimulationShocks(self.shock_type).create()
 
-        if self.model_type == "GTAP-V6":
+        elif self.model_type == "GTAP-V6":
             line_list_header = [
                 "CPU = yes; ! log show simulation times",
                 "NDS = no ; ! no displays",
@@ -151,7 +154,7 @@ class SimulationCMF(object):
 
             line_list_shocks = Shocks(self.shock_type).create()
 
-        if self.model_type == "gtap-v7":
+        elif self.model_type == "gtap-v7":
             line_list_header = [
                 "! This Command file",
                 "! was written by RunGTAP (Version 3.61 built 19/Oct/2013)",
@@ -202,6 +205,9 @@ class SimulationCMF(object):
             ]
 
             line_list_shocks = Shocks(self.shock_type).create()
+
+        else:
+            raise ValueError('Unknown model type in CMF for header: %s' % self.model_type)
 
         # Combine line lists
         line_list_total = line_list_header + line_list_method + line_list_exogendo + line_list_shocks

@@ -12,16 +12,18 @@ class Shocks(object):
     def create(self):
         # Create lines for shocks
 
+        """Creates a line list of shocks for insertion into the GTAP-Adjust's CMF file"""
+
         if self.shock_type == "pop5":
             line_list_shocks = ['Shock pop(REG) = uniform 5;']
 
-        if self.shock_type == "gdp5":
+        elif self.shock_type == "gdp5":
             line_list_shocks = [
                 'Swap qgdp(REG) = aoreg(REG);',
                 'Shock qgdp(REG) = uniform 5;'
             ]
 
-        if self.shock_type == "alterto5":
+        elif self.shock_type == "alterto5":
             line_list_shocks = [
                 "xSet REG1 (RestofWorld);",
                 "xSubset REG1 is subset of REG;",
@@ -30,8 +32,8 @@ class Shocks(object):
                 'Shock to(NSAV_COMM,REG) = uniform 5;'
             ]
 
-        # This shock doesn't actually work
-        if self.shock_type == "alterto7target":
+        elif self.shock_type == "alterto7target":
+            # This shock doesn't actually work
             line_list_shocks = [
                 "xSet REG1 (RestofWorld);",
                 "xSubset REG1 is subset of REG;",
@@ -40,7 +42,7 @@ class Shocks(object):
                 'Shock to(NSAV_COMM,REG) = target% 7 from file to.shk;'
             ]
 
-        if self.shock_type == "altertms3final":
+        elif self.shock_type == "altertms3final":
             line_list_shocks = [
                 "xSet REG1 (RestofWorld);",
                 "xSubset REG1 is subset of REG;",
@@ -49,10 +51,9 @@ class Shocks(object):
                 'final_level tms(TRAD_COMM,REG,REG) = uniform 103;'
             ]
 
-        if self.shock_type == "pfactorworld":
+        elif self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;']
 
-        """Creates a line list of shocks for insertion into the GTAP-Adjust's CMF file"""
         if self.shock_type == "OceanGrains":
             line_list_shocks = [
                 '',

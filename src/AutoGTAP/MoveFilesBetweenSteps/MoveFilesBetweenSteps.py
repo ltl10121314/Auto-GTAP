@@ -97,6 +97,7 @@ class MoveFilesBetweenSteps(object):
             "parameters": [source_parameters_file, destination_parameters_file],
             "sets": [source_sets_file, destination_sets_file],
         }
+
         if self.source_type != "GTAP-V6":
             self.files["tax_rates"] = [source_tax_rates_file, destination_tax_rates_file]
             self.files["view"] = [source_view_file, destination_view_file]
