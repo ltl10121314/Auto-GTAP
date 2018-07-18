@@ -54,13 +54,12 @@ for simulation_name in config.simulation_list:
             parameter_mod_description = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "parameter_mod_description"]
             parameter_modification_list = config.yaml_file["parameter_modifications"][parameter_mod_description]
+            old_work_directory = os.getcwd()
             os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
             ag.ModifyHAR("olddefault", "default", parameter_modification_list)
             os.rename("default.prm", "olddefault.har")
             subprocess.call("modhar -sti cmd_modify_har.sti")
-            os.chdir("..")
-            os.chdir("..")
-            os.chdir("..")
+            os.chdir(old_work_directory)
 
         elif part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
@@ -135,6 +134,7 @@ for simulation_name in config.simulation_list:
             raise ValueError('Unexpected part type: %s' % part_type)
 
 # Import simulation results into a single database
+old_work_directory = os.getcwd()
 os.chdir("WorkFiles")
 # load the various CSV files created by the experiment simulation into a database
 databaseSL4 = ag.ImportCsvSl4(config.csv_paths()).create()
@@ -143,5 +143,5 @@ databaseMod = ag.ModifyDatabase(databaseSL4).create()
 # Export the database to a results csv file
 ag.ExportDictionary("Results.csv", databaseMod)
 # Copy results.csv to the OutputFiles directory, and rename it with a timestamp
-os.chdir("..")
+os.chdir(old_work_directory)
 ag.CreateOutput()
