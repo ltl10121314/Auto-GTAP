@@ -20,18 +20,22 @@ class ModifyDatabase(object):
 
             # Add variable Descriptions
             newkey.append("No Variable Description Available")
-            if key[1] == 'pm(FOC_COMM:"USA")': newkey[3] = "Price of Simulation Commodity"
+            if key[1] == 'pm(FOC_COMM:"USA")':
+                newkey[3] = "Price of Simulation Commodity"
 
             # Change variable properties to be more understandable
-            if key[2] == "Linear": newkey[2] = "Percent Change"
-            if key[2] == "Changes": newkey[2] = "Absolute Change"
+            if key[2] == "Linear":
+                newkey[2] = "Percent Change"
+            if key[2] == "Changes":
+                newkey[2] = "Absolute Change"
 
             # Duplicate simulation name (for use as commodity being shocked)
             newkey.insert(0, newkey[0])
 
             # Adds column with description of simulation/commodity
             newkey.insert(2, "Unknown Sector")
-            if key[0] == "gas": newkey[2] = "Natural Gas"
+            if key[0] == "gas":
+                newkey[2] = "Natural Gas"
 
             # Add newkey to database
             newkey = tuple(newkey)
