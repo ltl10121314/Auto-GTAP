@@ -13,11 +13,13 @@ class ImportCsvSl4(object):
     def __init__(self, file_path_list: List[str]) -> None:
         self.file_path_list = file_path_list
 
-    def filecontents(self, filepath) -> List[str]:
+    @staticmethod
+    def filecontents(filepath) -> List[str]:
         """
         Reads the CSV file into memory
         :return:
         """
+
         with open(filepath, "r") as reader:  # Read the csv file
             return [line for line in reader.readlines() if
                     line != " \n"]  # deletes lines that are nothing but line breaks
