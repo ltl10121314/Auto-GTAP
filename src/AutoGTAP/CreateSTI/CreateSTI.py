@@ -38,6 +38,9 @@ class CreateSTI(object):
             ]
             output_file_name = "{0}_sltoht".format(self.input_file_name)
 
+        else:
+            raise ValueError('Unexpected sti type: %s' % self.sti_type)
+
         # Create final file
         with open("{0}.sti".format(output_file_name), "w+") as writer:  # Create the empty file
             writer.writelines(line + '\n' for line in line_list)  # write the line list to the file

@@ -54,7 +54,7 @@ class Shocks(object):
         elif self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;']
 
-        if self.shock_type == "OceanGrains":
+        elif self.shock_type == "OceanGrains":
             line_list_shocks = [
                 '',
                 '!    old exog                new exog   !   ',
@@ -62,5 +62,8 @@ class Shocks(object):
                 'final_level  vCOSTS("GrainsCropsA","Oceania")= 50000; ',
                 'Verbal Description = Adjust GTAP database  ;'
             ]
+
+        else:
+            raise ValueError('Unexpected shock type: %s' % self.shock_type)
 
         return line_list_shocks
