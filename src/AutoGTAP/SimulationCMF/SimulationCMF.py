@@ -204,8 +204,7 @@ class SimulationCMF(object):
             line_list_shocks = Shocks(self.shock_type).create()
 
         # Combine line lists
-        line_list_total = line_list_header + line_list_method + line_list_exogendo \
-                          + line_list_shocks
+        line_list_total = line_list_header + line_list_method + line_list_exogendo + line_list_shocks
 
         # Create final file
         cmf_file_name_with_path = "WorkFiles\\" + self.simulation_name + "\\" + self.model_folder + "\\" + cmf_file_name

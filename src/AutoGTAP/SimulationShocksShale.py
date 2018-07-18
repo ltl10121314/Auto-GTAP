@@ -26,11 +26,14 @@ class SimulationShocks(object):
             ' Swap aoall("Gas", "USA") = pm("Gas", "USA");',
             ' Shock pm("Gas","USA") = uniform {0};'.format(gas_price_shock)
         ]
-
-        us_gdp_2005 = 14.706  # https://data.worldbank.org/indicator/NY.GDP.MKTP.PP.KD?contextual=default&locations=US-1W
+        # GDP Data
+        # https://data.worldbank.org/indicator/NY.GDP.MKTP.PP.KD?contextual=default&locations=US-1W
+        us_gdp_2005 = 14.706
         us_gdp_2016 = 17.27
         world_gdp_2005 = 76.235
         world_gdp_2016 = 112.152
+
+        # GDP Calculations
         non_us_gdp_2005 = world_gdp_2005 - us_gdp_2005
         non_us_gdp_2016 = world_gdp_2016 - us_gdp_2016
         us_gdp_shock = 100 * us_gdp_2016 / us_gdp_2005 - 100

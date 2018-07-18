@@ -34,7 +34,8 @@ for simulation_name in config.simulation_list:
             prev_part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num][
                 "work_folder"]
             prev_part_type = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num]["type"]
-            ag.MoveFilesBetweenSteps(simulation_name, prev_part_type, part_type, prev_part_work_folder, part_work_folder)
+            ag.MoveFilesBetweenSteps(simulation_name, prev_part_type, part_type, prev_part_work_folder,
+                                     part_work_folder)
 
         # Run the actual work for this part, depending on which type of part it is
         if part_type == "GTPAg2":
@@ -60,7 +61,6 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
             os.chdir("..")
             os.chdir("..")
-
 
         if part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]

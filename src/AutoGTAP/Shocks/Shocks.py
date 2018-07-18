@@ -52,7 +52,6 @@ class Shocks(object):
         if self.shock_type == "pfactorworld":
             line_list_shocks = ['Shock pfactwld = uniform 10;']
 
-
         """Creates a line list of shocks for insertion into the GTAP-Adjust's CMF file"""
         if self.shock_type == "OceanGrains":
             line_list_shocks = [

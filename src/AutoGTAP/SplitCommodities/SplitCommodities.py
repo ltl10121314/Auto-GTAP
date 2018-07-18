@@ -2,7 +2,8 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-4-23"
 
-import os, subprocess
+import os
+import subprocess
 
 
 class SplitCommodities(object):

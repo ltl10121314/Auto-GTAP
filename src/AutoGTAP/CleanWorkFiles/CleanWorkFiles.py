@@ -2,7 +2,8 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-13"
 
-import os, shutil
+import os
+import shutil
 
 
 class CleanWorkFiles(object):

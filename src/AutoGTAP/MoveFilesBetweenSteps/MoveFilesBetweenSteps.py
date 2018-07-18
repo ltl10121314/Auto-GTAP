@@ -101,9 +101,13 @@ class MoveFilesBetweenSteps(object):
             self.files["tax_rates"] = [source_tax_rates_file, destination_tax_rates_file]
             self.files["view"] = [source_view_file, destination_view_file]
 
-        # Shock files only need to be created once, and then only updated if tax rates change. So they can be moved around constantly
+        # Shock files only need to be created once, and then only updated if tax rates change.
+        # So they can be moved around constantly
         # if self.destination_type != "Shocks-V6" and (
-        #         self.source_type == "GTAP-V6" or self.source_type == "GTAP-V7" or self.source_type == "GTPVEW-V6" or self.source_type == "Shocks-V6"):
+        #         self.source_type == "GTAP-V6" or \
+        #         self.source_type == "GTAP-V7" or \
+        #         self.source_type == "GTPVEW-V6" \
+        #         or self.source_type == "Shocks-V6"):
         #     shockfiles = ["to", "tf", "tpi", "tpd", "tgi", "tgd", "tfi", "tfd", "txs", "tms"]
         #     for shockfile in shockfiles:
         #         self.files[shockfile] = [source_folder + shockfile + ".shk", destination_folder + shockfile + ".shk"]
