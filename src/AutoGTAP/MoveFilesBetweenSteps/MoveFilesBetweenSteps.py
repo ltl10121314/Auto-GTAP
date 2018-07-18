@@ -45,6 +45,8 @@ class MoveFilesBetweenSteps(object):
             source_flows_file = "{0}gtap.har".format(source_folder)
             source_parameters_file = "{0}default.prm".format(source_folder)
             source_sets_file = "{0}sets.har".format(source_folder)
+            source_tax_rates_file = None
+            source_view_file = None
 
         elif self.source_type == "GTPVEW-V6":
             source_folder = source_part_folder
@@ -97,6 +99,8 @@ class MoveFilesBetweenSteps(object):
             destination_flows_file = "{0}gtap.har".format(destination_folder)
             destination_parameters_file = "{0}default.prm".format(destination_folder)
             destination_sets_file = "{0}sets.har".format(destination_folder)
+            destination_tax_rates_file = None
+            destination_view_file = None
 
         else:
             raise ValueError('Unexpected destination type: %s' % self.destination_type)
@@ -108,8 +112,9 @@ class MoveFilesBetweenSteps(object):
             "sets": [source_sets_file, destination_sets_file],
         }
 
-        if self.source_type != "GTAP-V6":
+        if source_tax_rates_file and destination_tax_rates_file:
             self.files["tax_rates"] = [source_tax_rates_file, destination_tax_rates_file]
+        if source_view_file and destination_view_file:
             self.files["view"] = [source_view_file, destination_view_file]
 
         # Shock files only need to be created once, and then only updated if tax rates change.
