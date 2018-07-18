@@ -84,7 +84,10 @@ for simulation_name in config.simulation_list:
             os.chdir("..")
 
         if part_type == "GTAP-Adjust":
+            # Load additional configuration information specific to GTAP simulations
             part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
+            part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+                "solution_method"]
 
             ag.GTAPAdjustCMF(simulation_name, part_solution_method, part_work_folder, part_shock)
 
