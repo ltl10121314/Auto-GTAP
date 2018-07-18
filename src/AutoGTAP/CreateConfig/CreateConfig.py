@@ -24,7 +24,7 @@ class CreateConfig(object):
 
         try:
             other_folders = self.yaml_file["simulations"][simulation_name]["other_input_directories"]
-        except ImportError:
+        except KeyError:
             other_folders = []
 
         all_folders = [simulation_folder] + other_folders
@@ -46,6 +46,6 @@ class CreateConfig(object):
     def part_additional_input_folders(self, simulation_name: str, part_num: int):
         try:
             folders = self.yaml_file["simulations"][simulation_name]["subparts"][part_num]["additional_input_folders"]
-        except:
+        except KeyError:
             folders = []
         return folders
