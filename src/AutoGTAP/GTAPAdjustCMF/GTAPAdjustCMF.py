@@ -8,10 +8,9 @@ from AutoGTAP.Shocks.Shocks import Shocks
 class GTAPAdjustCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the GTAP adjust (as opposed to the policy simulation)"""
 
-    __slots__ = ["simulation_name", "solution_method", "model_folder", "shock_type"]
+    __slots__ = ["simulation_name", "model_folder", "shock_type"]
 
-    def __init__(self, simulation_name: str, solution_method: str, model_folder: str, shock_type: str) -> None:
-        self.solution_method = solution_method
+    def __init__(self, simulation_name: str, model_folder: str, shock_type: str) -> None:
         self.model_folder = model_folder
         self.shock_type = shock_type
         self.simulation_name = simulation_name
