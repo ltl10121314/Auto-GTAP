@@ -59,8 +59,8 @@ simulations:
         input_folder: GTAP-E-model-exe
         work_folder: GTAP-E
         model_file_name: gtap
-        solution_method: j #should be g but ok for now as debugging
-        shock: actual #this shock is wrong but ok for now as debugging
+        solution_method: j #should be g but ok for now as debugging or a Auto-GTAP example
+        shock: actual #this shock is wrong but ok for now as debugging or a Auto-GTAP example
         additional_input_folders:
           - GTAP-E-data
         map:
@@ -88,8 +88,8 @@ simulations:
         input_folder: GTAP-E-model-exe
         work_folder: simulation
         model_file_name: gtap
-        solution_method: j #should be g but ok for now as debugging
-        shock: actual #this shock is wrong but ok for now as debugging
+        solution_method: j #should be g but ok for now as debugging or a Auto-GTAP example
+        shock: actual #this shock is wrong but ok for now as debugging or a Auto-GTAP example
         #need to add line for alternative parameter values
         map:
           - 'pm("Gas","USA")'

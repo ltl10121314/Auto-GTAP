@@ -3,7 +3,7 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-4-18"
 
 
-class SimulationShocks(object):
+class SimulationShocksShale(object):
     """Creates a line list of shocks for insertion into the simulation's CMF file"""
 
     def __init__(self, shock_type: str) -> None:
