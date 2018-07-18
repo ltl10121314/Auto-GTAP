@@ -23,16 +23,7 @@ Additional requirements for GTAP-E Validation advanced example
 
 Additional requirements for Productivity Increase advanced example
 - GEMPACK 14.0 (other versions untested, requires license from CoPS)
-
-This specific "Raw GTAP Data" above was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
-
-``GTPAg2\GTAP10p2\GTAP\2014``
-
-and should be placed in
-
-``Auto-GTAP\examples\productivity_increase\InputFiles\GTPAg2\GTAP10p2\GTAP\2014``
-
- 
+- GTAP Data File v10_2014 
  
 ### Clone the repository 
  
@@ -54,17 +45,24 @@ python -m venv venv
 ./setup.ps1
 ```
 
-- Create WorkFiles folders at
+#### Create WorkFiles folders at
 
 ```bash
 Auto-GTAP\examples\gtap-e-validation-advanced\WorkFiles
 Auto-GTAP\examples\gtap-e-validation-simple\WorkFiles
 Auto-GTAP\examples\productivity_increase-advanced\WorkFiles
 Auto-GTAP\examples\productivity_increase-simple\WorkFiles
-
 ```
 
-- Put Raw GTAP Data in subfolder of InputFiles for your aggregation program
+#### (Optional) Prepare Productivity Increase advanced example
+
+Put Raw GTAP Data in subfolder of InputFiles for your aggregation program. This specific "Raw GTAP Data" above was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
+
+``GTPAg2\GTAP10p2\GTAP\2014``
+
+and should be placed in
+
+``Auto-GTAP\examples\productivity_increase\InputFiles\GTPAg2\GTAP10p2\GTAP\2014``
 
 ## Example projects
 
@@ -76,7 +74,4 @@ Auto-GTAP\examples\productivity_increase-simple\WorkFiles
 ## Documentation
 
 - [Components of Auto-GTAP](docs/components-of-auto-gtap.md)
-
-## References
-
-- [Corong et al. 2017](https://jgea.org/resources/jgea/ojs/index.php/jgea/article/view/47)
+- [GTAP Prior to Auto-GTAP](docs/gtap-prior-to-auto-gtap.md)
