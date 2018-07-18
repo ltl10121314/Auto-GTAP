@@ -31,55 +31,55 @@ GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Gas""
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,0.23145035
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,-0.76854968
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,-2062.8904
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,47.711308
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,30.470312
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,137.70023
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,141393.64
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,45670.680
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,220.53868
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,227533.69
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,131810.72
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,926.15076
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,20452.244
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,14071.658
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-30.743711
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Percent Change,No Variable Description Available,-37.805019
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,65474.426
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,59093.840
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-244.01810
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Percent Change,No Variable Description Available,-42.615559
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",PreLevel,No Variable Description Available,1.0000000
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",PostLevel,No Variable Description Available,0.62194979
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Absolute Change,No Variable Description Available,-0.37805021
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"aoall(""Oil"":""USA"")",Percent Change,No Variable Description Available,5833.0938
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Percent Change,No Variable Description Available,71.322845
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",PostLevel,No Variable Description Available,0.57384443
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Absolute Change,No Variable Description Available,-0.42615557
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"aoall(""Oil"":""USA"")",Percent Change,No Variable Description Available,0.0000000
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Percent Change,No Variable Description Available,11.053705
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",PreLevel,No Variable Description Available,222488.91
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",PostLevel,No Variable Description Available,381174.31
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Absolute Change,No Variable Description Available,158685.41
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Percent Change,No Variable Description Available,1761.3822
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",PostLevel,No Variable Description Available,247082.17
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Absolute Change,No Variable Description Available,24593.266
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Percent Change,No Variable Description Available,71.647919
 GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",PreLevel,No Variable Description Available,669.97400
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",PostLevel,No Variable Description Available,12470.776
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Absolute Change,No Variable Description Available,11800.803
-GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qiw(""Oil"":""USA"")",Percent Change,No Variable Description Available,-22.261078
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",PostLevel,No Variable Description Available,1149.9965
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Absolute Change,No Variable Description Available,480.02246
+GTAP-E-J//GTAP-E//gtap.csv,GTAP-E-J//GTAP-E//gtap.csv,Unknown Sector,"qiw(""Oil"":""USA"")",Percent Change,No Variable Description Available,-14.042150
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",Percent Change,No Variable Description Available,-76.854965
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",PreLevel,No Variable Description Available,1.0000000
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",PostLevel,No Variable Description Available,0.23145035
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Gas"":""USA"")",Absolute Change,No Variable Description Available,-0.76854968
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,-2140.8694
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,47.711308
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"aoall(""Gas"":""USA"")",Percent Change,No Variable Description Available,24.167852
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Percent Change,No Variable Description Available,25.556293
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",PreLevel,No Variable Description Available,95722.961
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,141393.64
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,45670.680
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,220.53868
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",PostLevel,No Variable Description Available,120186.20
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Gas"":""USA"")",Absolute Change,No Variable Description Available,24463.242
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Percent Change,No Variable Description Available,20.500931
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",PreLevel,No Variable Description Available,6380.5854
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,20452.244
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,14071.658
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,-30.743711
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Percent Change,No Variable Description Available,-37.805019
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",PostLevel,No Variable Description Available,7688.6650
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Gas"":""USA"")",Absolute Change,No Variable Description Available,1308.0796
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qiw(""Gas"":""USA"")",Percent Change,No Variable Description Available,1.5910130
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Percent Change,No Variable Description Available,-43.903099
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",PreLevel,No Variable Description Available,1.0000000
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",PostLevel,No Variable Description Available,0.62194979
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Absolute Change,No Variable Description Available,-0.37805021
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"aoall(""Oil"":""USA"")",Percent Change,No Variable Description Available,6011.1069
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Percent Change,No Variable Description Available,71.322845
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",PostLevel,No Variable Description Available,0.56096900
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"pm(""Oil"":""USA"")",Absolute Change,No Variable Description Available,-0.43903100
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"aoall(""Oil"":""USA"")",Percent Change,No Variable Description Available,0.0000000
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Percent Change,No Variable Description Available,17.138777
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",PreLevel,No Variable Description Available,222488.91
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",PostLevel,No Variable Description Available,381174.31
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Absolute Change,No Variable Description Available,158685.41
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Percent Change,No Variable Description Available,1761.3822
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",PostLevel,No Variable Description Available,260620.78
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qo(""Oil"":""USA"")",Absolute Change,No Variable Description Available,38131.875
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Percent Change,No Variable Description Available,89.772285
 GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",PreLevel,No Variable Description Available,669.97400
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",PostLevel,No Variable Description Available,12470.776
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Absolute Change,No Variable Description Available,11800.803
-GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qiw(""Oil"":""USA"")",Percent Change,No Variable Description Available,-22.261078
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",PostLevel,No Variable Description Available,1271.4249
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qxw(""Oil"":""USA"")",Absolute Change,No Variable Description Available,601.45093
+GTAP-E-Custom-J//simulation//gtap.csv,GTAP-E-Custom-J//simulation//gtap.csv,Unknown Sector,"qiw(""Oil"":""USA"")",Percent Change,No Variable Description Available,-17.339468
