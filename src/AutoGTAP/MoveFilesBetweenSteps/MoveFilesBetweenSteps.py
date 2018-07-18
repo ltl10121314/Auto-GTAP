@@ -22,6 +22,7 @@ class MoveFilesBetweenSteps(object):
         source_part_folder = "WorkFiles\\" + self.simulation_name + "\\" + self.source_part_folder + "\\"
         destination_part_folder = "WorkFiles\\" + self.simulation_name + "\\" + self.destination_part_folder + "\\"
 
+        # Source Files
         if self.source_type == "GTPAg2":
             flexagg_output_folder = source_part_folder + "GTAP10p2\\GTAP\\output\\"
             source_flows_file = "{0}basedata.har".format(flexagg_output_folder)
@@ -38,23 +39,7 @@ class MoveFilesBetweenSteps(object):
             source_tax_rates_file = "{0}taxrates.har".format(source_folder)
             source_view_file = "{0}gtapview.har".format(source_folder)
 
-        if self.destination_type == "MSplitCom-Exe" or self.destination_type == "GTAP-Adjust":
-            destination_folder = destination_part_folder + "input\\"
-            destination_flows_file = "{0}basedata.har".format(destination_folder)
-            destination_parameters_file = "{0}default.prm".format(destination_folder)
-            destination_sets_file = "{0}sets.har".format(destination_folder)
-            destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
-            destination_view_file = "{0}baseview.har".format(destination_folder)
 
-        if self.destination_type == "GTAP-V7" or \
-                self.destination_type == "GTAP-V6" or \
-                self.destination_type == "GTAP-E":
-            destination_folder = destination_part_folder
-            destination_flows_file = "{0}basedata.har".format(destination_folder)
-            destination_parameters_file = "{0}default.prm".format(destination_folder)
-            destination_sets_file = "{0}sets.har".format(destination_folder)
-            destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
-            destination_view_file = "{0}baseview.har".format(destination_folder)
 
         if self.source_type == "GTAP-V7" or self.source_type == "GTAP-V6":
             source_folder = source_part_folder
@@ -62,11 +47,6 @@ class MoveFilesBetweenSteps(object):
             source_parameters_file = "{0}default.prm".format(source_folder)
             source_sets_file = "{0}sets.har".format(source_folder)
 
-        if self.destination_type == "GTPVEW-V6":
-            destination_folder = destination_part_folder
-            destination_flows_file = "{0}gtap.har".format(destination_folder)
-            destination_parameters_file = "{0}default.prm".format(destination_folder)
-            destination_sets_file = "{0}sets.har".format(destination_folder)
 
         if self.source_type == "GTPVEW-V6":
             source_folder = source_part_folder
@@ -92,6 +72,32 @@ class MoveFilesBetweenSteps(object):
             source_tax_rates_file = "{0}baserate.har".format(source_folder)
             source_view_file = "{0}baseview.har".format(source_folder)
 
+        # Destination Files
+        if self.destination_type == "MSplitCom-Exe" or self.destination_type == "GTAP-Adjust":
+            destination_folder = destination_part_folder + "input\\"
+            destination_flows_file = "{0}basedata.har".format(destination_folder)
+            destination_parameters_file = "{0}default.prm".format(destination_folder)
+            destination_sets_file = "{0}sets.har".format(destination_folder)
+            destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
+            destination_view_file = "{0}baseview.har".format(destination_folder)
+
+        if self.destination_type == "GTAP-V7" or \
+                self.destination_type == "GTAP-V6" or \
+                self.destination_type == "GTAP-E":
+            destination_folder = destination_part_folder
+            destination_flows_file = "{0}basedata.har".format(destination_folder)
+            destination_parameters_file = "{0}default.prm".format(destination_folder)
+            destination_sets_file = "{0}sets.har".format(destination_folder)
+            destination_tax_rates_file = "{0}baserate.har".format(destination_folder)
+            destination_view_file = "{0}baseview.har".format(destination_folder)
+
+        if self.destination_type == "GTPVEW-V6":
+            destination_folder = destination_part_folder
+            destination_flows_file = "{0}gtap.har".format(destination_folder)
+            destination_parameters_file = "{0}default.prm".format(destination_folder)
+            destination_sets_file = "{0}sets.har".format(destination_folder)
+
+        # Associate pairs of source and destination files
         self.files = {
             "flows": [source_flows_file, destination_flows_file],
             "parameters": [source_parameters_file, destination_parameters_file],
