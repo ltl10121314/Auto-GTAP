@@ -69,13 +69,17 @@ for simulation_name in config.simulation_list:
 
             part_sim_environment = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "sim_environment"]
+
+            old_work_directory = os.getcwd()
+            os.chdir(work_directory)
             if part_sim_environment == "gemsim":
                 # Create GSS and GST files for shocks and model gemsim
-                subprocess.call("tablo -sti {0}.sti".format(model_file_name), cwd=work_directory, shell=True)
-                subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name), cwd=work_directory, shell=True)
+                subprocess.call("tablo -sti {0}.sti".format(model_file_name))
+                subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name))
             if part_sim_environment == "fortran":
-                subprocess.call("{0} -cmf {1}.cmf".format(model_file_name, cmf_file_name), cwd=work_directory,
-                                shell=True)
+                subprocess.call("{0} -cmf {1}.cmf".format(model_file_name, cmf_file_name))
+            os.chdir(old_work_directory)
+
 
         elif part_type == "GTAP-Adjust":
             # Load additional configuration information specific to GTAP simulations
@@ -86,7 +90,11 @@ for simulation_name in config.simulation_list:
             # Change working directory to WorkFiles so all output (and logs)
             # will go there when gemsim or sltoht is called
             work_directory = "WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder)
-            subprocess.call("adjust.bat", cwd=work_directory, shell=True)
+            old_work_directory = os.getcwd()
+            os.chdir(work_directory)
+            subprocess.call("adjust.bat")
+            os.chdir(old_work_directory)
+
 
         elif part_type == "GTAP-V6" or part_type == "GTAP-E":
             # Load additional configuration information specific to GTAP simulations
@@ -102,19 +110,26 @@ for simulation_name in config.simulation_list:
 
             part_sim_environment = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
                 "sim_environment"]
+            old_work_directory = os.getcwd()
+            os.chdir(work_directory)
             if part_sim_environment == "gemsim":
                 # Create GSS and GST files for shocks and model gemsim
-                subprocess.call("tablo -sti {0}.sti".format(model_file_name), cwd=work_directory, shell=True)
-                subprocess.call("gemsim -cmf {0}.cmf".format(model_file_name), cwd=work_directory, shell=True)
+                subprocess.call("tablo -sti {0}.sti".format(model_file_name))
+                subprocess.call("gemsim -cmf {0}.cmf".format(model_file_name))
             if part_sim_environment == "fortran":
-                subprocess.call("{0} -cmf {0}.cmf".format(model_file_name), cwd=work_directory, shell=True)
+                subprocess.call("{0} -cmf {0}.cmf".format(model_file_name))
+            os.chdir(old_work_directory)
 
             # Use SLtoHT export the results of the simulation from sl4 to a CSV file
             ag.CreateMAP(work_directory, "sim", simulation_name,
                          map_variables)  # Map file determines which variables to export
             ag.CreateSTI(work_directory, model_file_name, simulation_name,
                          "sltoht")  # STI file controls running of sltoht
-            subprocess.call("sltoht -sti {0}_sltoht.sti".format(model_file_name), cwd=work_directory, shell=True)
+            old_work_directory = os.getcwd()
+            os.chdir(work_directory)
+            subprocess.call("sltoht -sti {0}_sltoht.sti".format(model_file_name))
+            os.chdir(old_work_directory)
+
 
         else:
             raise ValueError('Unexpected part type: %s' % part_type)
