@@ -16,9 +16,8 @@ class ModifyHAR(object):
         self.simulation_name = simulation_name
         self.part_num = part_num
 
-        parameter_mod_description = self.config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-            "parameter_mod_description"]
-        parameter_modification_list = self.config.yaml_file["parameter_modifications"][parameter_mod_description]
+        parameter_modification_list = \
+            self.config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["parameter_modifications"]
 
         part_work_folder = self.config.yaml_file["simulations"][self.simulation_name]["subparts"][self.part_num][
             "work_folder"]
