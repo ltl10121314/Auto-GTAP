@@ -1,6 +1,5 @@
 import os
 import subprocess
-import distutils.dir_util
 # noinspection PyPep8Naming
 import AutoGTAP as ag
 
@@ -21,12 +20,7 @@ for simulation_name in config.simulation_list:
         part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["work_folder"]
 
         # Copy input files for this part to the appropriate work directory
-        ag.CopyInputFiles(simulation_name, part_input_folder, part_work_folder).copy()
-
-        for additional_input_folder in config.part_additional_input_folders(simulation_name, part_num):
-            # need to use this copy method to overwrite files/folders (or copy files to folders that already exist)
-            distutils.dir_util.copy_tree("InputFiles\{0}".format(additional_input_folder),
-                                         "WorkFiles\{0}\{1}".format(simulation_name, part_work_folder))
+        ag.CopyInputFiles(config, simulation_name, part_num).copy()
 
         # Copy Work files from the previous part to the work directory for this part, unless this is the first part
         if part_num != 1:
