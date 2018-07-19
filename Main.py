@@ -1,5 +1,4 @@
 import os
-import subprocess
 # noinspection PyPep8Naming
 import AutoGTAP as ag
 
@@ -48,15 +47,4 @@ for simulation_name in config.simulation_list:
         else:
             raise ValueError('Unexpected part type: %s' % part_type)
 
-# Import simulation results into a single database
-old_work_directory = os.getcwd()
-os.chdir("WorkFiles")
-# load the various CSV files created by the experiment simulation into a database
-databaseSL4 = ag.ImportCsvSl4(config.csv_paths()).create()
-# Modify the database to make it more readable
-databaseMod = ag.ModifyDatabase(databaseSL4).create()
-# Export the database to a results csv file
-ag.ExportDictionary("Results.csv", databaseMod)
-# Copy results.csv to the OutputFiles directory, and rename it with a timestamp
-os.chdir(old_work_directory)
-ag.CreateOutput()
+ag.ExportResults(config)
