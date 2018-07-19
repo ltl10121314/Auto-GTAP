@@ -43,38 +43,7 @@ for simulation_name in config.simulation_list:
             ag.GTAPAdjustCMF(config, simulation_name, part_num)
 
         elif part_type == "GTAP-V6" or part_type == "GTAP-E":
-            # Load additional configuration information specific to GTAP simulations
-            part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
-            part_solution_method = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-                "solution_method"]
-            model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
-            map_variables = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["map"]
-
-            work_directory = "WorkFiles/{0}/{1}".format(simulation_name, part_work_folder)
-            ag.SimulationCMF(work_directory, simulation_name, part_solution_method, part_work_folder, part_shock,
-                             part_type)
-
-            part_sim_environment = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-                "sim_environment"]
-            old_work_directory = os.getcwd()
-            os.chdir(work_directory)
-            if part_sim_environment == "gemsim":
-                # Create GSS and GST files for shocks and model gemsim
-                subprocess.call("tablo -sti {0}.sti".format(model_file_name))
-                subprocess.call("gemsim -cmf {0}.cmf".format(model_file_name))
-            if part_sim_environment == "fortran":
-                subprocess.call("{0} -cmf {0}.cmf".format(model_file_name))
-            os.chdir(old_work_directory)
-
-            # Use SLtoHT export the results of the simulation from sl4 to a CSV file
-            ag.CreateMAP(work_directory, "sim", simulation_name,
-                         map_variables)  # Map file determines which variables to export
-            ag.CreateSTI(work_directory, model_file_name, simulation_name,
-                         "sltoht")  # STI file controls running of sltoht
-            old_work_directory = os.getcwd()
-            os.chdir(work_directory)
-            subprocess.call("sltoht -sti {0}_sltoht.sti".format(model_file_name))
-            os.chdir(old_work_directory)
+            ag.GtapModel(config, simulation_name, part_num)
 
         else:
             raise ValueError('Unexpected part type: %s' % part_type)

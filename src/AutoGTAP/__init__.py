@@ -14,3 +14,4 @@ from AutoGTAP.MoveFilesBetweenSteps.MoveFilesBetweenSteps import MoveFilesBetwee
 from AutoGTAP.SimulationCMF.SimulationCMF import SimulationCMF
 from AutoGTAP.SplitCommodities.SplitCommodities import SplitCommodities
 from AutoGTAP.Gtpvew.Gtpvew import Gtpvew
+from AutoGTAP.GtapModel.GtapModel import GtapModel
