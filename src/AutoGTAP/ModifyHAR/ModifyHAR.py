@@ -2,18 +2,40 @@ __author__ = "Andre Barbe"
 __project__ = "Auto-GTAP"
 __created__ = "2018-3-28"
 
+import os
+import subprocess
+
 
 class ModifyHAR(object):
     """Modifies the values of a HAR file"""
 
-    __slots__ = ["input_file", "output_file", "sti_file", "modifications"]
+    __slots__ = ["config", "simulation_name", "part_num", "input_file", "output_file", "sti_file", "modifications"]
 
-    def __init__(self, input_file: str, output_file: str, modifications: list) -> None:
-        self.input_file = input_file
-        self.output_file = output_file
+    def __init__(self, config, simulation_name: str, part_num: int) -> None:
+        self.config = config
+        self.simulation_name = simulation_name
+        self.part_num = part_num
+
+        parameter_mod_description = self.config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+            "parameter_mod_description"]
+        parameter_modification_list = self.config.yaml_file["parameter_modifications"][parameter_mod_description]
+
+        part_work_folder = self.config.yaml_file["simulations"][self.simulation_name]["subparts"][self.part_num][
+            "work_folder"]
+
+        self.input_file = "olddefault"
+        self.output_file = "default"
         self.sti_file = "cmd_modify_har.sti"
-        self.modifications = modifications
+        self.modifications = parameter_modification_list
+
+        old_work_directory = os.getcwd()
+        os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
+
         self.createsti()
+
+        os.rename("default.prm", "olddefault.har")
+        subprocess.call("modhar -sti cmd_modify_har.sti")
+        os.chdir(old_work_directory)
 
     def createsti(self) -> None:
         # Create lines for sti file that controls modhar

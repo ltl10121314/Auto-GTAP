@@ -36,15 +36,7 @@ for simulation_name in config.simulation_list:
         elif part_type == "modify_har":
             # Modify_HAR directly modifies a HAR file
             # This module should be rarely used
-            parameter_mod_description = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-                "parameter_mod_description"]
-            parameter_modification_list = config.yaml_file["parameter_modifications"][parameter_mod_description]
-            old_work_directory = os.getcwd()
-            os.chdir("WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder))
-            ag.ModifyHAR("olddefault", "default", parameter_modification_list)
-            os.rename("default.prm", "olddefault.har")
-            subprocess.call("modhar -sti cmd_modify_har.sti")
-            os.chdir(old_work_directory)
+            ag.ModifyHAR(config, simulation_name, part_num)
 
         elif part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
             model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
