@@ -13,3 +13,4 @@ from AutoGTAP.ModifyHAR.ModifyHAR import ModifyHAR
 from AutoGTAP.MoveFilesBetweenSteps.MoveFilesBetweenSteps import MoveFilesBetweenSteps
 from AutoGTAP.SimulationCMF.SimulationCMF import SimulationCMF
 from AutoGTAP.SplitCommodities.SplitCommodities import SplitCommodities
+from AutoGTAP.Gtpvew.Gtpvew import Gtpvew

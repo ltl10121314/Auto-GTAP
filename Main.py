@@ -34,27 +34,10 @@ for simulation_name in config.simulation_list:
             ag.SplitCommodities(simulation_name)
 
         elif part_type == "modify_har":
-            # Modify_HAR directly modifies a HAR file
-            # This module should be rarely used
             ag.ModifyHAR(config, simulation_name, part_num)
 
         elif part_type == "GTPVEW-V6" or part_type == "Shocks-V6":
-            model_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["model_file_name"]
-            cmf_file_name = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["cmf_file_name"]
-            work_directory = "WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder)
-
-            part_sim_environment = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-                "sim_environment"]
-
-            old_work_directory = os.getcwd()
-            os.chdir(work_directory)
-            if part_sim_environment == "gemsim":
-                # Create GSS and GST files for shocks and model gemsim
-                subprocess.call("tablo -sti {0}.sti".format(model_file_name))
-                subprocess.call("gemsim -cmf {0}.cmf".format(cmf_file_name))
-            if part_sim_environment == "fortran":
-                subprocess.call("{0} -cmf {1}.cmf".format(model_file_name, cmf_file_name))
-            os.chdir(old_work_directory)
+            ag.Gtpvew(config, simulation_name, part_num)
 
         elif part_type == "GTAP-Adjust":
             # Load additional configuration information specific to GTAP simulations
