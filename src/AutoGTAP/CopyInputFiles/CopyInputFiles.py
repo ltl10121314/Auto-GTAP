@@ -11,7 +11,7 @@ class CopyInputFiles(object):
 
     __slots__ = ["config", "simulation_name", "part_num", "input_folder", "work_folder"]
 
-    def __init__(self, config: dict, simulation_name: str, part_num: int) -> None:
+    def __init__(self, config, simulation_name: str, part_num: int) -> None:
         self.config = config
         self.simulation_name = simulation_name
         self.part_num = part_num

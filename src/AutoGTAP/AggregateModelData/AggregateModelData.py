@@ -9,15 +9,22 @@ import subprocess
 class AggregateModelData(object):
     """Uses GTAPAgg2 to aggregate raw GTAP data"""
 
-    __slots__ = ["simulation_name", "part_work_folder", "agg_scheme_file", "data_subfolder"]
+    __slots__ = ["config", "simulation_name", "part_num", "part_work_folder", "agg_scheme_file", "data_subfolder"]
 
-    def __init__(self, simulation_name: str, part_work_folder: str, agg_scheme_files: str, data_subfolder: str) -> None:
+    def __init__(self, config, simulation_name: str, part_num: int) -> None:
+        self.config = config
         self.simulation_name = simulation_name
-        self.part_work_folder = part_work_folder
-        self.agg_scheme_file = agg_scheme_files
-        self.data_subfolder = data_subfolder
+        self.part_num = part_num
+
+        self.part_work_folder = self.config.yaml_file["simulations"][self.simulation_name]["subparts"][self.part_num][
+            "work_folder"]
+
+        self.agg_scheme_file = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+            "agg_scheme_file"]
+        self.data_subfolder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+            "data_subfolder"]
 
         old_work_directory = os.getcwd()
         os.chdir("WorkFiles\\" + self.simulation_name + "\\" + self.part_work_folder + "\\GTAP10p2\\GTAP")
-        subprocess.call("runagg.bat {0} {1}".format(data_subfolder, agg_scheme_files))
+        subprocess.call("runagg.bat {0} {1}".format(self.data_subfolder, self.agg_scheme_file))
         os.chdir(old_work_directory)

@@ -11,13 +11,16 @@ class MoveFilesBetweenSteps(object):
     __slots__ = ["source_type", "destination_type", "files", "simulation_name", "source_part_folder",
                  "destination_part_folder"]
 
-    def __init__(self, simulation_name: str, source_type: str, destination_type: str, source_part_folder: str,
-                 destination_part_folder: str) -> None:
+    def __init__(self, config, simulation_name: str, part_num: int) -> None:
+        prev_part_num = part_num - 1
+
         self.simulation_name = simulation_name
-        self.source_type = source_type
-        self.destination_type = destination_type
-        self.source_part_folder = source_part_folder
-        self.destination_part_folder = destination_part_folder
+        self.source_type = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num]["type"]
+        self.destination_type = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["type"]
+        self.source_part_folder = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num][
+            "work_folder"]
+        self.destination_part_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
+            "work_folder"]
 
         # Define folders containing source and destination files
         source_part_folder = "WorkFiles\\" + self.simulation_name + "\\" + self.source_part_folder + "\\"

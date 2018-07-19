@@ -24,20 +24,11 @@ for simulation_name in config.simulation_list:
 
         # Copy Work files from the previous part to the work directory for this part, unless this is the first part
         if part_num != 1:
-            prev_part_num = part_num - 1
-            prev_part_work_folder = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num][
-                "work_folder"]
-            prev_part_type = config.yaml_file["simulations"][simulation_name]["subparts"][prev_part_num]["type"]
-            ag.MoveFilesBetweenSteps(simulation_name, prev_part_type, part_type, prev_part_work_folder,
-                                     part_work_folder)
+            ag.MoveFilesBetweenSteps(config, simulation_name, part_num)
 
         # Run the actual work for this part, depending on which type of part it is
         if part_type == "GTPAg2":
-            agg_scheme_file = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-                "agg_scheme_file"]
-            data_subfolder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num][
-                "data_subfolder"]
-            ag.AggregateModelData(simulation_name, part_work_folder, agg_scheme_file, data_subfolder)
+            ag.AggregateModelData(config, simulation_name, part_num)
 
         elif part_type == "MSplitCom-Exe":
             ag.SplitCommodities(simulation_name)
