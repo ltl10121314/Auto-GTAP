@@ -7,7 +7,7 @@ import subprocess
 
 
 class Gtpvew(object):
-    """Runs the gtpvew GEMPACK program"""
+    """Runs the gtpvew GEMPACK or FORTRAN program"""
 
     __slots__ = ["config", "simulation_name", "part_num"]
 
