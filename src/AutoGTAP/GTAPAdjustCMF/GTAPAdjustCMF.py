@@ -3,16 +3,21 @@ __project__ = "Auto-GTAP"
 __created__ = "2018-5-4"
 
 from AutoGTAP.Shocks.Shocks import Shocks
+import os
+import subprocess
 
 
 class GTAPAdjustCMF(object):
     """Creates an CMF file for controlling gemsim when it runs the GTAP adjust (as opposed to the policy simulation)"""
 
-    __slots__ = ["simulation_name", "model_folder", "shock_type"]
+    __slots__ = ["config", "simulation_name", "part_num", "model_folder", "shock_type"]
 
-    def __init__(self, simulation_name: str, model_folder: str, shock_type: str) -> None:
-        self.model_folder = model_folder
-        self.shock_type = shock_type
+    def __init__(self, config, simulation_name: str, part_num: int) -> None:
+        # Load additional configuration information specific to GTAP simulations
+        self.config = config
+
+        self.model_folder = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["work_folder"]
+        self.shock_type = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
         self.simulation_name = simulation_name
 
         cmf_file_name = "gtapadjust.cmf"
@@ -119,3 +124,11 @@ class GTAPAdjustCMF(object):
                                   cmf_file_name
         with open(cmf_file_name_with_path, "w+") as writer:  # Create the empty file
             writer.writelines(line + '\n' for line in line_list_total)  # write the line list to the file
+
+        # Change working directory to WorkFiles so all output (and logs)
+        # will go there when gemsim or sltoht is called
+        work_directory = "WorkFiles\\{0}\\{1}".format(simulation_name, self.model_folder)
+        old_work_directory = os.getcwd()
+        os.chdir(work_directory)
+        subprocess.call("adjust.bat")
+        os.chdir(old_work_directory)

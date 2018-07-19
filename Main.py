@@ -40,18 +40,7 @@ for simulation_name in config.simulation_list:
             ag.Gtpvew(config, simulation_name, part_num)
 
         elif part_type == "GTAP-Adjust":
-            # Load additional configuration information specific to GTAP simulations
-            part_shock = config.yaml_file["simulations"][simulation_name]["subparts"][part_num]["shock"]
-
-            ag.GTAPAdjustCMF(simulation_name, part_work_folder, part_shock)
-
-            # Change working directory to WorkFiles so all output (and logs)
-            # will go there when gemsim or sltoht is called
-            work_directory = "WorkFiles\\{0}\\{1}".format(simulation_name, part_work_folder)
-            old_work_directory = os.getcwd()
-            os.chdir(work_directory)
-            subprocess.call("adjust.bat")
-            os.chdir(old_work_directory)
+            ag.GTAPAdjustCMF(config, simulation_name, part_num)
 
         elif part_type == "GTAP-V6" or part_type == "GTAP-E":
             # Load additional configuration information specific to GTAP simulations
