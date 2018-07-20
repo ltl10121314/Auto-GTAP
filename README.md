@@ -37,9 +37,16 @@ git clone https://github.com/andre-barbe/Auto-GTAP.git
 python -m venv venv 
 ```
 
+### Activate the virtual environment
+
+```bash
+./venv/Scripts/activate
+```
+
 ### Running the program
 - Script path: Main.py
-- Working directory: Depends on example, e.g. examples\productivity-increase-simple
+- Source root: src
+- Working directory (depends on example): examples\productivity-increase-simple
 
 ### (Optional) Prepare Productivity Increase advanced example
 
