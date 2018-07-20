@@ -39,7 +39,7 @@ python -m venv venv
 
 ### Activate the virtual environment
 
-```
+```bash
 ./venv/Scripts/activate
 ```
 
@@ -50,7 +50,7 @@ python -m venv venv
 
 ### (Optional) For productivity increase advanced example
 
-This example includes a step to aggregate GTAP data, and thus requires the disaggregated data file from GTAP. This data file is not freely available but must be [purchased from GTAP]((https://www.gtap.agecon.purdue.edu/databases/default.asp)). Thus we have not included it with Auto-GTAP: users must manually acquire it and place it into Auto-GTAP.
+This example includes a step to aggregate GTAP data, and thus requires the disaggregated data file from GTAP. This data file is not freely available but must be [purchased from GTAP](https://www.gtap.agecon.purdue.edu/databases/default.asp). Thus we have not included it with Auto-GTAP: users must manually acquire it and place it into Auto-GTAP.
 
 The specific data used in this example was the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
 
