@@ -39,24 +39,26 @@ python -m venv venv
 
 ### Activate the virtual environment
 
-```bash
+```
 ./venv/Scripts/activate
 ```
 
-### Running the program
-- Script path: Main.py
-- Source root: src
-- Working directory (depends on example): examples\productivity-increase-simple
+### Running Auto-GTAP
+- Script path: ```Main.py```
+- Source root: ```src```
+- Working directory (depends on example): ```examples\productivity-increase-simple```
 
-### (Optional) Prepare Productivity Increase advanced example
+### (Optional) For productivity increase advanced example
 
-Put Raw GTAP Data in subfolder of InputFiles for your aggregation program. This specific "Raw GTAP Data" above was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
+This example includes a step to aggregate GTAP data, and thus requires the disaggregated data file from GTAP. This data file is not freely available but must be [purchased from GTAP]((https://www.gtap.agecon.purdue.edu/databases/default.asp)). Thus we have not included it with Auto-GTAP: users must manually acquire it and place it into Auto-GTAP.
 
-``GTPAg2\GTAP10p2\GTAP\2014``
+The specific data used in this example was the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
+
+````GTPAg2\GTAP10p2\GTAP\2014````
 
 and should be placed in
 
-``Auto-GTAP\examples\productivity_increase\InputFiles\GTPAg2\GTAP10p2\GTAP\2014``
+````Auto-GTAP\examples\productivity_increase\InputFiles\GTPAg2\GTAP10p2\GTAP\2014````
 
 ## Example projects
 
