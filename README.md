@@ -12,11 +12,9 @@ Auto-GTAP combines all these tasks into a single automated framework. By reducin
 
 ### Prerequisites
 
-TODO: describe the environment
-
 Mandatory
 - Python 3.6 (other versions untested)
-- Pyyaml 4.2bt (other versions untested)
+- Pyyaml 4.2b4 (other versions untested)
 
 Additional requirements for GTAP-E Validation advanced example
 - GEMPACK 14.0 (other versions untested, [purchase information](https://www.copsmodels.com/gempack.htm))
