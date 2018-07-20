@@ -37,6 +37,10 @@ git clone https://github.com/andre-barbe/Auto-GTAP.git
 python -m venv venv 
 ```
 
+### Running the program
+Script path: Main.py
+Working directory: Depends on example, e.g. examples\productivity-increase-simple
+
 ### (Optional) Prepare Productivity Increase advanced example
 
 Put Raw GTAP Data in subfolder of InputFiles for your aggregation program. This specific "Raw GTAP Data" above was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
