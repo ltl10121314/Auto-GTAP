@@ -38,8 +38,8 @@ python -m venv venv
 ```
 
 ### Running the program
-Script path: Main.py
-Working directory: Depends on example, e.g. examples\productivity-increase-simple
+- Script path: Main.py
+- Working directory: Depends on example, e.g. examples\productivity-increase-simple
 
 ### (Optional) Prepare Productivity Increase advanced example
 
