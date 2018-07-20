@@ -10,6 +10,12 @@ class CleanWorkFiles(object):
     """Deletes contents of given directories"""
 
     def __init__(self) -> None:
+        # creates WorkFiles directory if it does not exist
+        try:
+            os.makedirs('WorkFiles')
+        except OSError:
+            pass
+
         # From https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
         directories_to_clean = ['WorkFiles', 'OutputFiles']
         for directory in directories_to_clean:

@@ -39,22 +39,7 @@ git clone https://github.com/andre-barbe/Auto-GTAP.git
 python -m venv venv 
 ```
 
-### Initialize the workspace
-
-```bash
-./setup.ps1
-```
-
-#### Create WorkFiles folders at
-
-```bash
-Auto-GTAP\examples\gtap-e-validation-advanced\WorkFiles
-Auto-GTAP\examples\gtap-e-validation-simple\WorkFiles
-Auto-GTAP\examples\productivity_increase-advanced\WorkFiles
-Auto-GTAP\examples\productivity_increase-simple\WorkFiles
-```
-
-#### (Optional) Prepare Productivity Increase advanced example
+### (Optional) Prepare Productivity Increase advanced example
 
 Put Raw GTAP Data in subfolder of InputFiles for your aggregation program. This specific "Raw GTAP Data" above was taken from the PR2_v10_2014_Sep2017 release of GTAPg2. It was located in 
 
