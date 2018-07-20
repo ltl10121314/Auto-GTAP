@@ -1,12 +1,12 @@
 # Auto-GTAP
 
-Auto-GTAP combines all steps of running a GTAP-based research project under a single framework.
+Auto-GTAP combines all steps of running a GTAP-based research project into a single automated framework.
 
 ## Why use Auto-GTAP?
 
-In principle, a GTAP simulation can be run with a single command. However, the reality is that the process tends to be much more complicated. A typical GTAP-based research project will need to build balance a database, calculate shocks, and shuffle around various files at each stage, in addition to running the simulation itself, all before finally exporting simulation results.
+In principle, a GTAP simulation can be run with a single command. However, GTAP-based research projects usually contain more than just the model simulation. A project may also need to build a database, change aggregations, modify parameters, calculate shocks, or run multiple simulations, all the while shuffle around various files at each stage. While a single model simulation is already automated, these other task are not.
 
-While the simulation is an automated process, these ambient task require require user interaction. Auto-GTAP aims to provide a unified framework to lift these ambient tasks into the build toolchain. The goal is to increase the speed and replicability of GTAP-based analyses, by reducing the amount of manual orchestration required.
+Auto-GTAP combines all these tasks into a single automated framework. By reducing the amount of manual orchestration required to run a GTAP project, Auto-GTAP will increase the speed and replicability of your analysis.
 
 ## Getting started
 
@@ -19,11 +19,11 @@ Mandatory
 - Pyyaml 4.2bt (other versions untested)
 
 Additional requirements for GTAP-E Validation advanced example
-- GEMPACK 14.0 (other versions untested, requires license from CoPS)
+- GEMPACK 14.0 (other versions untested, [purchase information](https://www.copsmodels.com/gempack.htm))
 
 Additional requirements for Productivity Increase advanced example
-- GEMPACK 14.0 (other versions untested, requires license from CoPS)
-- GTAP Data File v10_2014 
+- GEMPACK 14.0 (other versions untested, [purchase information](https://www.copsmodels.com/gempack.htm))
+- GTAP Data File v10_2014 ([purchase information](https://www.gtap.agecon.purdue.edu/databases/default.asp))
  
 ### Clone the repository 
  
