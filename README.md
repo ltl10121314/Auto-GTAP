@@ -1,5 +1,5 @@
 # Auto-GTAP
-test
+
 Auto-GTAP combines all steps of running a GTAP-based research project into a single automated framework.
 
 ## Why use Auto-GTAP?
